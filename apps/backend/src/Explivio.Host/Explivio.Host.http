@@ -1,0 +1,6 @@
+@Explivio.Host_HostAddress = http://localhost:5095
+
+GET {{Explivio.Host_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
