@@ -1,0 +1,33 @@
+@baseUrl = http://localhost:5298
+
+### Get all trips
+GET {{baseUrl}}/trips
+Accept: application/json
+
+### 
+
+### Create a trip
+POST {{baseUrl}}/trips
+Content-Type: application/json
+
+{
+  "name": "Paris 2025",
+  "destination": "Paris, France",
+  "startDate": "2025-08-01",
+  "endDate": "2025-08-10",
+  "travelerCount": 2,
+  "userId": "00000000-0000-0000-0000-000000000001"
+}
+
+###
+
+### Get trip by id
+GET {{baseUrl}}/trips/00000000-0000-0000-0000-000000000001
+Accept: application/json
+
+###
+
+### Delete a trip
+DELETE {{baseUrl}}/trips/00000000-0000-0000-0000-000000000001
+
+###
