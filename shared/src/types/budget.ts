@@ -1,32 +1,7 @@
-export type ExpenseCategory =
-  | 'Transport'
-  | 'Accommodation'
-  | 'Food'
-  | 'Activities'
-  | 'Shopping'
-  | 'Other';
+import type { components } from '../generated/api';
 
-export interface Expense {
-  id: string;
-  tripId: string;
-  description: string;
-  amount: number;
-  currency: string;
-  category: ExpenseCategory;
-  date: string;
-  createdAt: string;
-}
-
-export interface AddExpenseRequest {
-  description: string;
-  amount: number;
-  currency: string;
-  category: ExpenseCategory;
-  date: string;
-}
-
-export interface BudgetSummary {
-  expenses: Expense[];
-  total: number;
-  byCategory: { category: ExpenseCategory; total: number }[];
-}
+export type Expense = Required<components['schemas']['Expense']>;
+export type ExpenseCategory = components['schemas']['ExpenseCategory'];
+export type AddExpenseRequest = components['schemas']['AddExpenseCommand'];
+export type BudgetSummary = components['schemas']['BudgetSummaryResponse'];
+export type CategoryTotal = components['schemas']['CategoryTotal'];

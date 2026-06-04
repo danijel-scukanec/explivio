@@ -1,0 +1,37 @@
+.trip-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: left;
+  transition: box-shadow 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: var(--shadow);
+  }
+}
+
+.trip-card__header {
+  margin-bottom: 12px;
+}
+
+.trip-card__name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0 0 4px;
+}
+
+.trip-card__destination {
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.trip-card__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--text);
+  gap: 8px;
+}

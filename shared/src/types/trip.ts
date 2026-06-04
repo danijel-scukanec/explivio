@@ -1,18 +1,4 @@
-export interface Trip {
-  id: string;
-  name: string;
-  destination: string;
-  startDate: string;
-  endDate: string;
-  travelerCount: number;
-  createdAt: string;
-}
+import type { components } from '../generated/api';
 
-export interface CreateTripRequest {
-  name: string;
-  destination: string;
-  startDate: string;
-  endDate: string;
-  travelerCount: number;
-  userId: string;
-}
+export type Trip = components['schemas']['TripResponse'];
+export type CreateTripRequest = components['schemas']['CreateTripCommand'];

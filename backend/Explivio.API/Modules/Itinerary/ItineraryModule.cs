@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Api;
 using Explivio.API.Modules.Itinerary.CreateActivity;
 using FluentValidation;
 using MediatR;
@@ -19,7 +20,7 @@ public static class ItineraryModule
                 .OrderBy(a => a.Date).ThenBy(a => a.StartTime)
                 .ToListAsync();
             return Results.Ok(activities);
-        });
+        }).Produces<IEnumerable<Activity>>();
 
         group.MapPost("/", async (Guid tripId, CreateActivityCommand command, IMediator mediator, IValidator<CreateActivityCommand> validator) =>
         {
@@ -29,8 +30,8 @@ public static class ItineraryModule
                 return Results.ValidationProblem(validation.ToDictionary());
 
             var id = await mediator.Send(cmd);
-            return Results.Created($"/trips/{tripId}/activities/{id}", new { id });
-        });
+            return Results.Created($"/trips/{tripId}/activities/{id}", new CreatedResponse(id));
+        }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
         group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db) =>
         {
@@ -38,7 +39,7 @@ public static class ItineraryModule
                 .Where(a => a.Id == id && a.TripId == tripId)
                 .ExecuteDeleteAsync();
             return deleted > 0 ? Results.NoContent() : Results.NotFound();
-        });
+        }).Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
 
         return app;
     }

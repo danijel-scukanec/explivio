@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Modules.Budget.AddExpense;
 using FluentValidation;
@@ -19,16 +20,15 @@ public static class BudgetModule
                 .OrderByDescending(e => e.Date)
                 .ToListAsync();
 
-            var summary = new
-            {
-                Expenses = expenses,
-                Total = expenses.Sum(e => e.Amount),
-                ByCategory = expenses.GroupBy(e => e.Category)
-                    .Select(g => new { Category = g.Key.ToString(), Total = g.Sum(e => e.Amount) })
-            };
+            var summary = new BudgetSummaryResponse(
+                Expenses: expenses,
+                Total: expenses.Sum(e => e.Amount),
+                ByCategory: expenses.GroupBy(e => e.Category)
+                    .Select(g => new CategoryTotal(g.Key.ToString(), g.Sum(e => e.Amount)))
+            );
 
             return Results.Ok(summary);
-        });
+        }).Produces<BudgetSummaryResponse>();
 
         group.MapPost("/", async (Guid tripId, AddExpenseCommand command, IMediator mediator, IValidator<AddExpenseCommand> validator) =>
         {
@@ -38,8 +38,8 @@ public static class BudgetModule
                 return Results.ValidationProblem(validation.ToDictionary());
 
             var id = await mediator.Send(cmd);
-            return Results.Created($"/trips/{tripId}/expenses/{id}", new { id });
-        });
+            return Results.Created($"/trips/{tripId}/expenses/{id}", new CreatedResponse(id));
+        }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
         group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db) =>
         {
@@ -47,7 +47,7 @@ public static class BudgetModule
                 .Where(e => e.Id == id && e.TripId == tripId)
                 .ExecuteDeleteAsync();
             return deleted > 0 ? Results.NoContent() : Results.NotFound();
-        });
+        }).Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
 
         return app;
     }

@@ -1,0 +1,131 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--shadow);
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+}
+
+.modal__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text);
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  &:hover {
+    color: var(--text-h);
+    background: var(--code-bg);
+  }
+}
+
+.modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px 24px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-h);
+    text-align: left;
+  }
+
+  input {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 15px;
+    background: var(--bg);
+    color: var(--text-h);
+    font-family: var(--sans);
+
+    &:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 0;
+      border-color: transparent;
+    }
+  }
+}
+
+.modal__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.modal__error {
+  font-size: 14px;
+  color: #e53e3e;
+  margin: 0;
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-family: var(--sans);
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    opacity: 0.88;
+  }
+}
+
+.btn--ghost {
+  background: var(--code-bg);
+  color: var(--text-h);
+
+  &:hover {
+    opacity: 0.8;
+  }
+}

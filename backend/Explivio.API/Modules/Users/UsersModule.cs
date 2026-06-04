@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Api;
 using Explivio.API.Modules.Users.RegisterUser;
 using FluentValidation;
 using MediatR;
@@ -17,8 +18,8 @@ public static class UsersModule
                 return Results.ValidationProblem(validation.ToDictionary());
 
             var id = await mediator.Send(command);
-            return Results.Created($"/users/{id}", new { id });
-        });
+            return Results.Created($"/users/{id}", new CreatedResponse(id));
+        }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
         return app;
     }

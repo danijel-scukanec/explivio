@@ -1,0 +1,9 @@
+{
+  "name": "explivio",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "frontend",
+    "mobile"
+  ]
+}
