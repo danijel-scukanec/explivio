@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { ActivityCategory, CreateActivityRequest } from '@explivio/shared';
 import { createActivity } from '../services/itineraryApi';
+import { PlaceSearchInput } from '../../../shared/components/PlaceSearchInput';
+import type { PlaceResult } from '../../../shared/components/PlaceSearchInput';
 import '../../trips/components/CreateTripModal.css';
 
 const CATEGORIES: ActivityCategory[] = [
@@ -25,13 +27,25 @@ export function AddActivityModal({ tripId, initialDate, minDate, maxDate, onClos
     location: '',
     description: '',
     category: 'Sightseeing' as ActivityCategory,
+    lat: null as number | null,
+    lng: null as number | null,
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
+  }
+
+  function handlePlaceSelect(place: PlaceResult) {
+    setForm(prev => ({
+      ...prev,
+      location: place.address,
+      name: prev.name || place.name,
+      lat: place.lat,
+      lng: place.lng,
+    }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -48,6 +62,8 @@ export function AddActivityModal({ tripId, initialDate, minDate, maxDate, onClos
       location: form.location || null,
       description: form.description || null,
       category: form.category,
+      latitude: form.lat,
+      longitude: form.lng,
     };
 
     try {
@@ -69,6 +85,16 @@ export function AddActivityModal({ tripId, initialDate, minDate, maxDate, onClos
         </div>
 
         <form onSubmit={handleSubmit} className="modal__form">
+          <label>
+            Search for a place
+            <PlaceSearchInput
+              value={form.location}
+              onChange={value => setForm(prev => ({ ...prev, location: value, lat: null, lng: null }))}
+              onPlaceSelect={handlePlaceSelect}
+              placeholder="Search restaurants, hotels, attractions…"
+            />
+          </label>
+
           <label>
             Activity name
             <input name="name" value={form.name} onChange={handleChange} required placeholder="e.g. Visit Senso-ji Temple" />
@@ -97,11 +123,6 @@ export function AddActivityModal({ tripId, initialDate, minDate, maxDate, onClos
               <input type="time" name="endTime" value={form.endTime} min={form.startTime} onChange={handleChange} />
             </label>
           </div>
-
-          <label>
-            Location
-            <input name="location" value={form.location} onChange={handleChange} placeholder="e.g. Asakusa, Tokyo" />
-          </label>
 
           <label>
             Notes

@@ -18,6 +18,8 @@ public class CreateActivityHandler(AppDbContext db) : IRequestHandler<CreateActi
             StartTime = command.StartTime,
             EndTime = command.EndTime,
             Category = command.Category,
+            Latitude = command.Latitude,
+            Longitude = command.Longitude,
             CreatedAt = DateTime.UtcNow
         };
 

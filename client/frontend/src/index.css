@@ -66,6 +66,41 @@ body {
   margin: 0;
 }
 
+.pac-container {
+  z-index: 10000;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  font-family: var(--sans);
+  font-size: 14px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.pac-item {
+  padding: 8px 12px;
+  color: var(--text);
+  cursor: pointer;
+  border-top: 1px solid var(--border);
+
+  &:first-child {
+    border-top: none;
+  }
+
+  &:hover {
+    background: var(--accent-bg);
+  }
+}
+
+.pac-item-query {
+  color: var(--text-h);
+  font-size: 14px;
+}
+
+.pac-icon {
+  display: none;
+}
+
 h1,
 h2 {
   font-family: var(--heading);

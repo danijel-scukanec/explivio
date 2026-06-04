@@ -5,5 +5,11 @@
     "shared",
     "frontend",
     "mobile"
-  ]
+  ],
+  "dependencies": {
+    "@googlemaps/js-api-loader": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/google.maps": "^3.65.0"
+  }
 }

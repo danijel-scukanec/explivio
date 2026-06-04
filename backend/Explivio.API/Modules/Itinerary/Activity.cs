@@ -11,6 +11,8 @@ public class Activity
     public TimeOnly? StartTime { get; set; }
     public TimeOnly? EndTime { get; set; }
     public ActivityCategory Category { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 

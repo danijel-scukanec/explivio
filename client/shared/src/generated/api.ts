@@ -436,6 +436,10 @@ export interface components {
             /** Format: time */
             endTime?: null | string;
             category?: components["schemas"]["ActivityCategory"];
+            /** Format: double */
+            latitude?: null | number | string;
+            /** Format: double */
+            longitude?: null | number | string;
             /** Format: date-time */
             createdAt?: string;
         };
@@ -476,6 +480,10 @@ export interface components {
             /** Format: time */
             endTime: null | string;
             category: components["schemas"]["ActivityCategory"];
+            /** Format: double */
+            latitude: null | number | string;
+            /** Format: double */
+            longitude: null | number | string;
         };
         CreatedResponse: {
             /** Format: uuid */

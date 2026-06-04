@@ -10,5 +10,7 @@ public record CreateActivityCommand(
     DateOnly Date,
     TimeOnly? StartTime,
     TimeOnly? EndTime,
-    ActivityCategory Category
+    ActivityCategory Category,
+    double? Latitude,
+    double? Longitude
 ) : IRequest<Guid>;
