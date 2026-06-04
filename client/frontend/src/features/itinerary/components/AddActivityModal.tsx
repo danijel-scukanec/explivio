@@ -88,12 +88,13 @@ export function AddActivityModal({ tripId, initialDate, minDate, maxDate, onClos
           <label>
             Search for a place
             <PlaceSearchInput
-              value={form.location}
-              onChange={value => setForm(prev => ({ ...prev, location: value, lat: null, lng: null }))}
               onPlaceSelect={handlePlaceSelect}
               placeholder="Search restaurants, hotels, attractions…"
             />
           </label>
+          {form.location && (
+            <p className="modal__place-selected">📍 {form.location}</p>
+          )}
 
           <label>
             Activity name

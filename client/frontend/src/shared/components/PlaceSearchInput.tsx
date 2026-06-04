@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
+import './PlaceSearchInput.css';
 
 export interface PlaceResult {
   name: string;
@@ -9,50 +10,44 @@ export interface PlaceResult {
 }
 
 interface Props {
-  value: string;
-  onChange: (value: string) => void;
   onPlaceSelect: (result: PlaceResult) => void;
   placeholder?: string;
 }
 
-setOptions({
-  key: import.meta.env.VITE_GOOGLE_PLACES_KEY,
-});
+setOptions({ key: import.meta.env.VITE_GOOGLE_PLACES_KEY });
 
-export function PlaceSearchInput({ value, onChange, onPlaceSelect, placeholder }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null);
+export function PlaceSearchInput({ onPlaceSelect, placeholder }: Props) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const elementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
 
   useEffect(() => {
-    if (!inputRef.current) return;
-    let listener: google.maps.MapsEventListener;
+    if (!containerRef.current || elementRef.current) return;
 
-    importLibrary('places').then(({ Autocomplete }: google.maps.PlacesLibrary) => {
-      const autocomplete = new Autocomplete(inputRef.current!, {
-        types: ['establishment', 'geocode'],
-        fields: ['name', 'formatted_address', 'geometry'],
-      });
+    importLibrary('places').then(({ PlaceAutocompleteElement }: google.maps.PlacesLibrary) => {
+      if (!containerRef.current || elementRef.current) return;
 
-      listener = autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (!place.geometry?.location) return;
+      const element = new PlaceAutocompleteElement({ placeholder: placeholder ?? null });
+      elementRef.current = element;
+      containerRef.current.appendChild(element);
+
+      element.addEventListener('gmp-select', async (event: google.maps.places.PlacePredictionSelectEvent) => {
+        const place = event.placePrediction.toPlace();
+        await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
+
         onPlaceSelect({
-          name: place.name ?? '',
-          address: place.formatted_address ?? '',
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
+          name: place.displayName ?? '',
+          address: place.formattedAddress ?? '',
+          lat: place.location?.lat() ?? 0,
+          lng: place.location?.lng() ?? 0,
         });
       });
     });
 
-    return () => { listener?.remove(); };
+    return () => {
+      elementRef.current?.remove();
+      elementRef.current = null;
+    };
   }, []);
 
-  return (
-    <input
-      ref={inputRef}
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
-    />
-  );
+  return <div ref={containerRef} className="place-search-wrapper" />;
 }

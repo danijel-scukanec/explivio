@@ -84,6 +84,15 @@
   gap: 12px;
 }
 
+.modal__place-selected {
+  font-size: 13px;
+  color: var(--text);
+  margin: -8px 0 0;
+  padding: 6px 10px;
+  background: var(--accent-bg);
+  border-radius: 6px;
+}
+
 .modal__error {
   font-size: 14px;
   color: #e53e3e;
