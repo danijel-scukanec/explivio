@@ -20,4 +20,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Explivio.ServiceDefaults\Explivio.ServiceDefaults.csproj" />
+  </ItemGroup>
+
 </Project>

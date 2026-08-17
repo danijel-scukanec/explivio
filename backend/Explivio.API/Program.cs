@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Aspire cross-cutting: OpenTelemetry, health checks, resilience, service discovery
+builder.AddServiceDefaults();
+
 builder.Services.AddOpenApi();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -38,6 +41,9 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Aspire health endpoints (/health, /alive) — Development only by default
+app.MapDefaultEndpoints();
 
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();

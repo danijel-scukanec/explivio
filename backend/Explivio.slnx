@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="Explivio.API/Explivio.API.csproj" />
+  <Project Path="Explivio.AppHost/Explivio.AppHost.csproj" />
+  <Project Path="Explivio.ServiceDefaults/Explivio.ServiceDefaults.csproj" />
 </Solution>
