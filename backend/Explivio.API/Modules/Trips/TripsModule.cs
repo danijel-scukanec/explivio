@@ -4,7 +4,6 @@ using Explivio.API.Modules.Trips.CreateTrip;
 using Explivio.API.Modules.Trips.DeleteTrip;
 using Explivio.API.Modules.Trips.GetTrip;
 using Explivio.API.Modules.Trips.GetTrips;
-using FluentValidation;
 using MediatR;
 
 namespace Explivio.API.Modules.Trips;
@@ -29,12 +28,8 @@ public static class TripsModule
             return result.ToHttpResult();
         }).Produces<TripResponse>().ProducesProblem(StatusCodes.Status404NotFound);
 
-        group.MapPost("/", async (CreateTripCommand command, IMediator mediator, IValidator<CreateTripCommand> validator) =>
+        group.MapPost("/", async (CreateTripCommand command, IMediator mediator) =>
         {
-            var validation = await validator.ValidateAsync(command);
-            if (!validation.IsValid)
-                return Results.ValidationProblem(validation.ToDictionary());
-
             var id = await mediator.Send(command);
             return Results.Created($"/trips/{id}", new CreatedResponse(id));
         }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();

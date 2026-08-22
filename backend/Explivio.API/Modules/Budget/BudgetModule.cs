@@ -1,7 +1,6 @@
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Modules.Budget.AddExpense;
-using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,14 +29,9 @@ public static class BudgetModule
             return Results.Ok(summary);
         }).Produces<BudgetSummaryResponse>();
 
-        group.MapPost("/", async (Guid tripId, AddExpenseCommand command, IMediator mediator, IValidator<AddExpenseCommand> validator) =>
+        group.MapPost("/", async (Guid tripId, AddExpenseCommand command, IMediator mediator) =>
         {
-            var cmd = command with { TripId = tripId };
-            var validation = await validator.ValidateAsync(cmd);
-            if (!validation.IsValid)
-                return Results.ValidationProblem(validation.ToDictionary());
-
-            var id = await mediator.Send(cmd);
+            var id = await mediator.Send(command with { TripId = tripId });
             return Results.Created($"/trips/{tripId}/expenses/{id}", new CreatedResponse(id));
         }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 

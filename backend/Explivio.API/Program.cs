@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Explivio.API.Infrastructure.Api;
+using Explivio.API.Infrastructure.Behaviors;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Users;
@@ -34,7 +35,13 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    // Order matters: Logging wraps Validation wraps the handler.
+    cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 builder.Services.AddDbContext<AppDbContext>(options =>

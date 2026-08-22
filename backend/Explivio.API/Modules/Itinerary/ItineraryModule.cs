@@ -1,6 +1,5 @@
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Modules.Itinerary.CreateActivity;
-using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Explivio.API.Infrastructure.Database;
@@ -22,14 +21,9 @@ public static class ItineraryModule
             return Results.Ok(activities);
         }).Produces<IEnumerable<Activity>>();
 
-        group.MapPost("/", async (Guid tripId, CreateActivityCommand command, IMediator mediator, IValidator<CreateActivityCommand> validator) =>
+        group.MapPost("/", async (Guid tripId, CreateActivityCommand command, IMediator mediator) =>
         {
-            var cmd = command with { TripId = tripId };
-            var validation = await validator.ValidateAsync(cmd);
-            if (!validation.IsValid)
-                return Results.ValidationProblem(validation.ToDictionary());
-
-            var id = await mediator.Send(cmd);
+            var id = await mediator.Send(command with { TripId = tripId });
             return Results.Created($"/trips/{tripId}/activities/{id}", new CreatedResponse(id));
         }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
