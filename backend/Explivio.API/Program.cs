@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json.Serialization;
+using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Users;
@@ -14,6 +15,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 builder.Services.AddOpenApi();
+
+// F03: consistent error responses. ProblemDetails (RFC 9457) is the single wire format
+// for every error — from the Result flow, from validation, and from the exception handler.
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Instance ??=
+            $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
+        // Ties a client-visible error to its OpenTelemetry trace (F02).
+        context.ProblemDetails.Extensions.TryAdd(
+            "traceId",
+            System.Diagnostics.Activity.Current?.Id ?? context.HttpContext.TraceIdentifier);
+    };
+});
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -41,6 +59,10 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// F03: catch unhandled exceptions and empty error status codes, emit ProblemDetails for both.
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 // Aspire health endpoints (/health, /alive) — Development only by default
 app.MapDefaultEndpoints();

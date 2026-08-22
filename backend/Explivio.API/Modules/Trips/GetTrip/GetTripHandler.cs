@@ -1,16 +1,21 @@
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Infrastructure.Outcomes;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Explivio.API.Modules.Trips.GetTrip;
 
-public class GetTripHandler(AppDbContext db) : IRequestHandler<GetTripQuery, TripResponse?>
+public class GetTripHandler(AppDbContext db) : IRequestHandler<GetTripQuery, Result<TripResponse>>
 {
-    public async Task<TripResponse?> Handle(GetTripQuery query, CancellationToken cancellationToken)
+    public async Task<Result<TripResponse>> Handle(GetTripQuery query, CancellationToken cancellationToken)
     {
-        return await db.Trips
+        var trip = await db.Trips
             .Where(t => t.Id == query.TripId && t.UserId == query.UserId)
             .Select(t => new TripResponse(t.Id, t.Name, t.Destination, t.StartDate, t.EndDate, t.TravelerCount, t.CreatedAt))
             .FirstOrDefaultAsync(cancellationToken);
+
+        return trip is null
+            ? Error.NotFound("Trip.NotFound", $"No trip with id '{query.TripId}' was found.")
+            : trip;
     }
 }

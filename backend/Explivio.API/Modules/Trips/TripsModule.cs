@@ -1,4 +1,5 @@
 using Explivio.API.Infrastructure.Api;
+using Explivio.API.Infrastructure.Outcomes;
 using Explivio.API.Modules.Trips.CreateTrip;
 using Explivio.API.Modules.Trips.DeleteTrip;
 using Explivio.API.Modules.Trips.GetTrip;
@@ -24,9 +25,9 @@ public static class TripsModule
         group.MapGet("/{id:guid}", async (Guid id, IMediator mediator, HttpContext ctx) =>
         {
             var userId = ctx.GetUserId();
-            var trip = await mediator.Send(new GetTripQuery(id, userId));
-            return trip is null ? Results.NotFound() : Results.Ok(trip);
-        }).Produces<TripResponse>().Produces(StatusCodes.Status404NotFound);
+            var result = await mediator.Send(new GetTripQuery(id, userId));
+            return result.ToHttpResult();
+        }).Produces<TripResponse>().ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapPost("/", async (CreateTripCommand command, IMediator mediator, IValidator<CreateTripCommand> validator) =>
         {
@@ -41,9 +42,9 @@ public static class TripsModule
         group.MapDelete("/{id:guid}", async (Guid id, IMediator mediator, HttpContext ctx) =>
         {
             var userId = ctx.GetUserId();
-            var deleted = await mediator.Send(new DeleteTripCommand(id, userId));
-            return deleted ? Results.NoContent() : Results.NotFound();
-        }).Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
+            var result = await mediator.Send(new DeleteTripCommand(id, userId));
+            return result.ToHttpResult();
+        }).Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound);
 
         return app;
     }
