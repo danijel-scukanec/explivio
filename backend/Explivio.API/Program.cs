@@ -67,6 +67,9 @@ builder.Services.AddApiVersioning(options =>
     options.ApiVersionReader = new UrlSegmentApiVersionReader();
 });
 
+// F09: per-user sliding-window rate limiting (429 + Retry-After as ProblemDetails).
+builder.Services.AddExplivioRateLimiter(builder.Configuration);
+
 builder.Services.AddAuthentication().AddJwtBearer();
 builder.Services.AddAuthorization();
 
@@ -106,6 +109,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Rate limiter runs after authentication so it can partition by the 'sub' claim.
+app.UseRateLimiter();
 
 // F09: all feature endpoints live under /v{version} (e.g. /v1/trips).
 var versionSet = app.NewApiVersionSet()
