@@ -92,7 +92,7 @@ Service Bus + outbox, AI + Notifications workers, first CQRS read model, Testcon
 **Phase 3 — AI spine** (F12–F14, F16, F21)
 Microsoft.Extensions.AI + Semantic Kernel, agentic itinerary generation with structured outputs, RAG over Cosmos vectors, streaming over SignalR, AI observability. _Outcome:_ the headline AI demo.
 
-**Phase 4 — Collaboration & real-time** (F15, F20, F13)
+**Phase 4 — Collaboration & real-time** (F15, F20)
 Shared trips, roles, presence, co-editing, notifications. _Outcome:_ multiplayer trip planning.
 
 **Phase 5 — Multimodal & breadth** (F17–F19, F22–F31)
