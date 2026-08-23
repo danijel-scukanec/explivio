@@ -7,18 +7,13 @@ public class CreateTripHandler(AppDbContext db) : IRequestHandler<CreateTripComm
 {
     public async Task<Guid> Handle(CreateTripCommand command, CancellationToken cancellationToken)
     {
-        var trip = new Trip
-        {
-            Id = Guid.NewGuid(),
-            Name = command.Name,
-            Destination = command.Destination,
-            StartDate = command.StartDate,
-            EndDate = command.EndDate,
-            TravelerCount = command.TravelerCount,
-            UserId = command.UserId,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        var trip = Trip.Create(
+            command.Name,
+            command.Destination,
+            command.StartDate,
+            command.EndDate,
+            command.TravelerCount,
+            command.UserId);
 
         db.Trips.Add(trip);
         await db.SaveChangesAsync(cancellationToken);

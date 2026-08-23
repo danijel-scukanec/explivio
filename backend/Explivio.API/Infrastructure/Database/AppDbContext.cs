@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Outbox;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Users;
 using Explivio.API.Modules.Itinerary;
@@ -12,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<Activity> Activities => Set<Activity>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

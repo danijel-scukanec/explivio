@@ -5,6 +5,7 @@ using Asp.Versioning.Builder;
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Behaviors;
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Infrastructure.Outbox;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Users;
 using Explivio.API.Modules.Itinerary;
@@ -47,8 +48,11 @@ builder.Services.AddMediatR(cfg =>
 });
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
+// F05: the outbox interceptor writes domain events into the same transaction as the business change.
+builder.Services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"))
+           .AddInterceptors(sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()));
 
 builder.Services.AddSingleton(sp =>
 {
@@ -56,6 +60,16 @@ builder.Services.AddSingleton(sp =>
     var databaseName = builder.Configuration["CosmosDb:DatabaseName"] ?? "explivio";
     return new Microsoft.Azure.Cosmos.CosmosClient(connectionString);
 });
+
+// F05: publish outbox events to Service Bus — only when a broker is configured (Aspire AppHost
+// injects the "messaging" connection; Azure provides it in production). Without it the API and the
+// integration tests still run: the interceptor keeps writing outbox rows, they just aren't
+// published until a broker is present.
+if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("messaging")))
+{
+    builder.AddAzureServiceBusClient("messaging");
+    builder.Services.AddHostedService<OutboxProcessor>();
+}
 
 // F09: API versioning via URL segment (/v1/...). C# stays the source of truth for the
 // version; the frontend regenerates types from the versioned OpenAPI spec.
