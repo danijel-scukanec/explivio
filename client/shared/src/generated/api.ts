@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/trips": {
+    "/v1/trips": {
         parameters: {
             query?: never;
             header?: never;
@@ -71,7 +71,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/trips/{id}": {
+    "/v1/trips/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -103,7 +103,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
@@ -132,7 +134,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
@@ -141,7 +145,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/register": {
+    "/v1/users/register": {
         parameters: {
             query?: never;
             header?: never;
@@ -189,7 +193,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/trips/{tripId}/activities": {
+    "/v1/trips/{tripId}/activities": {
         parameters: {
             query?: never;
             header?: never;
@@ -260,7 +264,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/trips/{tripId}/activities/{id}": {
+    "/v1/trips/{tripId}/activities/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -303,7 +307,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/trips/{tripId}/expenses": {
+    "/v1/trips/{tripId}/expenses": {
         parameters: {
             query?: never;
             header?: never;
@@ -374,7 +378,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/trips/{tripId}/expenses/{id}": {
+    "/v1/trips/{tripId}/expenses/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -528,6 +532,14 @@ export interface components {
             errors?: {
                 [key: string]: string[];
             };
+        };
+        ProblemDetails: {
+            type?: null | string;
+            title?: null | string;
+            /** Format: int32 */
+            status?: null | number | string;
+            detail?: null | string;
+            instance?: null | string;
         };
         RegisterUserCommand: {
             email: string;

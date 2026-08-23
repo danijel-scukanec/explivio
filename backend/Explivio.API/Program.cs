@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json.Serialization;
+using Asp.Versioning;
+using Asp.Versioning.Builder;
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Behaviors;
 using Explivio.API.Infrastructure.Database;
@@ -15,7 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Aspire cross-cutting: OpenTelemetry, health checks, resilience, service discovery
 builder.AddServiceDefaults();
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+    options.AddDocumentTransformer<ReplaceVersionParameterTransformer>());
 
 // F03: consistent error responses. ProblemDetails (RFC 9457) is the single wire format
 // for every error — from the Result flow, from validation, and from the exception handler.
@@ -52,6 +55,16 @@ builder.Services.AddSingleton(sp =>
     var connectionString = builder.Configuration.GetConnectionString("CosmosDb");
     var databaseName = builder.Configuration["CosmosDb:DatabaseName"] ?? "explivio";
     return new Microsoft.Azure.Cosmos.CosmosClient(connectionString);
+});
+
+// F09: API versioning via URL segment (/v1/...). C# stays the source of truth for the
+// version; the frontend regenerates types from the versioned OpenAPI spec.
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
 });
 
 builder.Services.AddAuthentication().AddJwtBearer();
@@ -94,9 +107,15 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapTripsEndpoints();
-app.MapUsersEndpoints();
-app.MapItineraryEndpoints();
-app.MapBudgetEndpoints();
+// F09: all feature endpoints live under /v{version} (e.g. /v1/trips).
+var versionSet = app.NewApiVersionSet()
+    .HasApiVersion(new ApiVersion(1))
+    .Build();
+var api = app.MapGroup("/v{version:apiVersion}").WithApiVersionSet(versionSet);
+
+api.MapTripsEndpoints();
+api.MapUsersEndpoints();
+api.MapItineraryEndpoints();
+api.MapBudgetEndpoints();
 
 app.Run();

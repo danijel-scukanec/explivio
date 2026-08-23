@@ -1,6 +1,6 @@
 import type { Trip, CreateTripRequest } from '@explivio/shared';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5298';
+const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 
 export async function getTrips(): Promise<Trip[]> {
   const res = await fetch(`${API_URL}/trips`);
