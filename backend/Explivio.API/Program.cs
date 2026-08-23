@@ -125,3 +125,6 @@ api.MapItineraryEndpoints();
 api.MapBudgetEndpoints();
 
 app.Run();
+
+// Exposes the implicit Program class to the integration test project (WebApplicationFactory<Program>).
+public partial class Program;

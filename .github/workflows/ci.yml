@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore Explivio.slnx
+
+      - name: Build
+        run: dotnet build Explivio.slnx --configuration Release --no-restore
+
+      # Integration tests spin up SQL Server via Testcontainers; the hosted runner's
+      # Docker daemon is available out of the box. xUnit v3 runs on Microsoft.Testing
+      # .Platform (opted in via global.json), whose `dotnet test` takes --solution.
+      - name: Test
+        run: dotnet test --solution Explivio.slnx --configuration Release --no-build
