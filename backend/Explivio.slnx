@@ -4,5 +4,7 @@
   <Project Path="Explivio.API/Explivio.API.csproj" />
   <Project Path="Explivio.AppHost/Explivio.AppHost.csproj" />
   <Project Path="Explivio.IntegrationTests/Explivio.IntegrationTests.csproj" />
+  <Project Path="Explivio.NotificationsWorker/Explivio.NotificationsWorker.csproj" />
+  <Project Path="Explivio.NotificationsWorker.Tests/Explivio.NotificationsWorker.Tests.csproj" />
   <Project Path="Explivio.ServiceDefaults/Explivio.ServiceDefaults.csproj" />
 </Solution>

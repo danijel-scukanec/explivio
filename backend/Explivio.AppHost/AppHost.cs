@@ -15,7 +15,9 @@ var domainEvents = serviceBus.AddServiceBusTopic("domain-events");
 var aiWorkerSubscription = domainEvents.AddServiceBusSubscription("ai-worker");
 aiWorkerSubscription.Resource.MaxDeliveryCount = 5;
 
-domainEvents.AddServiceBusSubscription("notifications-worker"); // F07
+// F07: the notifications worker's subscription. Same dead-letter posture as the AI worker.
+var notificationsWorkerSubscription = domainEvents.AddServiceBusSubscription("notifications-worker");
+notificationsWorkerSubscription.Resource.MaxDeliveryCount = 5;
 
 // The Explivio API, orchestrated by Aspire. SQL is still supplied via appsettings for now;
 // it will move into the AppHost in a later step.
@@ -26,6 +28,12 @@ builder.AddProject<Projects.Explivio_API>("api")
 // F06: the AI worker. Consumes the 'ai-worker' subscription; SQL (the inbox store) is still
 // supplied via its own appsettings for now, mirroring the API.
 builder.AddProject<Projects.Explivio_AIWorker>("aiworker")
+    .WithReference(serviceBus)
+    .WaitFor(serviceBus);
+
+// F07: the notifications worker. Consumes the 'notifications-worker' subscription; SQL (its inbox
+// store) is still supplied via its own appsettings for now, mirroring the API and the AI worker.
+builder.AddProject<Projects.Explivio_NotificationsWorker>("notificationsworker")
     .WithReference(serviceBus)
     .WaitFor(serviceBus);
 

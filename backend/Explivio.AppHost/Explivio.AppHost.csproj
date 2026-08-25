@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Explivio.API\Explivio.API.csproj" />
     <ProjectReference Include="..\Explivio.AIWorker\Explivio.AIWorker.csproj" />
+    <ProjectReference Include="..\Explivio.NotificationsWorker\Explivio.NotificationsWorker.csproj" />
   </ItemGroup>
 
   <ItemGroup>
