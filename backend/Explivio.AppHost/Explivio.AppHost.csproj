@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Explivio.API\Explivio.API.csproj" />
+    <ProjectReference Include="..\Explivio.AIWorker\Explivio.AIWorker.csproj" />
   </ItemGroup>
 
   <ItemGroup>
