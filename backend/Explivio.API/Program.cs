@@ -5,6 +5,7 @@ using Asp.Versioning.Builder;
 using Explivio.API.Infrastructure.Ai;
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Behaviors;
+using Explivio.API.Infrastructure.Idempotency;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Outbox;
 using Explivio.API.Infrastructure.ReadModel;
@@ -156,6 +157,10 @@ app.UseAuthorization();
 
 // Rate limiter runs after authentication so it can partition by the 'sub' claim.
 app.UseRateLimiter();
+
+// F04: boundary idempotency for mutating requests carrying an Idempotency-Key. After auth so it can
+// scope keys by user, and after the rate limiter so throttled requests never reserve a key.
+app.UseIdempotency();
 
 // F09: all feature endpoints live under /v{version} (e.g. /v1/trips).
 var versionSet = app.NewApiVersionSet()

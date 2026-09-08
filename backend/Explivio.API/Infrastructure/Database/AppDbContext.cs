@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Idempotency;
 using Explivio.API.Infrastructure.Outbox;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Users;
@@ -14,6 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Activity> Activities => Set<Activity>();
     public DbSet<Expense> Expenses => Set<Expense>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
