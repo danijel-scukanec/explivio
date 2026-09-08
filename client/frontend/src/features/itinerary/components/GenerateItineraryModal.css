@@ -1,0 +1,95 @@
+/* F13: streaming AI generation modal. Reuses CreateTripModal.css for the shell; these add the wide
+   layout and the progressively-revealed activity cards. */
+
+.modal.modal--wide {
+  max-width: 640px;
+  width: 100%;
+}
+
+.gen-result {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.gen-result__summary {
+  color: var(--text);
+  font-size: 0.95rem;
+  margin: 0 0 1rem;
+}
+
+.gen-result__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.gen-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  background: var(--social-bg);
+  /* Each card fades in as it is revealed from the stream. */
+  animation: gen-card-in 0.25s ease-out;
+}
+
+@keyframes gen-card-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.gen-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+}
+
+.gen-card__day {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.gen-card__time {
+  color: var(--text);
+}
+
+.gen-card__cat {
+  margin-left: auto;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  font-size: 0.7rem;
+}
+
+.gen-card__name {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+  color: var(--text-h);
+}
+
+.gen-card__desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+/* Placeholder shimmer for the activity currently streaming in. */
+.gen-card--pending {
+  height: 4.5rem;
+  border-style: dashed;
+  background: linear-gradient(90deg, var(--social-bg) 25%, var(--accent-bg) 50%, var(--social-bg) 75%);
+  background-size: 200% 100%;
+  animation: gen-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes gen-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}

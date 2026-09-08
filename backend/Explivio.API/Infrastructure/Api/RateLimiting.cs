@@ -29,7 +29,9 @@ public static class RateLimiting
                 // Infra/metadata endpoints (health probes, OpenAPI) must never be throttled.
                 if (context.Request.Path.StartsWithSegments("/health")
                     || context.Request.Path.StartsWithSegments("/alive")
-                    || context.Request.Path.StartsWithSegments("/openapi"))
+                    || context.Request.Path.StartsWithSegments("/openapi")
+                    // F13: SignalR negotiate + long-lived hub connections must not be throttled.
+                    || context.Request.Path.StartsWithSegments("/hubs"))
                 {
                     return RateLimitPartition.GetNoLimiter("infra");
                 }

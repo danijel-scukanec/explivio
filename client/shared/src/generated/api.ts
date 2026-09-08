@@ -71,6 +71,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/trips/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TripSummaryResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/trips/{id}": {
         parameters: {
             query?: never;
@@ -245,6 +280,56 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["CreatedResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/trips/{tripId}/activities/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tripId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["GenerateItineraryCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GeneratedItinerary"];
                     };
                 };
                 /** @description Bad Request */
@@ -446,6 +531,7 @@ export interface components {
             longitude?: null | number | string;
             /** Format: date-time */
             createdAt?: string;
+            domainEvents?: null | components["schemas"]["IDomainEvent"][];
         };
         /** @enum {unknown} */
         ActivityCategory: "Sightseeing" | "Food" | "Transport" | "Accommodation" | "Adventure" | "Other";
@@ -519,9 +605,31 @@ export interface components {
             date?: string;
             /** Format: date-time */
             createdAt?: string;
+            domainEvents?: null | components["schemas"]["IDomainEvent"][];
         };
         /** @enum {unknown} */
         ExpenseCategory: "Transport" | "Accommodation" | "Food" | "Activities" | "Shopping" | "Other";
+        GeneratedActivity: {
+            /** Format: int32 */
+            day: number | string;
+            name: string;
+            description: string;
+            category: components["schemas"]["ActivityCategory"];
+            suggestedStartTime: null | string;
+        };
+        GeneratedItinerary: {
+            summary: string;
+            activities: components["schemas"]["GeneratedActivity"][];
+        };
+        GenerateItineraryCommand: {
+            /** Format: uuid */
+            tripId: string;
+            prompt: string;
+            /** Format: int32 */
+            days: number | string;
+            style: null | string;
+            budget: null | string;
+        };
         HttpValidationProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -533,6 +641,7 @@ export interface components {
                 [key: string]: string[];
             };
         };
+        IDomainEvent: Record<string, never>;
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -558,6 +667,22 @@ export interface components {
             travelerCount: number | string;
             /** Format: date-time */
             createdAt: string;
+        };
+        TripSummaryResponse: {
+            /** Format: uuid */
+            tripId: string;
+            name: string;
+            destination: string;
+            /** Format: date */
+            startDate: string;
+            /** Format: date */
+            endDate: string;
+            /** Format: int32 */
+            travelerCount: number | string;
+            /** Format: int32 */
+            activityCount: number | string;
+            /** Format: double */
+            totalSpend: number | string;
         };
     };
     responses: never;

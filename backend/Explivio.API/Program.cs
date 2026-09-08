@@ -11,6 +11,7 @@ using Explivio.API.Infrastructure.ReadModel;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Users;
 using Explivio.API.Modules.Itinerary;
+using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Budget;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -88,6 +89,10 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("messag
 // tests run with no credentials and no cost.
 builder.Services.AddExplivioAi(builder.Configuration);
 
+// F13: SignalR for streaming AI itinerary generation to the client (in-process; Azure SignalR is a
+// later scaling swap). The ItineraryGenerationHub streams the generation token-by-token.
+builder.Services.AddSignalR();
+
 // F09: API versioning via URL segment (/v1/...). C# stays the source of truth for the
 // version; the frontend regenerates types from the versioned OpenAPI spec.
 builder.Services.AddApiVersioning(options =>
@@ -162,6 +167,10 @@ api.MapTripsEndpoints();
 api.MapUsersEndpoints();
 api.MapItineraryEndpoints();
 api.MapBudgetEndpoints();
+
+// F13: the streaming itinerary-generation hub. Not versioned like the REST group — SignalR hubs are
+// addressed by a stable path; the default CORS policy and auth apply as for the rest of the app.
+app.MapHub<ItineraryGenerationHub>("/hubs/itinerary-generation");
 
 app.Run();
 

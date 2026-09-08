@@ -38,9 +38,16 @@ public sealed class FakeItineraryChatClient : IChatClient
         ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        // Single-chunk streaming so a streaming caller (F13) still works against the stub.
-        yield return new ChatResponseUpdate(ChatRole.Assistant, CannedItineraryJson);
-        await Task.CompletedTask;
+        // Emit the canned JSON in small chunks with a short delay so the streaming path (F13) behaves
+        // like a real model — the client's progressive card reveal actually animates with no provider.
+        const int chunkSize = 24;
+        for (var i = 0; i < CannedItineraryJson.Length; i += chunkSize)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var chunk = CannedItineraryJson.Substring(i, Math.Min(chunkSize, CannedItineraryJson.Length - i));
+            yield return new ChatResponseUpdate(ChatRole.Assistant, chunk);
+            await Task.Delay(40, cancellationToken);
+        }
     }
 
     public object? GetService(Type serviceType, object? serviceKey = null) =>

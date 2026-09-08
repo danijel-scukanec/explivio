@@ -55,3 +55,8 @@
 .itinerary-page__status--error {
   color: #e53e3e;
 }
+
+.itinerary-page__actions {
+  display: flex;
+  gap: 0.5rem;
+}

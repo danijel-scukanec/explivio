@@ -6,6 +6,7 @@ import { getTrip } from '../../trips/services/tripsApi';
 import { getActivities, deleteActivity } from '../services/itineraryApi';
 import { DaySchedule } from '../components/DaySchedule';
 import { AddActivityModal } from '../components/AddActivityModal';
+import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
 import './ItineraryPage.css';
 
 export function ItineraryPage() {
@@ -15,6 +16,7 @@ export function ItineraryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showGenerate, setShowGenerate] = useState(false);
 
   async function load() {
     if (!tripId) return;
@@ -61,7 +63,10 @@ export function ItineraryPage() {
           <h1>{trip.name}</h1>
           <span className="itinerary-page__destination">{trip.destination}</span>
         </div>
-        <button className="btn btn--primary" onClick={() => setShowModal(true)}>+ Add activity</button>
+        <div className="itinerary-page__actions">
+          <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ Generate with AI</button>
+          <button className="btn btn--primary" onClick={() => setShowModal(true)}>+ Add activity</button>
+        </div>
       </div>
 
       <div className="itinerary-page__days">
@@ -83,6 +88,16 @@ export function ItineraryPage() {
           maxDate={trip.endDate}
           onClose={() => setShowModal(false)}
           onCreated={handleCreated}
+        />
+      )}
+
+      {showGenerate && (
+        <GenerateItineraryModal
+          tripId={tripId!}
+          startDate={trip.startDate}
+          endDate={trip.endDate}
+          onClose={() => setShowGenerate(false)}
+          onAdded={() => { setShowGenerate(false); load(); }}
         />
       )}
     </div>
