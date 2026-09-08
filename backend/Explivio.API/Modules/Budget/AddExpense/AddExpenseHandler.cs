@@ -7,17 +7,13 @@ public class AddExpenseHandler(AppDbContext db) : IRequestHandler<AddExpenseComm
 {
     public async Task<Guid> Handle(AddExpenseCommand command, CancellationToken cancellationToken)
     {
-        var expense = new Expense
-        {
-            Id = Guid.NewGuid(),
-            TripId = command.TripId,
-            Description = command.Description,
-            Amount = command.Amount,
-            Currency = command.Currency,
-            Category = command.Category,
-            Date = command.Date,
-            CreatedAt = DateTime.UtcNow
-        };
+        var expense = Expense.Create(
+            command.TripId,
+            command.Description,
+            command.Amount,
+            command.Currency,
+            command.Category,
+            command.Date);
 
         db.Expenses.Add(expense);
         await db.SaveChangesAsync(cancellationToken);

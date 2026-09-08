@@ -2,6 +2,7 @@
   <Project Path="Explivio.AIWorker/Explivio.AIWorker.csproj" />
   <Project Path="Explivio.AIWorker.Tests/Explivio.AIWorker.Tests.csproj" />
   <Project Path="Explivio.API/Explivio.API.csproj" />
+  <Project Path="Explivio.API.Tests/Explivio.API.Tests.csproj" />
   <Project Path="Explivio.AppHost/Explivio.AppHost.csproj" />
   <Project Path="Explivio.IntegrationTests/Explivio.IntegrationTests.csproj" />
   <Project Path="Explivio.NotificationsWorker/Explivio.NotificationsWorker.csproj" />

@@ -6,6 +6,7 @@ using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Behaviors;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Outbox;
+using Explivio.API.Infrastructure.ReadModel;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Users;
 using Explivio.API.Modules.Itinerary;
@@ -54,6 +55,12 @@ builder.Services.AddDbContext<AppDbContext>((sp, options) =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"))
            .AddInterceptors(sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>()));
 
+// F08: the read side. Its own context over the "read" schema of the same database, with a separate
+// migrations history so the read and write models evolve independently (CQRS separation).
+builder.Services.AddDbContext<ReadDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"), sql =>
+        sql.MigrationsHistoryTable("__EFMigrationsHistory", ReadDbContext.Schema)));
+
 builder.Services.AddSingleton(sp =>
 {
     var connectionString = builder.Configuration.GetConnectionString("CosmosDb");
@@ -69,6 +76,10 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("messag
 {
     builder.AddAzureServiceBusClient("messaging");
     builder.Services.AddHostedService<OutboxProcessor>();
+
+    // F08: the read-model projector consumes those same events off its own subscription and keeps
+    // the TripSummary read model current. Broker-free (tests), the read model just stays empty.
+    builder.Services.AddHostedService<TripSummaryProjector>();
 }
 
 // F09: API versioning via URL segment (/v1/...). C# stays the source of truth for the
@@ -96,6 +107,14 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// F08: apply the read model's own migration on startup. It targets only the "read" schema, so it
+// never touches the write model's tables (AppDbContext is still migrated manually). Gated on SQL
+// being configured; retried briefly to tolerate SQL still warming up under the AppHost.
+if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("SqlServer")))
+{
+    await MigrateReadModelAsync(app);
+}
 
 // F03: catch unhandled exceptions and empty error status codes, emit ProblemDetails for both.
 app.UseExceptionHandler();
@@ -139,6 +158,28 @@ api.MapItineraryEndpoints();
 api.MapBudgetEndpoints();
 
 app.Run();
+
+// F08: apply the read model's migration, retrying while SQL warms up under the AppHost.
+static async Task MigrateReadModelAsync(WebApplication app)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+    for (var attempt = 1; attempt <= 10; attempt++)
+    {
+        try
+        {
+            using var scope = app.Services.CreateScope();
+            var read = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
+            await read.Database.MigrateAsync();
+            return;
+        }
+        catch (Exception ex) when (attempt < 10)
+        {
+            logger.LogWarning(ex, "Read-model migration attempt {Attempt} failed; retrying.", attempt);
+            await Task.Delay(TimeSpan.FromSeconds(3));
+        }
+    }
+}
 
 // Exposes the implicit Program class to the integration test project (WebApplicationFactory<Program>).
 public partial class Program;

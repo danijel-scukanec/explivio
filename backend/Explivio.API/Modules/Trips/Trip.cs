@@ -31,7 +31,15 @@ public class Trip : Entity
             UpdatedAt = DateTime.UtcNow,
         };
 
-        trip.AddDomainEvent(new TripCreatedDomainEvent(trip.Id, trip.Destination, trip.UserId));
+        trip.AddDomainEvent(new TripCreatedDomainEvent(
+            trip.Id, trip.Name, trip.Destination, trip.StartDate, trip.EndDate, trip.TravelerCount, trip.UserId));
         return trip;
+    }
+
+    // F08: raise the deletion event before the aggregate is removed, so the outbox interceptor
+    // captures it in the same transaction and the read-model projector can drop the summary.
+    public void Delete()
+    {
+        AddDomainEvent(new TripDeletedDomainEvent(Id));
     }
 }

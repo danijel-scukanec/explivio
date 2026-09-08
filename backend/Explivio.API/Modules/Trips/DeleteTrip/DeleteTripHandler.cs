@@ -9,12 +9,20 @@ public class DeleteTripHandler(AppDbContext db) : IRequestHandler<DeleteTripComm
 {
     public async Task<Result> Handle(DeleteTripCommand command, CancellationToken cancellationToken)
     {
-        var deleted = await db.Trips
-            .Where(t => t.Id == command.TripId && t.UserId == command.UserId)
-            .ExecuteDeleteAsync(cancellationToken);
+        // F08: load then remove (instead of a bulk ExecuteDelete) so the aggregate can raise
+        // TripDeletedDomainEvent and the outbox interceptor captures it in the same transaction.
+        var trip = await db.Trips
+            .FirstOrDefaultAsync(t => t.Id == command.TripId && t.UserId == command.UserId, cancellationToken);
 
-        return deleted > 0
-            ? Result.Success()
-            : Error.NotFound("Trip.NotFound", $"No trip with id '{command.TripId}' was found.");
+        if (trip is null)
+        {
+            return Error.NotFound("Trip.NotFound", $"No trip with id '{command.TripId}' was found.");
+        }
+
+        trip.Delete();
+        db.Trips.Remove(trip);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
     }
 }

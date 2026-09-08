@@ -19,6 +19,11 @@ aiWorkerSubscription.Resource.MaxDeliveryCount = 5;
 var notificationsWorkerSubscription = domainEvents.AddServiceBusSubscription("notifications-worker");
 notificationsWorkerSubscription.Resource.MaxDeliveryCount = 5;
 
+// F08: the read-model projector's subscription (hosted inside the API). It sees every domain event
+// and maintains the TripSummary read model.
+var readModelSubscription = domainEvents.AddServiceBusSubscription("read-model");
+readModelSubscription.Resource.MaxDeliveryCount = 5;
+
 // The Explivio API, orchestrated by Aspire. SQL is still supplied via appsettings for now;
 // it will move into the AppHost in a later step.
 builder.AddProject<Projects.Explivio_API>("api")

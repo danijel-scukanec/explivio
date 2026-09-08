@@ -29,10 +29,18 @@ public static class ItineraryModule
 
         group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db) =>
         {
-            var deleted = await db.Activities
-                .Where(a => a.Id == id && a.TripId == tripId)
-                .ExecuteDeleteAsync();
-            return deleted > 0 ? Results.NoContent() : Results.NotFound();
+            // F08: load then remove so the aggregate raises ActivityRemovedDomainEvent for the
+            // read-model projector (the outbox interceptor captures it in the same transaction).
+            var activity = await db.Activities.FirstOrDefaultAsync(a => a.Id == id && a.TripId == tripId);
+            if (activity is null)
+            {
+                return Results.NotFound();
+            }
+
+            activity.Remove();
+            db.Activities.Remove(activity);
+            await db.SaveChangesAsync();
+            return Results.NoContent();
         }).Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
 
         return app;

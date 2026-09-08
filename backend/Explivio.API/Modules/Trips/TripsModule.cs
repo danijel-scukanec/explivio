@@ -1,10 +1,12 @@
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Outcomes;
+using Explivio.API.Infrastructure.ReadModel;
 using Explivio.API.Modules.Trips.CreateTrip;
 using Explivio.API.Modules.Trips.DeleteTrip;
 using Explivio.API.Modules.Trips.GetTrip;
 using Explivio.API.Modules.Trips.GetTrips;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Explivio.API.Modules.Trips;
 
@@ -20,6 +22,20 @@ public static class TripsModule
             var trips = await mediator.Send(new GetTripsQuery(userId));
             return Results.Ok(trips);
         }).Produces<IEnumerable<TripResponse>>();
+
+        // F08: CQRS read side — served straight from the projected TripSummary read model, no joins.
+        group.MapGet("/dashboard", async (ReadDbContext read, HttpContext ctx) =>
+        {
+            var userId = ctx.GetUserId();
+            var summaries = await read.TripSummaries
+                .Where(s => s.UserId == userId)
+                .OrderByDescending(s => s.UpdatedAt)
+                .Select(s => new TripSummaryResponse(
+                    s.TripId, s.Name, s.Destination, s.StartDate, s.EndDate,
+                    s.TravelerCount, s.ActivityCount, s.TotalSpend))
+                .ToListAsync();
+            return Results.Ok(summaries);
+        }).Produces<IEnumerable<TripSummaryResponse>>();
 
         group.MapGet("/{id:guid}", async (Guid id, IMediator mediator, HttpContext ctx) =>
         {
