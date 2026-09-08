@@ -33,8 +33,8 @@ flowchart LR
   end
 
   sb["Azure Service Bus"]
-  sql[("Azure SQL<br/>source of truth")]
-  cosmos[("Cosmos DB<br/>docs · 1 read model · vector/RAG")]
+  sql[("Azure SQL<br/>write model + 1 read model")]
+  cosmos[("Cosmos DB<br/>docs · vector/RAG")]
   redis[("Redis")]
   blob[("Blob Storage")]
   signalr{{"SignalR"}}
@@ -106,12 +106,12 @@ Modules/
 
 | Store | Role | Notes |
 |---|---|---|
-| **Azure SQL** (EF Core) | System of record for relational/transactional data (trips, activities, expenses, users) | Migrations checked in |
-| **Cosmos DB** | Documents (preferences, activity feed, notifications), **one CQRS read model** (see below), **vector search for RAG** | Serverless; partitioned by user/trip |
+| **Azure SQL** (EF Core) | System of record for relational/transactional data (trips, activities, expenses, users), plus **one CQRS read model** in a separate `read` schema (see below) | Migrations checked in |
+| **Cosmos DB** | Documents (preferences, activity feed, notifications), **vector search for RAG** | Serverless; partitioned by user/trip |
 | **Redis** | Distributed cache, rate-limit store, **semantic AI cache** | |
 | **Blob Storage** | Photos, documents, receipts, generated PDFs | |
 
-**CQRS read model (scoped to one feature):** writes go to SQL inside a transaction; a domain event + outbox row is written in the same transaction. To demonstrate the pattern without doubling every write path, **exactly one** feature (the activity feed / budget summary) has a consumer that projects a denormalized **read model** into Cosmos. Everything else reads straight from SQL. The seam is designed so the pattern can be extended later if warranted.
+**CQRS read model (scoped to one feature):** writes go to SQL inside a transaction; a domain event + outbox row is written in the same transaction. To demonstrate the pattern without doubling every write path, **exactly one** feature (the per-trip dashboard summary — activity count + total spend) has an event-driven projector that maintains a denormalized **read model** in a separate SQL `read` schema (its own migrations history, isolated from the write model). The projection and an inbox-dedupe row are committed together for exactly-once projection. Everything else reads straight from the write model. The seam is designed so the pattern can be extended — or moved to Cosmos — later if warranted.
 
 **RAG:** place/review text is embedded (Azure OpenAI embeddings) and stored as vectors in Cosmos DB vector search; the AI planner retrieves relevant context at query time.
 
@@ -127,7 +127,7 @@ Modules/
 - **Example flows:**
   - `TripCreated` → Notifications Worker sends a welcome/getting-started nudge.
   - `ItineraryGenerationRequested` → AI Worker runs the agentic planner (saga) → emits `ItineraryGenerated` → API streams results to the client over SignalR.
-  - `ExpenseAdded` → read-model projector recomputes the budget summary in Cosmos.
+  - `ExpenseAdded` → read-model projector updates the trip dashboard summary (total spend) in the SQL `read` schema.
 
 ---
 
