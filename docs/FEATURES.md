@@ -40,7 +40,7 @@ Legend for _Proves_: 🧩 distributed-systems · 🤖 AI · 🎨 full-stack · �
 | F05 | **Event-driven core** over Azure Service Bus + **transactional outbox** | 🧩 |
 | F06 | **AI Worker** service (consumes AI jobs) | 🧩🤖 |
 | F07 | **Notifications Worker** service (consumes domain events) | 🧩 |
-| F08 | **CQRS read model** projected into Cosmos — **scoped to one feature** (activity feed / budget summary) to prove the pattern without doubling every write path | 🧩 |
+| F08 | **CQRS read model** — a per-trip dashboard summary in its own SQL `read` schema, kept current by an event-driven projector; **scoped to one feature** to prove the pattern without doubling every write path | 🧩 |
 | F09 | Health checks, resilience pipelines, rate limiting, API versioning | 🛠️ |
 | F10 | **Integration tests** with Testcontainers + **GitHub Actions** CI/CD | 🛠️ |
 | F11 | **azd → Azure Container Apps** deploy from the Aspire model | 🧩🛠️ |

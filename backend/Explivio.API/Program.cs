@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
+using Explivio.API.Infrastructure.Ai;
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Behaviors;
 using Explivio.API.Infrastructure.Database;
@@ -81,6 +82,11 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("messag
     // the TripSummary read model current. Broker-free (tests), the read model just stays empty.
     builder.Services.AddHostedService<TripSummaryProjector>();
 }
+
+// F12: the AI chat client for itinerary generation. Real Azure OpenAI / GitHub Models client when
+// configured (AI:Endpoint + AI:ApiKey), otherwise a deterministic dev stub — so the API builds and
+// tests run with no credentials and no cost.
+builder.Services.AddExplivioAi(builder.Configuration);
 
 // F09: API versioning via URL segment (/v1/...). C# stays the source of truth for the
 // version; the frontend regenerates types from the versioned OpenAPI spec.

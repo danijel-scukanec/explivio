@@ -1,5 +1,6 @@
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Modules.Itinerary.CreateActivity;
+using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Explivio.API.Infrastructure.Database;
@@ -26,6 +27,14 @@ public static class ItineraryModule
             var id = await mediator.Send(command with { TripId = tripId });
             return Results.Created($"/trips/{tripId}/activities/{id}", new CreatedResponse(id));
         }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
+
+        // F12: AI itinerary generation. Synchronous — the caller waits for the draft. Returns a
+        // draft only; the user reviews it and creates activities via POST above. F13 will stream this.
+        group.MapPost("/generate", async (Guid tripId, GenerateItineraryCommand command, IMediator mediator) =>
+        {
+            var draft = await mediator.Send(command with { TripId = tripId });
+            return Results.Ok(draft);
+        }).Produces<GeneratedItinerary>().ProducesValidationProblem();
 
         group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db) =>
         {
