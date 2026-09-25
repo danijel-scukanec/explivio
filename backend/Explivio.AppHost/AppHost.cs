@@ -13,6 +13,15 @@ var sql = builder.AddAzureSqlServer("sql")
 // (configuration keys are case-insensitive), while the physical database keeps its "Explivio" name.
 var database = sql.AddDatabase("sqlserver", "Explivio");
 
+// F02/F11: Application Insights for distributed telemetry once deployed. Only added in publish mode
+// (azd deploy): it has no local emulator, so referencing it during `aspire run` would leave each
+// service waiting on an Azure resource that can't be provisioned locally. Locally, telemetry goes to
+// the Aspire dashboard via OTLP instead; ServiceDefaults enables the Azure Monitor exporter only when
+// the injected APPLICATIONINSIGHTS_CONNECTION_STRING is present (i.e. when deployed).
+var appInsights = builder.ExecutionContext.IsPublishMode
+    ? builder.AddAzureApplicationInsights("appinsights")
+    : null;
+
 // F05: Service Bus for the transactional outbox. Runs as the local emulator (Docker) in dev and
 // provisions real Azure Service Bus when deployed. Domain events are published to this topic;
 // the AI (F06) and Notifications (F07) workers will add subscriptions here later.
@@ -40,7 +49,7 @@ readModelSubscription.Resource.MaxDeliveryCount = 5;
 // The Explivio API, orchestrated by Aspire. It now takes both its SQL database and the Service Bus
 // from the AppHost; the injected connection strings replace the appsettings values in every
 // environment.
-builder.AddProject<Projects.Explivio_API>("api")
+var api = builder.AddProject<Projects.Explivio_API>("api")
     .WithReference(database)
     .WaitFor(database)
     .WithReference(serviceBus)
@@ -48,7 +57,7 @@ builder.AddProject<Projects.Explivio_API>("api")
 
 // F06: the AI worker. Consumes the 'ai-worker' subscription and stores its inbox in the shared SQL
 // database (its own "worker" schema).
-builder.AddProject<Projects.Explivio_AIWorker>("aiworker")
+var aiWorker = builder.AddProject<Projects.Explivio_AIWorker>("aiworker")
     .WithReference(database)
     .WaitFor(database)
     .WithReference(serviceBus)
@@ -56,10 +65,20 @@ builder.AddProject<Projects.Explivio_AIWorker>("aiworker")
 
 // F07: the notifications worker. Consumes the 'notifications-worker' subscription and stores its
 // inbox in the shared SQL database (its own "notifications" schema).
-builder.AddProject<Projects.Explivio_NotificationsWorker>("notificationsworker")
+var notificationsWorker = builder.AddProject<Projects.Explivio_NotificationsWorker>("notificationsworker")
     .WithReference(database)
     .WaitFor(database)
     .WithReference(serviceBus)
     .WaitFor(serviceBus);
+
+// Wire Application Insights into every service, but only when it exists (publish/deploy mode) — see
+// its declaration above. This injects APPLICATIONINSIGHTS_CONNECTION_STRING, which ServiceDefaults
+// keys the Azure Monitor exporter off.
+if (appInsights is not null)
+{
+    api.WithReference(appInsights);
+    aiWorker.WithReference(appInsights);
+    notificationsWorker.WithReference(appInsights);
+}
 
 builder.Build().Run();
