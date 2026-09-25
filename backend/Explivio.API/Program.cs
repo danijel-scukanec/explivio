@@ -120,12 +120,14 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// F08: apply the read model's own migration on startup. It targets only the "read" schema, so it
-// never touches the write model's tables (AppDbContext is still migrated manually). Gated on SQL
-// being configured; retried briefly to tolerate SQL still warming up under the AppHost.
+// F11: bring the whole schema up on startup — write model (dbo) first, then the read model (read).
+// This lets a fresh clone or a fresh Aspire/Azure SQL come up with no manual `ef database update`.
+// MigrateAsync is idempotent (applies only pending migrations), and the two contexts keep separate
+// migrations histories, so they evolve independently. Gated on SQL being configured; retried briefly
+// to tolerate SQL still warming up under the AppHost.
 if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("SqlServer")))
 {
-    await MigrateReadModelAsync(app);
+    await MigrateDatabaseAsync(app);
 }
 
 // F03: catch unhandled exceptions and empty error status codes, emit ProblemDetails for both.
@@ -179,8 +181,9 @@ app.MapHub<ItineraryGenerationHub>("/hubs/itinerary-generation");
 
 app.Run();
 
-// F08: apply the read model's migration, retrying while SQL warms up under the AppHost.
-static async Task MigrateReadModelAsync(WebApplication app)
+// F11: migrate the write model (dbo) then the read model (read), retrying while SQL warms up under
+// the AppHost. Both run in one scope per attempt so a transient failure retries the whole set.
+static async Task MigrateDatabaseAsync(WebApplication app)
 {
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
@@ -189,13 +192,15 @@ static async Task MigrateReadModelAsync(WebApplication app)
         try
         {
             using var scope = app.Services.CreateScope();
+            var write = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            await write.Database.MigrateAsync();
             var read = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
             await read.Database.MigrateAsync();
             return;
         }
         catch (Exception ex) when (attempt < 10)
         {
-            logger.LogWarning(ex, "Read-model migration attempt {Attempt} failed; retrying.", attempt);
+            logger.LogWarning(ex, "Database migration attempt {Attempt} failed; retrying.", attempt);
             await Task.Delay(TimeSpan.FromSeconds(3));
         }
     }

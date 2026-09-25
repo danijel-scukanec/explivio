@@ -1,5 +1,18 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+// F11: SQL Server, now owned by the Aspire model (it was previously supplied through each service's
+// appsettings — see F05, which deliberately parked SQL here until the deploy step). Locally it runs
+// as a container, so one `aspire run` brings the database up alongside everything else; the same
+// declaration provisions Azure SQL Database when deployed. A data volume persists the local database
+// across runs so it doesn't have to be re-seeded each time.
+var sql = builder.AddAzureSqlServer("sql")
+    .RunAsContainer(container => container.WithDataVolume());
+
+// The application database. The Aspire resource is named "sqlserver" so its injected connection
+// string lands under the existing ConnectionStrings:SqlServer key every service already reads
+// (configuration keys are case-insensitive), while the physical database keeps its "Explivio" name.
+var database = sql.AddDatabase("sqlserver", "Explivio");
+
 // F05: Service Bus for the transactional outbox. Runs as the local emulator (Docker) in dev and
 // provisions real Azure Service Bus when deployed. Domain events are published to this topic;
 // the AI (F06) and Notifications (F07) workers will add subscriptions here later.
@@ -24,21 +37,28 @@ notificationsWorkerSubscription.Resource.MaxDeliveryCount = 5;
 var readModelSubscription = domainEvents.AddServiceBusSubscription("read-model");
 readModelSubscription.Resource.MaxDeliveryCount = 5;
 
-// The Explivio API, orchestrated by Aspire. SQL is still supplied via appsettings for now;
-// it will move into the AppHost in a later step.
+// The Explivio API, orchestrated by Aspire. It now takes both its SQL database and the Service Bus
+// from the AppHost; the injected connection strings replace the appsettings values in every
+// environment.
 builder.AddProject<Projects.Explivio_API>("api")
+    .WithReference(database)
+    .WaitFor(database)
     .WithReference(serviceBus)
     .WaitFor(serviceBus);
 
-// F06: the AI worker. Consumes the 'ai-worker' subscription; SQL (the inbox store) is still
-// supplied via its own appsettings for now, mirroring the API.
+// F06: the AI worker. Consumes the 'ai-worker' subscription and stores its inbox in the shared SQL
+// database (its own "worker" schema).
 builder.AddProject<Projects.Explivio_AIWorker>("aiworker")
+    .WithReference(database)
+    .WaitFor(database)
     .WithReference(serviceBus)
     .WaitFor(serviceBus);
 
-// F07: the notifications worker. Consumes the 'notifications-worker' subscription; SQL (its inbox
-// store) is still supplied via its own appsettings for now, mirroring the API and the AI worker.
+// F07: the notifications worker. Consumes the 'notifications-worker' subscription and stores its
+// inbox in the shared SQL database (its own "notifications" schema).
 builder.AddProject<Projects.Explivio_NotificationsWorker>("notificationsworker")
+    .WithReference(database)
+    .WaitFor(database)
     .WithReference(serviceBus)
     .WaitFor(serviceBus);
 
