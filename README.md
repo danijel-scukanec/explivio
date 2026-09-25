@@ -81,7 +81,7 @@ This is an evolving portfolio project. The **committed target** — the foundati
 
 **Roadmap (planned, not yet built)**
 
-Azure deploy via `azd` → Container Apps · RAG over Cosmos vector search · AI chat assistant · receipt/email parsing (vision) · map view · real-time collaboration · push notifications · AI ops (token/cost telemetry, semantic cache, evals) · **real auth (Microsoft Entra External ID — a fake dev identity is used today)** · mobile parity.
+RAG over Cosmos vector search · AI chat assistant · receipt/email parsing (vision) · map view · real-time collaboration · push notifications · AI ops (token/cost telemetry, semantic cache, evals) · **real auth (Microsoft Entra External ID — a fake dev identity is used today)** · mobile parity.
 
 ---
 
@@ -144,6 +144,33 @@ Unit tests run anywhere; the integration tests spin up a real SQL Server via Tes
 
 ---
 
+## Deploying to Azure
+
+The app deploys to **Azure Container Apps** with the **Azure Developer CLI (`azd`)**, driven entirely by the Aspire model. `azd` reads the AppHost's deployment manifest and **generates the infrastructure itself** — a Container App for the API and each worker, plus Azure SQL, Service Bus, Application Insights, and the managed-identity role assignments — so there is **no hand-written Bicep to maintain**. See [ADR 0005](docs/adr/0005-bicep-over-terraform.md) for why Bicep + azd over Terraform.
+
+**Prerequisites:** the [Azure Developer CLI](https://aka.ms/install-azd), the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli), and an Azure subscription.
+
+```bash
+# authenticate
+azd auth login
+az login
+
+# provision infrastructure + build and deploy every service
+# (prompts once for subscription, region, and an environment name)
+azd up
+
+# ... demo it, then tear everything down to stop billing
+azd down
+```
+
+- **Deploy-on-demand** — the app is meant to be brought up with `azd up` and removed with `azd down`, not kept always-on; `azd down` deletes the resources so billing stops.
+- **Passwordless** — services authenticate to SQL and Service Bus with a managed identity (no secrets in config); `azd` provisions the required role assignments.
+- **Schema on startup** — the relational schema and read model are migrated automatically when a service starts, so a fresh deployment comes up ready with no manual migration step.
+- **Observability in the cloud** — the same OpenTelemetry that feeds the Aspire dashboard locally flows to **Application Insights** once deployed.
+- **Inspect the generated infra** — run `azd infra synth` to write the generated Bicep into the repo.
+
+---
+
 ## Repository structure
 
 ```
@@ -159,7 +186,7 @@ explivio/
     frontend/          React + Vite (TypeScript)
     mobile/            React Native + Expo (scaffold)
     shared/            types generated from OpenAPI + shared utils
-  infra/             Bicep modules (to be superseded by the Aspire/azd model)
+  azure.yaml         azd config (infrastructure is generated from the Aspire model)
   docs/              ARCHITECTURE.md · FEATURES.md · adr/
 ```
 
@@ -169,4 +196,4 @@ explivio/
 
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** — system topology, data & messaging architecture, AI design, cross-cutting concerns.
 - **[docs/FEATURES.md](docs/FEATURES.md)** — prioritized feature map and phased delivery roadmap.
-- **[docs/adr/](docs/adr/)** — architecture decision records (modular monolith, outbox, Aspire, deferred auth).
+- **[docs/adr/](docs/adr/)** — architecture decision records (modular monolith, outbox, Aspire, deferred auth, Bicep over Terraform).
