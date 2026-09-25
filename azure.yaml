@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+# azd configuration for deploying Explivio to Azure Container Apps.
+#
+# The single service points at the .NET Aspire AppHost. azd reads the Aspire
+# deployment manifest the AppHost emits and generates the Container Apps
+# infrastructure itself (one Container App per project resource, plus Azure SQL,
+# Service Bus and Application Insights) — there is no hand-written Bicep to
+# maintain. Run `azd infra synth` if you want that generated Bicep written into
+# the repo to inspect or customise.
+name: explivio
+services:
+  app:
+    language: dotnet
+    project: ./backend/Explivio.AppHost/Explivio.AppHost.csproj
+    host: containerapp

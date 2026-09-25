@@ -6,6 +6,10 @@ obj/
 .vs/
 *.nupkg
 
+# Aspire / azd generated artifacts (regenerated on demand; azd regenerates its own on deploy)
+aspire-manifest.json
+*.module.bicep
+
 # Node
 node_modules/
 dist/
