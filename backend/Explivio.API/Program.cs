@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
@@ -8,6 +9,7 @@ using Explivio.API.Infrastructure.Behaviors;
 using Explivio.API.Infrastructure.Idempotency;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Outbox;
+using Explivio.API.Infrastructure.Rag;
 using Explivio.API.Infrastructure.ReadModel;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Users;
@@ -15,6 +17,8 @@ using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Budget;
 using FluentValidation;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,13 +68,6 @@ builder.Services.AddDbContext<ReadDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"), sql =>
         sql.MigrationsHistoryTable("__EFMigrationsHistory", ReadDbContext.Schema)));
 
-builder.Services.AddSingleton(sp =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("CosmosDb");
-    var databaseName = builder.Configuration["CosmosDb:DatabaseName"] ?? "explivio";
-    return new Microsoft.Azure.Cosmos.CosmosClient(connectionString);
-});
-
 // F05: publish outbox events to Service Bus — only when a broker is configured (Aspire AppHost
 // injects the "messaging" connection; Azure provides it in production). Without it the API and the
 // integration tests still run: the interceptor keeps writing outbox rows, they just aren't
@@ -89,6 +86,35 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("messag
 // configured (AI:Endpoint + AI:ApiKey), otherwise a deterministic dev stub — so the API builds and
 // tests run with no credentials and no cost.
 builder.Services.AddExplivioAi(builder.Configuration);
+
+// F14: retrieval-augmented generation — embeddings + place retrieval that ground the generated
+// itinerary in real places. In-memory over the seeded corpus by default; Cosmos vector search when a
+// connection is configured (added below).
+builder.Services.AddExplivioRag(builder.Configuration);
+
+// F14: when Cosmos is configured (the Aspire AppHost injects "cosmos"; Azure provides it when
+// deployed), swap the in-memory retriever for real Cosmos vector search and seed the corpus on
+// startup. Without it the API still grounds generation via the in-memory retriever, so tests and a
+// bare `dotnet run` need no Cosmos. The client uses System.Text.Json (web defaults) so Place
+// serializes to the camelCase documents the vector query reads back.
+if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("cosmos")))
+{
+    builder.AddAzureCosmosClient("cosmos", configureClientOptions: options =>
+    {
+        // Web JSON so Place serializes to the camelCase documents the vector query reads back.
+        options.UseSystemTextJsonSerializerWithOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        // Gateway mode + endpoint pinning: required for the local emulator (it only exposes the
+        // gateway; the default Direct/TCP mode can't reach the backend and hangs on retries). Both
+        // are safe against real single-region Azure Cosmos, so we set them unconditionally.
+        options.ConnectionMode = ConnectionMode.Gateway;
+        options.LimitToEndpoint = true;
+    });
+
+    builder.Services.RemoveAll<IPlaceRetriever>();
+    builder.Services.AddSingleton<IPlaceRetriever, CosmosPlaceRetriever>();
+    builder.Services.AddHostedService<PlaceSeeder>();
+}
 
 // F13: SignalR for streaming AI itinerary generation to the client (in-process; Azure SignalR is a
 // later scaling swap). The ItineraryGenerationHub streams the generation token-by-token.

@@ -1,0 +1,36 @@
+[
+  { "destination": "Lisbon", "name": "Belém Tower", "category": "Sightseeing", "text": "Iconic 16th-century fortified tower on the Tagus river, a symbol of Portugal's Age of Discovery and a UNESCO World Heritage site." },
+  { "destination": "Lisbon", "name": "Jerónimos Monastery", "category": "Sightseeing", "text": "Vast Manueline-style monastery in Belém with ornate cloisters, one of Lisbon's most impressive landmarks." },
+  { "destination": "Lisbon", "name": "Time Out Market", "category": "Food", "text": "Lively food hall where top Lisbon chefs and vendors serve everything from fresh seafood to pastries under one roof." },
+  { "destination": "Lisbon", "name": "Tram 28", "category": "Sightseeing", "text": "Historic yellow tram that winds through Alfama, Graça and Baixa, a classic way to see the old city's steep streets." },
+  { "destination": "Lisbon", "name": "Alfama District", "category": "Sightseeing", "text": "Lisbon's oldest neighbourhood, a maze of narrow lanes, viewpoints and fado houses below São Jorge Castle." },
+  { "destination": "Lisbon", "name": "Pastéis de Belém", "category": "Food", "text": "The original custard-tart bakery, serving warm pastéis de nata from a secret recipe since 1837." },
+
+  { "destination": "Paris", "name": "Louvre Museum", "category": "Sightseeing", "text": "The world's largest art museum, home to the Mona Lisa and tens of thousands of works; best visited early to beat the crowds." },
+  { "destination": "Paris", "name": "Eiffel Tower", "category": "Sightseeing", "text": "Paris's defining iron landmark with observation decks; stunning at sunset and when it sparkles on the hour after dark." },
+  { "destination": "Paris", "name": "Le Marais", "category": "Food", "text": "Historic district packed with falafel stands, bakeries, cafés and boutiques, great for a relaxed food stroll." },
+  { "destination": "Paris", "name": "Musée d'Orsay", "category": "Sightseeing", "text": "Beaux-Arts railway station turned museum with the world's finest collection of Impressionist masterpieces." },
+  { "destination": "Paris", "name": "Montmartre", "category": "Sightseeing", "text": "Hilltop artists' quarter crowned by the Sacré-Cœur basilica, with winding streets and sweeping city views." },
+  { "destination": "Paris", "name": "Seine River Cruise", "category": "Adventure", "text": "Boat trip past Notre-Dame, the Louvre and the Eiffel Tower, a scenic way to see the monuments from the water." },
+
+  { "destination": "Rome", "name": "Colosseum", "category": "Sightseeing", "text": "Ancient Roman amphitheatre that once held 50,000 spectators; book a timed ticket to skip the long lines." },
+  { "destination": "Rome", "name": "Vatican Museums", "category": "Sightseeing", "text": "Immense museum complex ending at the Sistine Chapel's Michelangelo ceiling; go early or late to avoid crowds." },
+  { "destination": "Rome", "name": "Trastevere", "category": "Food", "text": "Cobblestoned neighbourhood famed for trattorias and nightlife, ideal for an evening of classic Roman cuisine." },
+  { "destination": "Rome", "name": "Pantheon", "category": "Sightseeing", "text": "Remarkably preserved ancient temple with the world's largest unreinforced concrete dome and an open oculus." },
+  { "destination": "Rome", "name": "Trevi Fountain", "category": "Sightseeing", "text": "Baroque masterpiece and Rome's most famous fountain; tradition says a tossed coin ensures your return." },
+  { "destination": "Rome", "name": "Roman Forum", "category": "Sightseeing", "text": "Sprawling ruins of the political and commercial heart of ancient Rome, next to the Palatine Hill." },
+
+  { "destination": "Barcelona", "name": "Sagrada Família", "category": "Sightseeing", "text": "Gaudí's extraordinary unfinished basilica with soaring tree-like columns and kaleidoscopic stained glass." },
+  { "destination": "Barcelona", "name": "Park Güell", "category": "Sightseeing", "text": "Whimsical Gaudí park of mosaic terraces and organic architecture with panoramic views over the city." },
+  { "destination": "Barcelona", "name": "La Boqueria Market", "category": "Food", "text": "Bustling covered market off La Rambla with tapas bars, fresh juices, jamón and seafood counters." },
+  { "destination": "Barcelona", "name": "Gothic Quarter", "category": "Sightseeing", "text": "Medieval maze of narrow streets and plazas around the cathedral, full of history, shops and cafés." },
+  { "destination": "Barcelona", "name": "Barceloneta Beach", "category": "Adventure", "text": "City beach with a lively boardwalk, water sports and seafood chiringuitos, a short walk from the old town." },
+  { "destination": "Barcelona", "name": "Casa Batlló", "category": "Sightseeing", "text": "Gaudí's fantastical modernist house on Passeig de Gràcia, with a scaled roof and bone-like balconies." },
+
+  { "destination": "Kyoto", "name": "Fushimi Inari Shrine", "category": "Sightseeing", "text": "Shinto shrine famous for thousands of vermilion torii gates winding up the sacred Mount Inari; go early for quiet photos." },
+  { "destination": "Kyoto", "name": "Kinkaku-ji", "category": "Sightseeing", "text": "The Golden Pavilion, a Zen temple covered in gold leaf reflected in a tranquil mirror pond." },
+  { "destination": "Kyoto", "name": "Nishiki Market", "category": "Food", "text": "Narrow five-block market known as 'Kyoto's Kitchen', lined with stalls selling street food, pickles and sweets." },
+  { "destination": "Kyoto", "name": "Arashiyama Bamboo Grove", "category": "Adventure", "text": "Ethereal path through towering bamboo stalks, best paired with the nearby Tenryu-ji temple and river." },
+  { "destination": "Kyoto", "name": "Gion District", "category": "Sightseeing", "text": "Kyoto's historic geisha quarter of wooden machiya teahouses, atmospheric at dusk along Hanamikoji Street." },
+  { "destination": "Kyoto", "name": "Kiyomizu-dera", "category": "Sightseeing", "text": "Hillside Buddhist temple with a vast wooden stage offering sweeping views, especially in cherry-blossom and autumn seasons." }
+]

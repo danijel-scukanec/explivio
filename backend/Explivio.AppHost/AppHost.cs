@@ -22,6 +22,35 @@ var appInsights = builder.ExecutionContext.IsPublishMode
     ? builder.AddAzureApplicationInsights("appinsights")
     : null;
 
+// F14: Cosmos DB for the RAG vector store (place embeddings + vector search). Runs locally as the
+// vNext/preview emulator container, which — unlike the classic emulator — supports vector search;
+// RunAsPreviewEmulator is marked experimental (ASPIRECOSMOSDB001), hence the suppression. When
+// deployed it provisions real Azure Cosmos DB (serverless). The API creates the vector-indexed
+// container itself on startup (the embedding policy can't be expressed here), so only the account and
+// database are declared.
+//
+// Locally the Cosmos vNext/preview emulator is heavy and unstable (it runs Postgres + builds a
+// DiskANN index and can wedge the app), so — like Application Insights — it is NOT part of a normal
+// `aspire run`: the API falls back to the in-memory retriever and the local run stays stable. Set
+// EXPLIVIO_COSMOS_EMULATOR=true to opt into the emulator when you specifically want to exercise the
+// Cosmos vector path locally. In publish mode it is always the real Azure resource.
+var useCosmosEmulator = string.Equals(
+    builder.Configuration["EXPLIVIO_COSMOS_EMULATOR"], "true", StringComparison.OrdinalIgnoreCase);
+
+IResourceBuilder<AzureCosmosDBResource>? cosmos = null;
+if (builder.ExecutionContext.IsPublishMode)
+{
+    cosmos = builder.AddAzureCosmosDB("cosmos");
+}
+else if (useCosmosEmulator)
+{
+#pragma warning disable ASPIRECOSMOSDB001
+    cosmos = builder.AddAzureCosmosDB("cosmos").RunAsPreviewEmulator();
+#pragma warning restore ASPIRECOSMOSDB001
+}
+
+cosmos?.AddCosmosDatabase("explivio");
+
 // F05: Service Bus for the transactional outbox. Runs as the local emulator (Docker) in dev and
 // provisions real Azure Service Bus when deployed. Domain events are published to this topic;
 // the AI (F06) and Notifications (F07) workers will add subscriptions here later.
@@ -54,6 +83,18 @@ var api = builder.AddProject<Projects.Explivio_API>("api")
     .WaitFor(database)
     .WithReference(serviceBus)
     .WaitFor(serviceBus);
+
+// F14: give the API the Cosmos connection when Cosmos exists (real in publish mode, or the opt-in
+// local emulator). Without it the API uses the in-memory retriever. Only wait on the local emulator —
+// in publish mode the reference is enough.
+if (cosmos is not null)
+{
+    api.WithReference(cosmos);
+    if (useCosmosEmulator)
+    {
+        api.WaitFor(cosmos);
+    }
+}
 
 // F06: the AI worker. Consumes the 'ai-worker' subscription and stores its inbox in the shared SQL
 // database (its own "worker" schema).

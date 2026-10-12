@@ -1,4 +1,5 @@
 using Explivio.API.Infrastructure.Ai;
+using Explivio.API.Infrastructure.Rag;
 using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Xunit;
@@ -10,6 +11,13 @@ namespace Explivio.API.Tests;
 // and enum mapping, with no AI provider, credentials, or network.
 public sealed class GenerateItineraryHandlerTests
 {
+    // No-op grounding: these tests isolate the structured-output round-trip, not RAG.
+    private sealed class NoGrounding : IItineraryGroundingProvider
+    {
+        public Task<string> BuildAsync(GenerateItineraryCommand command, CancellationToken cancellationToken) =>
+            Task.FromResult(string.Empty);
+    }
+
     private static GenerateItineraryCommand SampleCommand() => new(
         TripId: Guid.NewGuid(),
         Prompt: "A relaxed foodie weekend",
@@ -20,7 +28,7 @@ public sealed class GenerateItineraryHandlerTests
     [Fact]
     public async Task Handle_ReturnsStructuredItinerary_FromChatClient()
     {
-        var handler = new GenerateItineraryHandler(new FakeItineraryChatClient());
+        var handler = new GenerateItineraryHandler(new FakeItineraryChatClient(), new NoGrounding());
 
         var result = await handler.Handle(SampleCommand(), CancellationToken.None);
 
@@ -32,7 +40,7 @@ public sealed class GenerateItineraryHandlerTests
     [Fact]
     public async Task Handle_MapsActivityFields_IncludingEnumCategory()
     {
-        var handler = new GenerateItineraryHandler(new FakeItineraryChatClient());
+        var handler = new GenerateItineraryHandler(new FakeItineraryChatClient(), new NoGrounding());
 
         var result = await handler.Handle(SampleCommand(), CancellationToken.None);
 

@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Explivio.API.Infrastructure.Rag;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -14,6 +15,7 @@ namespace Explivio.API.Modules.Itinerary.GenerateItinerary;
 [Authorize]
 public sealed class ItineraryGenerationHub(
     IChatClient chatClient,
+    IItineraryGroundingProvider grounding,
     IValidator<GenerateItineraryCommand> validator) : Hub
 {
     public async IAsyncEnumerable<string> Generate(
@@ -28,7 +30,9 @@ public sealed class ItineraryGenerationHub(
             throw new HubException(string.Join(" ", validation.Errors.Select(e => e.ErrorMessage)));
         }
 
-        var messages = ItineraryChat.BuildMessages(command);
+        // F14: same retrieval-augmented prompt as the non-streaming handler.
+        var groundingText = await grounding.BuildAsync(command, cancellationToken);
+        var messages = ItineraryChat.BuildMessages(command, groundingText);
         var options = ItineraryChat.StructuredOutputOptions();
 
         await foreach (var update in chatClient.GetStreamingResponseAsync(messages, options, cancellationToken))

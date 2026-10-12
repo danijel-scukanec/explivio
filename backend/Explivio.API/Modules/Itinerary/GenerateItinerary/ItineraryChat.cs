@@ -13,11 +13,21 @@ public static class ItineraryChat
         "Spread activities sensibly across the requested number of days, group nearby things together, " +
         "and choose the most fitting category for each activity. Keep descriptions concise and practical.";
 
-    public static IList<ChatMessage> BuildMessages(GenerateItineraryCommand command) =>
-    [
-        new(ChatRole.System, SystemPrompt),
-        new(ChatRole.User, BuildUserPrompt(command)),
-    ];
+    // F14: an optional grounding block (real places retrieved for the trip's destination) is added as
+    // a second system message, so both the streaming and non-streaming paths generate from the same
+    // retrieved context. When grounding is empty the prompt is exactly the F12/F13 one — ungrounded.
+    public static IList<ChatMessage> BuildMessages(GenerateItineraryCommand command, string? grounding = null)
+    {
+        var messages = new List<ChatMessage> { new(ChatRole.System, SystemPrompt) };
+
+        if (!string.IsNullOrWhiteSpace(grounding))
+        {
+            messages.Add(new ChatMessage(ChatRole.System, grounding));
+        }
+
+        messages.Add(new ChatMessage(ChatRole.User, BuildUserPrompt(command)));
+        return messages;
+    }
 
     // The structured-output contract: the model must reply as JSON matching GeneratedItinerary.
     // Used on the streaming path, where we assemble the JSON from deltas ourselves (the non-streaming
