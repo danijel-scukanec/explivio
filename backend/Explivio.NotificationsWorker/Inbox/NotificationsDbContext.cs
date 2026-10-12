@@ -1,3 +1,4 @@
+using Explivio.Messaging;
 using Microsoft.EntityFrameworkCore;
 
 namespace Explivio.NotificationsWorker.Inbox;
@@ -15,11 +16,6 @@ public sealed class NotificationsDbContext(DbContextOptions<NotificationsDbConte
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
-
-        var inbox = modelBuilder.Entity<InboxMessage>();
-        inbox.ToTable("InboxMessages");
-        inbox.HasKey(m => m.MessageId);
-        inbox.Property(m => m.MessageId).HasMaxLength(200);
-        inbox.Property(m => m.Subject).HasMaxLength(200);
+        modelBuilder.ConfigureInbox<InboxMessage>();
     }
 }

@@ -1,13 +1,13 @@
+using Explivio.Messaging;
+
 namespace Explivio.AIWorker.Inbox;
 
-// F06: a record of a domain-event message this worker has already handled. Consuming Service Bus is
-// at-least-once, so the same message can arrive more than once (retries, redelivery). Recording the
-// Service Bus MessageId (the outbox row id) lets us detect and skip a duplicate — the inbox pattern,
-// the consumer-side counterpart to F05's outbox.
-public sealed class InboxMessage
+// F06: this worker's inbox row, living in the "worker" schema. The shared InboxProcessor records one
+// per handled message to dedupe at-least-once delivery; see IInboxMessage for the pattern.
+public sealed class InboxMessage : IInboxMessage
 {
     // The Service Bus MessageId, which the outbox sets to the originating outbox row id.
-    public required string MessageId { get; set; }
-    public required string Subject { get; set; }
+    public string MessageId { get; set; } = string.Empty;
+    public string Subject { get; set; } = string.Empty;
     public DateTime ProcessedOnUtc { get; set; }
 }

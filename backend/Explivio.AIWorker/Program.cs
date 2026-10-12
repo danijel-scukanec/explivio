@@ -1,5 +1,6 @@
 using Explivio.AIWorker.Consuming;
 using Explivio.AIWorker.Inbox;
+using Explivio.Messaging;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,42 +26,20 @@ builder.Services.AddSingleton<DomainEventDispatcher>();
 if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("messaging")))
 {
     builder.AddAzureServiceBusClient("messaging");
-    builder.Services.AddHostedService<DomainEventProcessor>();
+    builder.Services.AddHostedService<AiWorkerProcessor>();
 }
 
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
-// Apply the worker's own inbox migration on startup. It targets only the "worker" schema, so it
-// never touches the API's tables. Retried briefly to tolerate SQL still warming up under the AppHost.
+// Apply the worker's own inbox migration on startup (isolated "worker" schema).
 if (!string.IsNullOrWhiteSpace(sqlConnectionString))
 {
-    await MigrateInboxAsync(app);
+    await app.MigrateDbContextAsync<WorkerDbContext>();
 }
 
 app.Run();
-
-static async Task MigrateInboxAsync(WebApplication app)
-{
-    var logger = app.Services.GetRequiredService<ILogger<Program>>();
-
-    for (var attempt = 1; attempt <= 10; attempt++)
-    {
-        try
-        {
-            using var scope = app.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<WorkerDbContext>();
-            await db.Database.MigrateAsync();
-            return;
-        }
-        catch (Exception ex) when (attempt < 10)
-        {
-            logger.LogWarning(ex, "Inbox migration attempt {Attempt} failed; retrying.", attempt);
-            await Task.Delay(TimeSpan.FromSeconds(3));
-        }
-    }
-}
 
 // Exposed so integration tests can host the worker via WebApplicationFactory.
 public partial class Program;

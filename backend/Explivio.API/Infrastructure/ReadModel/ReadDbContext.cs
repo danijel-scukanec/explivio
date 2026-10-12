@@ -1,3 +1,4 @@
+using Explivio.Messaging;
 using Microsoft.EntityFrameworkCore;
 
 namespace Explivio.API.Infrastructure.ReadModel;
@@ -24,10 +25,6 @@ public sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : DbC
         summary.Property(s => s.TotalSpend).HasColumnType("decimal(18,2)");
         summary.HasIndex(s => s.UserId);
 
-        var inbox = modelBuilder.Entity<ProjectionInboxMessage>();
-        inbox.ToTable("InboxMessages");
-        inbox.HasKey(m => m.MessageId);
-        inbox.Property(m => m.MessageId).HasMaxLength(200);
-        inbox.Property(m => m.Subject).HasMaxLength(200);
+        modelBuilder.ConfigureInbox<ProjectionInboxMessage>();
     }
 }
