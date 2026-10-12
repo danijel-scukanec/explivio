@@ -171,11 +171,18 @@ app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
-    // Inject a fake identity so RequireAuthorization() passes without a real B2C token
+    // Inject a fake identity so RequireAuthorization() passes without a real B2C token.
+    // F15: honour an "X-Dev-User" header (a GUID) so you can act as different users locally and
+    // exercise collaboration/sharing without real auth — e.g. open two browser profiles as two
+    // users. Defaults to user ...0001 when the header is absent or not a GUID.
+    const string defaultDevUser = "00000000-0000-0000-0000-000000000001";
     app.Use((ctx, next) =>
     {
-        ctx.User = new ClaimsPrincipal(new ClaimsIdentity(
-            [new Claim("sub", "00000000-0000-0000-0000-000000000001")], "dev"));
+        var sub = Guid.TryParse(ctx.Request.Headers["X-Dev-User"], out var devUser)
+            ? devUser.ToString()
+            : defaultDevUser;
+
+        ctx.User = new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", sub)], "dev"));
         return next();
     });
 }
@@ -197,6 +204,7 @@ var versionSet = app.NewApiVersionSet()
 var api = app.MapGroup("/v{version:apiVersion}").WithApiVersionSet(versionSet);
 
 api.MapTripsEndpoints();
+api.MapTripMembersEndpoints();
 api.MapUsersEndpoints();
 api.MapItineraryEndpoints();
 api.MapBudgetEndpoints();

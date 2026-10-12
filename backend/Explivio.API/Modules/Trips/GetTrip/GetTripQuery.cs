@@ -3,7 +3,8 @@ using MediatR;
 
 namespace Explivio.API.Modules.Trips.GetTrip;
 
-public record GetTripQuery(Guid TripId, Guid UserId) : IRequest<Result<TripResponse>>;
+// F15: no UserId — access is authorized by RequireTripRole before the handler runs.
+public record GetTripQuery(Guid TripId) : IRequest<Result<TripResponse>>;
 
 public record TripResponse(
     Guid Id,

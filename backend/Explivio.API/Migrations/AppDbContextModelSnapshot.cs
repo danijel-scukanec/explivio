@@ -199,6 +199,29 @@ namespace Explivio.API.Migrations
                     b.ToTable("Trips");
                 });
 
+            modelBuilder.Entity("Explivio.API.Modules.Trips.TripMember", b =>
+                {
+                    b.Property<Guid>("TripId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("TripId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TripMembers", (string)null);
+                });
+
             modelBuilder.Entity("Explivio.API.Modules.Users.User", b =>
                 {
                     b.Property<Guid>("Id")

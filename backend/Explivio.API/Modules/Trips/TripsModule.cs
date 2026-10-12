@@ -1,4 +1,5 @@
 using Explivio.API.Infrastructure.Api;
+using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Outcomes;
 using Explivio.API.Infrastructure.ReadModel;
 using Explivio.API.Modules.Trips.CreateTrip;
@@ -23,12 +24,19 @@ public static class TripsModule
             return Results.Ok(trips);
         }).Produces<IEnumerable<TripResponse>>();
 
-        // F08: CQRS read side — served straight from the projected TripSummary read model, no joins.
-        group.MapGet("/dashboard", async (ReadDbContext read, HttpContext ctx) =>
+        // F08: CQRS read side — served from the projected TripSummary read model.
+        // F15: scoped to the trips the caller is a member of (the read model is keyed by owner, so we
+        // first resolve the caller's member trip ids from the write model, then filter the summaries).
+        group.MapGet("/dashboard", async (ReadDbContext read, AppDbContext db, HttpContext ctx) =>
         {
             var userId = ctx.GetUserId();
+            var memberTripIds = await db.TripMembers
+                .Where(m => m.UserId == userId)
+                .Select(m => m.TripId)
+                .ToListAsync();
+
             var summaries = await read.TripSummaries
-                .Where(s => s.UserId == userId)
+                .Where(s => memberTripIds.Contains(s.TripId))
                 .OrderByDescending(s => s.UpdatedAt)
                 .Select(s => new TripSummaryResponse(
                     s.TripId, s.Name, s.Destination, s.StartDate, s.EndDate,
@@ -37,25 +45,26 @@ public static class TripsModule
             return Results.Ok(summaries);
         }).Produces<IEnumerable<TripSummaryResponse>>();
 
-        group.MapGet("/{id:guid}", async (Guid id, IMediator mediator, HttpContext ctx) =>
+        group.MapGet("/{id:guid}", async (Guid id, IMediator mediator) =>
         {
-            var userId = ctx.GetUserId();
-            var result = await mediator.Send(new GetTripQuery(id, userId));
+            var result = await mediator.Send(new GetTripQuery(id));
             return result.ToHttpResult();
-        }).Produces<TripResponse>().ProducesProblem(StatusCodes.Status404NotFound);
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Viewer, "id"))
+          .Produces<TripResponse>().ProducesProblem(StatusCodes.Status404NotFound);
 
-        group.MapPost("/", async (CreateTripCommand command, IMediator mediator) =>
+        group.MapPost("/", async (CreateTripCommand command, IMediator mediator, HttpContext ctx) =>
         {
-            var id = await mediator.Send(command);
+            // F15: the owner is the authenticated caller, not whatever the body carries.
+            var id = await mediator.Send(command with { UserId = ctx.GetUserId() });
             return Results.Created($"/trips/{id}", new CreatedResponse(id));
         }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
-        group.MapDelete("/{id:guid}", async (Guid id, IMediator mediator, HttpContext ctx) =>
+        group.MapDelete("/{id:guid}", async (Guid id, IMediator mediator) =>
         {
-            var userId = ctx.GetUserId();
-            var result = await mediator.Send(new DeleteTripCommand(id, userId));
+            var result = await mediator.Send(new DeleteTripCommand(id));
             return result.ToHttpResult();
-        }).Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound);
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Owner, "id"))
+          .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound);
 
         return app;
     }

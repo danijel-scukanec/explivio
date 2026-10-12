@@ -3,4 +3,5 @@ using MediatR;
 
 namespace Explivio.API.Modules.Trips.DeleteTrip;
 
-public record DeleteTripCommand(Guid TripId, Guid UserId) : IRequest<Result>;
+// F15: no UserId — Owner access is authorized by RequireTripRole before the handler runs.
+public record DeleteTripCommand(Guid TripId) : IRequest<Result>;

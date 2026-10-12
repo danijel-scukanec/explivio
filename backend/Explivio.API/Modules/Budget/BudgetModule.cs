@@ -1,6 +1,7 @@
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Modules.Budget.AddExpense;
+using Explivio.API.Modules.Trips;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,13 +28,15 @@ public static class BudgetModule
             );
 
             return Results.Ok(summary);
-        }).Produces<BudgetSummaryResponse>();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Viewer))
+          .Produces<BudgetSummaryResponse>();
 
         group.MapPost("/", async (Guid tripId, AddExpenseCommand command, IMediator mediator) =>
         {
             var id = await mediator.Send(command with { TripId = tripId });
             return Results.Created($"/trips/{tripId}/expenses/{id}", new CreatedResponse(id));
-        }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
+          .Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
         group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db) =>
         {
@@ -41,7 +44,8 @@ public static class BudgetModule
                 .Where(e => e.Id == id && e.TripId == tripId)
                 .ExecuteDeleteAsync();
             return deleted > 0 ? Results.NoContent() : Results.NotFound();
-        }).Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
+          .Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
 
         return app;
     }

@@ -11,6 +11,7 @@ namespace Explivio.API.Infrastructure.Database;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<Trip> Trips => Set<Trip>();
+    public DbSet<TripMember> TripMembers => Set<TripMember>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Activity> Activities => Set<Activity>();
     public DbSet<Expense> Expenses => Set<Expense>();

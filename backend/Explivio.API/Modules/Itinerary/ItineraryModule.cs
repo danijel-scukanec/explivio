@@ -1,6 +1,7 @@
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Modules.Itinerary.CreateActivity;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
+using Explivio.API.Modules.Trips;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Explivio.API.Infrastructure.Database;
@@ -11,6 +12,7 @@ public static class ItineraryModule
 {
     public static IEndpointRouteBuilder MapItineraryEndpoints(this IEndpointRouteBuilder app)
     {
+        // F15: every activity route is trip-scoped — reads need Viewer, writes need Editor.
         var group = app.MapGroup("/trips/{tripId:guid}/activities").RequireAuthorization();
 
         group.MapGet("/", async (Guid tripId, AppDbContext db) =>
@@ -20,13 +22,15 @@ public static class ItineraryModule
                 .OrderBy(a => a.Date).ThenBy(a => a.StartTime)
                 .ToListAsync();
             return Results.Ok(activities);
-        }).Produces<IEnumerable<Activity>>();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Viewer))
+          .Produces<IEnumerable<Activity>>();
 
         group.MapPost("/", async (Guid tripId, CreateActivityCommand command, IMediator mediator) =>
         {
             var id = await mediator.Send(command with { TripId = tripId });
             return Results.Created($"/trips/{tripId}/activities/{id}", new CreatedResponse(id));
-        }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
+          .Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
         // F12: AI itinerary generation. Synchronous — the caller waits for the draft. Returns a
         // draft only; the user reviews it and creates activities via POST above. F13 will stream this.
@@ -34,7 +38,8 @@ public static class ItineraryModule
         {
             var draft = await mediator.Send(command with { TripId = tripId });
             return Results.Ok(draft);
-        }).Produces<GeneratedItinerary>().ProducesValidationProblem();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
+          .Produces<GeneratedItinerary>().ProducesValidationProblem();
 
         group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db) =>
         {
@@ -50,7 +55,8 @@ public static class ItineraryModule
             db.Activities.Remove(activity);
             await db.SaveChangesAsync();
             return Results.NoContent();
-        }).Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
+          .Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
 
         return app;
     }

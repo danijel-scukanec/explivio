@@ -12,7 +12,7 @@ public class DeleteTripHandler(AppDbContext db) : IRequestHandler<DeleteTripComm
         // F08: load then remove (instead of a bulk ExecuteDelete) so the aggregate can raise
         // TripDeletedDomainEvent and the outbox interceptor captures it in the same transaction.
         var trip = await db.Trips
-            .FirstOrDefaultAsync(t => t.Id == command.TripId && t.UserId == command.UserId, cancellationToken);
+            .FirstOrDefaultAsync(t => t.Id == command.TripId, cancellationToken);
 
         if (trip is null)
         {
