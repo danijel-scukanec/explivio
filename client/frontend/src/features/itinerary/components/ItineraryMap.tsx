@@ -37,6 +37,11 @@ function FitBounds({ points }: { points: [number, number][] }) {
   useEffect(() => {
     if (points.length === 0) return;
     map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 15 });
+    // Guard against a far-flung outlier collapsing the view to the whole world: if fitting every pin
+    // forces an extreme zoom-out, fall back to the first pin at city zoom so the trip stays legible.
+    if (map.getZoom() < 6) {
+      map.setView(points[0], 12);
+    }
   }, [points, map]);
   return null;
 }
