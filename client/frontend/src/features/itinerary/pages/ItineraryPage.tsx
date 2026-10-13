@@ -7,7 +7,7 @@ import { getActivities, deleteActivity } from '../services/itineraryApi';
 import { DaySchedule } from '../components/DaySchedule';
 import { AddActivityModal } from '../components/AddActivityModal';
 import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
-import { useTripCollaboration } from '../hooks/useTripCollaboration';
+import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import './ItineraryPage.css';
 
 export function ItineraryPage() {
@@ -78,6 +78,7 @@ export function ItineraryPage() {
           )}
         </div>
         <div className="itinerary-page__actions">
+          <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 Budget</Link>
           <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ Generate with AI</button>
           <button className="btn btn--primary" onClick={() => setShowModal(true)}>+ Add activity</button>
         </div>

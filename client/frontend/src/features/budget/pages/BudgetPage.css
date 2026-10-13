@@ -1,0 +1,162 @@
+.budget-page {
+  padding: 40px 32px;
+  text-align: left;
+
+  @media (max-width: 1024px) {
+    padding: 24px 20px;
+  }
+}
+
+.budget-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  gap: 16px;
+}
+
+.budget-page__back {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  a {
+    font-size: 14px;
+    color: var(--text);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--accent);
+    }
+  }
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.budget-page__destination {
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.budget-page__actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.budget-page__status {
+  font-size: 15px;
+  color: var(--text);
+  margin: 0;
+}
+
+.budget-page__status--error {
+  color: #e53e3e;
+}
+
+/* F15: live presence badge — who else is viewing this trip right now. */
+.budget-page__presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.budget-page__presence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  animation: presence-pulse 2s ease-in-out infinite;
+}
+
+@keyframes presence-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Summary card */
+.budget-summary {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.budget-summary__total {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 20px;
+}
+
+.budget-summary__total-label {
+  font-size: 13px;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.budget-summary__total-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+.budget-summary__categories {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.budget-summary__category {
+  display: grid;
+  grid-template-columns: 120px 1fr 90px;
+  align-items: center;
+  gap: 12px;
+}
+
+.budget-summary__category-label {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.budget-summary__bar-track {
+  background: var(--accent-bg);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.budget-summary__bar-fill {
+  background: var(--accent);
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.budget-summary__category-value {
+  font-size: 13px;
+  color: var(--text-h);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Expense list */
+.budget-page__expenses-title {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+
+.budget-page__empty {
+  font-size: 14px;
+  color: var(--text);
+}

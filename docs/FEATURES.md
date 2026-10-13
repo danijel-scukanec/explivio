@@ -23,7 +23,7 @@ Legend for _Proves_: 🧩 distributed-systems · 🤖 AI · 🎨 full-stack · �
 | Itinerary — day-by-day activities + coordinates (Google Places New) | ✅ |
 | Budget — expenses + category summary | ✅ |
 | Users — register / get | ✅ |
-| Web: Trips + Itinerary UI, shared PlaceSearchInput | ✅ |
+| Web: Trips + Itinerary + Budget UI, shared PlaceSearchInput | ✅ |
 | Bicep modules (sql, cosmos, appservice, staticwebapp) | ✅ (to be superseded by Aspire/azd) |
 | Mobile: Expo scaffold | ✅ (barebones) |
 

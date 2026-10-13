@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
-import { devUserQuery } from '../../../shared/devUser';
+import { devUserQuery } from '../devUser';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5298';
 
@@ -11,7 +11,8 @@ export interface TripCollaboration {
 // F15 Phase B: joins the trip's live collaboration group. Tracks who else is viewing (presence) and
 // calls onChange whenever a member edits the trip, so the page can refetch. In-process SignalR; the
 // push is immediate (not routed through the 5s outbox). Collaboration is best-effort — if the hub is
-// unreachable the page still works, it just won't update live.
+// unreachable the page still works, it just won't update live. Lives in shared/ because both the
+// itinerary and budget pages use it.
 export function useTripCollaboration(
   tripId: string | undefined,
   onChange: () => void,
