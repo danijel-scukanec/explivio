@@ -2,6 +2,7 @@ using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Modules.Budget.AddExpense;
 using Explivio.API.Modules.Trips;
+using Explivio.API.Modules.Trips.Collaboration;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,12 +39,19 @@ public static class BudgetModule
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
-        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db) =>
+        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db, ITripCollaborationNotifier collaboration) =>
         {
             var deleted = await db.Expenses
                 .Where(e => e.Id == id && e.TripId == tripId)
                 .ExecuteDeleteAsync();
-            return deleted > 0 ? Results.NoContent() : Results.NotFound();
+            if (deleted == 0)
+            {
+                return Results.NotFound();
+            }
+
+            // F15 Phase B: nudge anyone viewing the trip to refetch — immediate, after the commit.
+            await collaboration.TripChangedAsync(tripId, "expense.deleted");
+            return Results.NoContent();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
 

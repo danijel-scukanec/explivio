@@ -2,6 +2,7 @@ using Explivio.API.Infrastructure.Api;
 using Explivio.API.Modules.Itinerary.CreateActivity;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Trips;
+using Explivio.API.Modules.Trips.Collaboration;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Explivio.API.Infrastructure.Database;
@@ -41,7 +42,7 @@ public static class ItineraryModule
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces<GeneratedItinerary>().ProducesValidationProblem();
 
-        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db) =>
+        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db, ITripCollaborationNotifier collaboration) =>
         {
             // F08: load then remove so the aggregate raises ActivityRemovedDomainEvent for the
             // read-model projector (the outbox interceptor captures it in the same transaction).
@@ -54,6 +55,9 @@ public static class ItineraryModule
             activity.Remove();
             db.Activities.Remove(activity);
             await db.SaveChangesAsync();
+
+            // F15 Phase B: nudge anyone viewing the trip to refetch — immediate, after the commit.
+            await collaboration.TripChangedAsync(tripId, "activity.deleted");
             return Results.NoContent();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);

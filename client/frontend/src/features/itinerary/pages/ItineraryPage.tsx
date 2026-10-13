@@ -7,6 +7,7 @@ import { getActivities, deleteActivity } from '../services/itineraryApi';
 import { DaySchedule } from '../components/DaySchedule';
 import { AddActivityModal } from '../components/AddActivityModal';
 import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
+import { useTripCollaboration } from '../hooks/useTripCollaboration';
 import './ItineraryPage.css';
 
 export function ItineraryPage() {
@@ -37,6 +38,10 @@ export function ItineraryPage() {
 
   useEffect(() => { load(); }, [tripId]);
 
+  // F15 Phase B: live collaboration — refetch when another member edits, and show who's viewing.
+  const { presentUserIds } = useTripCollaboration(tripId, load);
+  const othersViewing = Math.max(0, presentUserIds.length - 1);
+
   async function handleDelete(id: string) {
     if (!tripId) return;
     await deleteActivity(tripId, id);
@@ -62,6 +67,15 @@ export function ItineraryPage() {
           <Link to="/trips">← Trips</Link>
           <h1>{trip.name}</h1>
           <span className="itinerary-page__destination">{trip.destination}</span>
+          {othersViewing > 0 && (
+            <span
+              className="itinerary-page__presence"
+              title={presentUserIds.join(', ')}
+            >
+              <span className="itinerary-page__presence-dot" aria-hidden="true" />
+              {othersViewing} other{othersViewing > 1 ? 's' : ''} viewing
+            </span>
+          )}
         </div>
         <div className="itinerary-page__actions">
           <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ Generate with AI</button>

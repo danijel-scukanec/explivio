@@ -12,6 +12,7 @@ using Explivio.API.Infrastructure.Outbox;
 using Explivio.API.Infrastructure.Rag;
 using Explivio.API.Infrastructure.ReadModel;
 using Explivio.API.Modules.Trips;
+using Explivio.API.Modules.Trips.Collaboration;
 using Explivio.API.Modules.Users;
 using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
@@ -120,6 +121,12 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("cosmos
 // later scaling swap). The ItineraryGenerationHub streams the generation token-by-token.
 builder.Services.AddSignalR();
 
+// F15 Phase B: real-time collaboration. TripPresence tracks who is connected per trip (ephemeral,
+// in-memory singleton); the notifier pushes immediate "TripChanged" nudges to a trip's group when a
+// member edits it — in-process via IHubContext, NOT via the outbox (whose 5s poll would lag).
+builder.Services.AddSingleton<TripPresence>();
+builder.Services.AddSingleton<ITripCollaborationNotifier, TripCollaborationNotifier>();
+
 // F09: API versioning via URL segment (/v1/...). C# stays the source of truth for the
 // version; the frontend regenerates types from the versioned OpenAPI spec.
 builder.Services.AddApiVersioning(options =>
@@ -174,11 +181,15 @@ if (app.Environment.IsDevelopment())
     // Inject a fake identity so RequireAuthorization() passes without a real B2C token.
     // F15: honour an "X-Dev-User" header (a GUID) so you can act as different users locally and
     // exercise collaboration/sharing without real auth — e.g. open two browser profiles as two
-    // users. Defaults to user ...0001 when the header is absent or not a GUID.
+    // users. A "devUser" query parameter is accepted as a fallback because browsers can't set custom
+    // headers on a WebSocket upgrade, so the SignalR collaboration hub identifies its user that way.
+    // Defaults to user ...0001 when neither is present or valid.
     const string defaultDevUser = "00000000-0000-0000-0000-000000000001";
     app.Use((ctx, next) =>
     {
-        var sub = Guid.TryParse(ctx.Request.Headers["X-Dev-User"], out var devUser)
+        var requested = ctx.Request.Headers["X-Dev-User"].FirstOrDefault()
+            ?? ctx.Request.Query["devUser"].FirstOrDefault();
+        var sub = Guid.TryParse(requested, out var devUser)
             ? devUser.ToString()
             : defaultDevUser;
 
@@ -212,6 +223,9 @@ api.MapBudgetEndpoints();
 // F13: the streaming itinerary-generation hub. Not versioned like the REST group — SignalR hubs are
 // addressed by a stable path; the default CORS policy and auth apply as for the rest of the app.
 app.MapHub<ItineraryGenerationHub>("/hubs/itinerary-generation");
+
+// F15 Phase B: the real-time trip collaboration hub (presence + live-edit nudges).
+app.MapHub<TripCollaborationHub>("/hubs/trip-collaboration");
 
 app.Run();
 
