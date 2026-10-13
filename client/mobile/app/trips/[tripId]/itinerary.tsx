@@ -4,6 +4,7 @@ import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-rou
 import type { Trip, Activity } from '@explivio/shared';
 import { formatActivityTime, formatTripDate, getDaysInRange } from '@explivio/shared';
 import { getTrip, getActivities, deleteActivity } from '../../../src/api';
+import { useTripCollaboration } from '../../../src/useTripCollaboration';
 import { theme } from '../../../src/theme';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -40,6 +41,10 @@ export default function ItineraryScreen() {
   // Refetch on focus so additions/deletions made on the form screen show on return.
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
+  // F15/F31: live collaboration — refetch when another member edits, and show who else is viewing.
+  const { presentUserIds } = useTripCollaboration(tripId, load);
+  const othersViewing = Math.max(0, presentUserIds.length - 1);
+
   async function handleDelete(id: string) {
     if (!tripId) return;
     await deleteActivity(tripId, id);
@@ -75,6 +80,13 @@ export default function ItineraryScreen() {
           ),
         }}
       />
+
+      {othersViewing > 0 ? (
+        <View style={styles.presence}>
+          <View style={styles.presenceDot} />
+          <Text style={styles.presenceText}>{othersViewing} other{othersViewing > 1 ? 's' : ''} viewing</Text>
+        </View>
+      ) : null}
 
       {loading ? (
         <ActivityIndicator style={styles.center} color={theme.accent} />
@@ -127,6 +139,9 @@ const styles = StyleSheet.create({
   error: { color: theme.danger },
   headerActions: { flexDirection: 'row', gap: 16 },
   headerButton: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  presence: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.accentBg },
+  presenceDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22c55e' },
+  presenceText: { fontSize: 13, color: theme.accent, fontWeight: '500' },
   dayHeader: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 16, marginBottom: 4 },
   dayNumber: { fontSize: 15, fontWeight: '700', color: theme.textStrong },
   dayDate: { fontSize: 13, color: theme.text },

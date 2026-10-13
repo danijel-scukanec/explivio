@@ -4,6 +4,7 @@ import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-rou
 import type { BudgetSummary, Expense } from '@explivio/shared';
 import { formatCurrency, formatTripDate } from '@explivio/shared';
 import { getBudget, deleteExpense } from '../../../src/api';
+import { useTripCollaboration } from '../../../src/useTripCollaboration';
 import { theme } from '../../../src/theme';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -31,6 +32,10 @@ export default function BudgetScreen() {
   }, [tripId]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  // F15/F31: live collaboration — refetch when another member changes expenses, and show presence.
+  const { presentUserIds } = useTripCollaboration(tripId, load);
+  const othersViewing = Math.max(0, presentUserIds.length - 1);
 
   async function handleDelete(id: string) {
     if (!tripId) return;
@@ -65,6 +70,12 @@ export default function BudgetScreen() {
   return (
     <View style={styles.screen}>
       {header}
+      {othersViewing > 0 ? (
+        <View style={styles.presence}>
+          <View style={styles.presenceDot} />
+          <Text style={styles.presenceText}>{othersViewing} other{othersViewing > 1 ? 's' : ''} viewing</Text>
+        </View>
+      ) : null}
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.summary}>
           <Text style={styles.totalLabel}>TOTAL SPEND</Text>
@@ -109,6 +120,9 @@ const styles = StyleSheet.create({
   center: { textAlign: 'center', marginTop: 40, color: theme.text },
   error: { color: theme.danger },
   headerButton: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  presence: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.accentBg },
+  presenceDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22c55e' },
+  presenceText: { fontSize: 13, color: theme.accent, fontWeight: '500' },
   summary: { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border, borderRadius: 12, padding: 16, marginBottom: 20 },
   totalLabel: { fontSize: 12, color: theme.text, letterSpacing: 0.5 },
   totalValue: { fontSize: 30, fontWeight: '700', color: theme.textStrong, marginTop: 2, marginBottom: 14 },

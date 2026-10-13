@@ -10,7 +10,8 @@ import type {
 // On web (expo start --web) the device is the host, so localhost works. For a real device/emulator,
 // set EXPO_PUBLIC_API_URL to the host's LAN IP (emulators also have their own aliases). The dev API
 // injects a fake identity, so no auth header is needed.
-const API_URL = `${process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:5298'}/v1`;
+export const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:5298';
+const API_URL = `${API_BASE}/v1`;
 
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}${path}`);
