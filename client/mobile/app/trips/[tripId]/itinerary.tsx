@@ -5,6 +5,7 @@ import type { Trip, Activity } from '@explivio/shared';
 import { formatActivityTime, formatTripDate, getDaysInRange } from '@explivio/shared';
 import { getTrip, getActivities, deleteActivity } from '../../../src/api';
 import { useTripCollaboration } from '../../../src/useTripCollaboration';
+import { ItineraryMap } from '../../../src/ItineraryMap';
 import { theme } from '../../../src/theme';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -51,14 +52,11 @@ export default function ItineraryScreen() {
     load();
   }
 
-  const sections = useMemo<DaySection[]>(() => {
-    if (!trip) return [];
-    return getDaysInRange(trip.startDate, trip.endDate).map((date, i) => ({
-      title: date,
-      dayNumber: i + 1,
-      data: activities.filter(a => a.date === date),
-    }));
-  }, [trip, activities]);
+  const days = useMemo(() => (trip ? getDaysInRange(trip.startDate, trip.endDate) : []), [trip]);
+  const sections = useMemo<DaySection[]>(
+    () => days.map((date, i) => ({ title: date, dayNumber: i + 1, data: activities.filter(a => a.date === date) })),
+    [days, activities],
+  );
 
   return (
     <View style={styles.screen}>
@@ -98,6 +96,7 @@ export default function ItineraryScreen() {
           keyExtractor={item => item.id}
           contentContainerStyle={styles.list}
           stickySectionHeadersEnabled={false}
+          ListHeaderComponent={<ItineraryMap activities={activities} days={days} />}
           renderSectionHeader={({ section }) => (
             <View style={styles.dayHeader}>
               <Text style={styles.dayNumber}>Day {section.dayNumber}</Text>
