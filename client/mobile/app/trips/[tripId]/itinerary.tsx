@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import type { Trip, Activity } from '@explivio/shared';
 import { formatActivityTime, formatTripDate, getDaysInRange } from '@explivio/shared';
-import { getTrip, getActivities } from '../../../src/api';
+import { getTrip, getActivities, deleteActivity } from '../../../src/api';
 import { theme } from '../../../src/theme';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -22,27 +22,30 @@ interface DaySection {
 }
 
 export default function ItineraryScreen() {
+  const router = useRouter();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!tripId) return;
-    let active = true;
-    Promise.all([getTrip(tripId), getActivities(tripId)])
-      .then(([tripData, activityData]) => {
-        if (!active) return;
-        setTrip(tripData);
-        setActivities(activityData);
-      })
-      .catch(() => { if (active) setError('Could not load itinerary.'); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    return Promise.all([getTrip(tripId), getActivities(tripId)])
+      .then(([tripData, activityData]) => { setTrip(tripData); setActivities(activityData); setError(null); })
+      .catch(() => setError('Could not load itinerary.'))
+      .finally(() => setLoading(false));
   }, [tripId]);
 
-  // Build one section per trip day, each holding that day's activities (ordered as returned).
+  // Refetch on focus so additions/deletions made on the form screen show on return.
+  useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  async function handleDelete(id: string) {
+    if (!tripId) return;
+    await deleteActivity(tripId, id);
+    load();
+  }
+
   const sections = useMemo<DaySection[]>(() => {
     if (!trip) return [];
     return getDaysInRange(trip.startDate, trip.endDate).map((date, i) => ({
@@ -54,7 +57,24 @@ export default function ItineraryScreen() {
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen options={{ title: trip?.name ?? 'Itinerary' }} />
+      <Stack.Screen
+        options={{
+          title: trip?.name ?? 'Itinerary',
+          headerRight: () => (
+            <View style={styles.headerActions}>
+              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/budget`)} hitSlop={10}>
+                <Text style={styles.headerButton}>Budget</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push(`/trips/${tripId}/add-activity?startDate=${trip?.startDate ?? ''}`)}
+                hitSlop={10}
+              >
+                <Text style={styles.headerButton}>+ Add</Text>
+              </TouchableOpacity>
+            </View>
+          ),
+        }}
+      />
 
       {loading ? (
         <ActivityIndicator style={styles.center} color={theme.accent} />
@@ -88,6 +108,9 @@ export default function ItineraryScreen() {
                   {item.location ? <Text style={styles.activityMeta}>📍 {item.location}</Text> : null}
                   {item.description ? <Text style={styles.activityMeta}>{item.description}</Text> : null}
                 </View>
+                <TouchableOpacity onPress={() => handleDelete(item.id)} hitSlop={10} style={styles.delete}>
+                  <Text style={styles.deleteText}>✕</Text>
+                </TouchableOpacity>
               </View>
             );
           }}
@@ -102,25 +125,17 @@ const styles = StyleSheet.create({
   list: { padding: 16 },
   center: { textAlign: 'center', marginTop: 40, color: theme.text },
   error: { color: theme.danger },
-  dayHeader: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
-    marginTop: 16,
-    marginBottom: 4,
-  },
+  headerActions: { flexDirection: 'row', gap: 16 },
+  headerButton: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  dayHeader: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 16, marginBottom: 4 },
   dayNumber: { fontSize: 15, fontWeight: '700', color: theme.textStrong },
   dayDate: { fontSize: 13, color: theme.text },
   empty: { fontSize: 13, color: theme.text, paddingVertical: 8, fontStyle: 'italic' },
-  activity: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.border,
-  },
+  activity: { flexDirection: 'row', gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: theme.border },
   time: { width: 92, fontSize: 13, color: theme.text },
   activityBody: { flex: 1 },
   activityName: { fontSize: 15, fontWeight: '600', color: theme.textStrong },
   activityMeta: { fontSize: 13, color: theme.text, marginTop: 2 },
+  delete: { paddingHorizontal: 4 },
+  deleteText: { color: theme.border, fontSize: 15 },
 });
