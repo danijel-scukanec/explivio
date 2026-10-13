@@ -19,6 +19,7 @@ export const formStyles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 12 },
   rowItem: { flex: 1 },
   error: { color: theme.danger, fontSize: 13 },
+  hint: { color: theme.accent, fontSize: 13, marginTop: 6 },
   submit: {
     backgroundColor: theme.accent,
     borderRadius: 10,

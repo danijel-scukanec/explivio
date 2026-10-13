@@ -3,6 +3,7 @@ import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import type { ActivityCategory, CreateActivityRequest } from '@explivio/shared';
 import { createActivity } from '../../../src/api';
+import { PlaceSearch, type PlaceResult } from '../../../src/PlaceSearch';
 import { formStyles as s } from '../../../src/formStyles';
 import { theme } from '../../../src/theme';
 
@@ -19,11 +20,23 @@ export default function AddActivityScreen() {
     location: '',
     description: '',
     category: 'Sightseeing' as ActivityCategory,
+    lat: null as number | null,
+    lng: null as number | null,
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const set = (key: keyof typeof form) => (value: string) => setForm(prev => ({ ...prev, [key]: value }));
+
+  function handlePlace(place: PlaceResult) {
+    setForm(prev => ({
+      ...prev,
+      location: place.address,
+      name: prev.name || place.name,
+      lat: place.lat,
+      lng: place.lng,
+    }));
+  }
 
   async function submit() {
     setError(null);
@@ -41,8 +54,8 @@ export default function AddActivityScreen() {
       location: form.location || null,
       description: form.description || null,
       category: form.category,
-      latitude: null,
-      longitude: null,
+      latitude: form.lat,
+      longitude: form.lng,
     };
     try {
       await createActivity(tripId!, data);
@@ -57,6 +70,11 @@ export default function AddActivityScreen() {
     <View style={s.screen}>
       <Stack.Screen options={{ title: 'Add activity' }} />
       <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+        <View>
+          <Text style={s.label}>Search for a place</Text>
+          <PlaceSearch onSelect={handlePlace} />
+          {form.location ? <Text style={s.hint}>📍 {form.location}</Text> : null}
+        </View>
         <View>
           <Text style={s.label}>Activity name</Text>
           <TextInput style={s.input} value={form.name} onChangeText={set('name')} placeholder="e.g. Visit Belém Tower" placeholderTextColor={theme.border} />
