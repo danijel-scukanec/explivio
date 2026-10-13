@@ -69,6 +69,12 @@ export default function ItineraryScreen() {
                 <Text style={styles.headerButton}>Budget</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                onPress={() => router.push(`/trips/${tripId}/generate?startDate=${trip?.startDate ?? ''}&days=${days.length}`)}
+                hitSlop={10}
+              >
+                <Text style={styles.headerButton}>✨</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
                 onPress={() => router.push(`/trips/${tripId}/add-activity?startDate=${trip?.startDate ?? ''}`)}
                 hitSlop={10}
               >

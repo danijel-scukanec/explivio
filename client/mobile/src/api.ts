@@ -5,6 +5,8 @@ import type {
   CreateTripRequest,
   CreateActivityRequest,
   AddExpenseRequest,
+  GenerateItineraryRequest,
+  GeneratedItinerary,
 } from '@explivio/shared';
 
 // On web (expo start --web) the device is the host, so localhost works. For a real device/emulator,
@@ -46,6 +48,9 @@ export const createActivity = (tripId: string, data: CreateActivityRequest) =>
   postJson<{ id: string }>(`/trips/${tripId}/activities`, { ...data, tripId });
 export const deleteActivity = (tripId: string, id: string) =>
   del(`/trips/${tripId}/activities/${id}`);
+// F12: synchronous AI generation — returns a draft itinerary (not persisted).
+export const generateItinerary = (tripId: string, data: GenerateItineraryRequest) =>
+  postJson<GeneratedItinerary>(`/trips/${tripId}/activities/generate`, { ...data, tripId });
 
 // Budget
 export const getBudget = (tripId: string) => getJson<BudgetSummary>(`/trips/${tripId}/expenses`);
