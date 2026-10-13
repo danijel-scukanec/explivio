@@ -87,12 +87,12 @@ This is an evolving portfolio project. The **committed target** — the foundati
 | AI | Itinerary generation (structured output) + **live streaming over SignalR**, with accept-to-itinerary flow in the web UI |
 | RAG | Itinerary grounding by **vector search** — embeddings + place retrieval over **Azure Cosmos DB** when deployed, in-memory over a seeded corpus locally |
 | Collaboration | Shareable trips with role-based membership (Owner/Editor/Viewer) + **real-time presence and live updates over SignalR** |
-| Web | Trips, Itinerary (day-by-day + AI generate), Google Places search |
+| Web | Trips, Itinerary (day-by-day + AI generate + **map**), Budget, Google Places search; map via **Leaflet + OpenStreetMap** (keyless) |
 | Quality | Testcontainers integration tests + GitHub Actions CI |
 
 **Roadmap (planned, not yet built)**
 
-AI chat assistant · receipt/email parsing (vision) · map view · push notifications · AI ops (token/cost telemetry, semantic cache, evals) · **real auth (Microsoft Entra External ID — a fake dev identity is used today)** · mobile parity.
+AI chat assistant · receipt/email parsing (vision) · push notifications · AI ops (token/cost telemetry, semantic cache, evals) · **real auth (Microsoft Entra External ID — a fake dev identity is used today)** · mobile parity.
 
 ---
 

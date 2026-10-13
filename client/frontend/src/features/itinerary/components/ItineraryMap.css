@@ -1,0 +1,45 @@
+.itinerary-map {
+  margin-bottom: 24px;
+}
+
+.itinerary-map__canvas {
+  height: 320px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  z-index: 0; /* keep tiles/controls below app modals */
+}
+
+.itinerary-map--empty {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  text-align: center;
+  padding: 0 16px;
+}
+
+/* Colored, numbered day pin (a Leaflet divIcon). */
+.itinerary-map__pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* The Leaflet popup picks up the app font; keep it readable in light/dark. */
+.leaflet-popup-content {
+  font-size: 13px;
+  line-height: 1.4;
+}

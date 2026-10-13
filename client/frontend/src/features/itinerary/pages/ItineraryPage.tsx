@@ -7,6 +7,7 @@ import { getActivities, deleteActivity } from '../services/itineraryApi';
 import { DaySchedule } from '../components/DaySchedule';
 import { AddActivityModal } from '../components/AddActivityModal';
 import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
+import { ItineraryMap } from '../components/ItineraryMap';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import './ItineraryPage.css';
 
@@ -83,6 +84,8 @@ export function ItineraryPage() {
           <button className="btn btn--primary" onClick={() => setShowModal(true)}>+ Add activity</button>
         </div>
       </div>
+
+      <ItineraryMap activities={activities} days={days} />
 
       <div className="itinerary-page__days">
         {days.map((date, i) => (
