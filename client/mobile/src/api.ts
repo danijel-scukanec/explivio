@@ -38,6 +38,7 @@ async function del(path: string): Promise<void> {
 export const getTrips = () => getJson<Trip[]>('/trips');
 export const getTrip = (tripId: string) => getJson<Trip>(`/trips/${tripId}`);
 export const createTrip = (data: CreateTripRequest) => postJson<{ id: string }>('/trips', data);
+export const deleteTrip = (tripId: string) => del(`/trips/${tripId}`);
 
 // Itinerary
 export const getActivities = (tripId: string) => getJson<Activity[]>(`/trips/${tripId}/activities`);

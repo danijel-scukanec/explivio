@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import type { Trip } from '@explivio/shared';
 import { formatTripDate, getTripDuration } from '@explivio/shared';
-import { getTrips } from '../src/api';
+import { getTrips, deleteTrip } from '../src/api';
 import { theme } from '../src/theme';
 
 export default function TripsScreen() {
@@ -12,18 +12,23 @@ export default function TripsScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const load = useCallback(() => {
+    setError(null);
+    return getTrips()
+      .then(setTrips)
+      .catch(() => setError('Could not load trips.'))
+      .finally(() => setLoading(false));
+  }, []);
+
   // Refetch every time the screen regains focus, so a trip created on the form screen shows on return.
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      setError(null);
-      getTrips()
-        .then(data => { if (active) setTrips(data); })
-        .catch(() => { if (active) setError('Could not load trips.'); })
-        .finally(() => { if (active) setLoading(false); });
-      return () => { active = false; };
-    }, []),
-  );
+  useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  function confirmDelete(trip: Trip) {
+    Alert.alert('Delete trip', `Delete “${trip.name}”? This can't be undone.`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => void deleteTrip(trip.id).then(load).catch(() => {}) },
+    ]);
+  }
 
   return (
     <View style={styles.screen}>
@@ -55,6 +60,7 @@ export default function TripsScreen() {
                 style={styles.card}
                 activeOpacity={0.7}
                 onPress={() => router.push(`/trips/${item.id}/itinerary`)}
+                onLongPress={() => confirmDelete(item)}
               >
                 <Text style={styles.cardTitle}>{item.name}</Text>
                 <Text style={styles.cardDestination}>{item.destination}</Text>
