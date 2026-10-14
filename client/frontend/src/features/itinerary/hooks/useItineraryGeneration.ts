@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
 import type { GeneratedActivity, GenerateItineraryRequest } from '@explivio/shared';
-import { parsePartialItinerary } from '../utils/streamingItinerary';
+import { parsePartialItinerary } from '@explivio/shared';
 
 const HUB_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/hubs/itinerary-generation`;
 

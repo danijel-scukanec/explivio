@@ -1,4 +1,4 @@
-import type { GeneratedActivity } from '@explivio/shared';
+import type { GeneratedActivity } from '../types/itinerary';
 
 export interface PartialItinerary {
   summary: string | null;
@@ -6,11 +6,12 @@ export interface PartialItinerary {
   complete: boolean;
 }
 
-// F13: parse an in-progress structured-JSON stream from the itinerary generation hub. The model
+// F13/F31: parse an in-progress structured-JSON stream from the itinerary generation hub. The model
 // streams a single JSON object ({ summary, activities: [...] }) token-by-token, so mid-stream the
 // text is not yet valid JSON. This extracts whatever is already complete — the summary once its
 // string closes, and each activity object once its braces balance — so the UI can reveal cards one
-// by one as they arrive. When the whole payload parses, `complete` is true.
+// by one as they arrive. When the whole payload parses, `complete` is true. Shared by the web and
+// mobile streaming hooks.
 export function parsePartialItinerary(text: string): PartialItinerary {
   // Fast path: the full object is already valid JSON.
   try {

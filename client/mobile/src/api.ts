@@ -5,8 +5,6 @@ import type {
   CreateTripRequest,
   CreateActivityRequest,
   AddExpenseRequest,
-  GenerateItineraryRequest,
-  GeneratedItinerary,
 } from '@explivio/shared';
 import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
 
@@ -71,13 +69,7 @@ export const createActivity = (tripId: string, data: CreateActivityRequest) =>
   mutate<{ id: string }>('POST', `/trips/${tripId}/activities`, { ...data, tripId });
 export const deleteActivity = (tripId: string, id: string) =>
   mutate('DELETE', `/trips/${tripId}/activities/${id}`);
-
-// F12: synchronous AI generation — a draft, needed immediately, so it is never cached or queued.
-export async function generateItinerary(tripId: string, data: GenerateItineraryRequest): Promise<GeneratedItinerary> {
-  const res = await rawSend('POST', `/trips/${tripId}/activities/generate`, { ...data, tripId });
-  if (!res.ok) throw new Error(`Request failed (${res.status})`);
-  return res.json() as Promise<GeneratedItinerary>;
-}
+// AI generation streams over the itinerary-generation hub — see useItineraryGeneration.
 
 // Budget
 export const getBudget = (tripId: string) => getJson<BudgetSummary>(`/trips/${tripId}/expenses`);

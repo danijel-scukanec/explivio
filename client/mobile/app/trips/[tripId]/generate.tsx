@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import type { GeneratedActivity, GeneratedItinerary } from '@explivio/shared';
-import { generateItinerary, createActivity } from '../../../src/api';
+import { createActivity } from '../../../src/api';
+import { useItineraryGeneration } from '../../../src/useItineraryGeneration';
 import { formStyles as s } from '../../../src/formStyles';
 import { theme } from '../../../src/theme';
 
@@ -21,29 +21,23 @@ export default function GenerateScreen() {
   const { tripId, startDate, days: daysParam } = useLocalSearchParams<{ tripId: string; startDate?: string; days?: string }>();
   const [prompt, setPrompt] = useState('');
   const [days, setDays] = useState(daysParam ?? '3');
-  const [result, setResult] = useState<GeneratedItinerary | null>(null);
-  const [status, setStatus] = useState<'idle' | 'generating' | 'adding'>('idle');
-  const [error, setError] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
-  async function generate() {
-    setError(null);
-    setResult(null);
-    setStatus('generating');
-    try {
-      const data = await generateItinerary(tripId!, { tripId: tripId!, prompt, days: Number(days) || 3, style: null, budget: null });
-      setResult(data);
-    } catch {
-      setError('Generation failed. Try again.');
-    } finally {
-      setStatus('idle');
-    }
+  // F31: streams the itinerary over SignalR so activity cards reveal one by one, like the web client.
+  const gen = useItineraryGeneration(tripId!);
+
+  function generate() {
+    setAddError(null);
+    gen.generate({ tripId: tripId!, prompt, days: Number(days) || 3, style: null, budget: null });
   }
 
   async function addAll() {
-    if (!result || !startDate) return;
-    setStatus('adding');
+    if (!gen.activities.length || !startDate) return;
+    setAdding(true);
+    setAddError(null);
     try {
-      for (const a of result.activities as GeneratedActivity[]) {
+      for (const a of gen.activities) {
         await createActivity(tripId!, {
           tripId: tripId!,
           name: a.name,
@@ -59,10 +53,13 @@ export default function GenerateScreen() {
       }
       router.back();
     } catch {
-      setError('Could not add all activities.');
-      setStatus('idle');
+      setAddError('Could not add all activities.');
+      setAdding(false);
     }
   }
+
+  const streaming = gen.status === 'streaming';
+  const busy = streaming || adding;
 
   return (
     <View style={s.screen}>
@@ -77,24 +74,26 @@ export default function GenerateScreen() {
             placeholder="e.g. 3 relaxed days in Lisbon, food and history"
             placeholderTextColor={theme.border}
             multiline
+            editable={!busy}
           />
         </View>
         <View style={{ width: 120 }}>
           <Text style={s.label}>Days</Text>
-          <TextInput style={s.input} value={days} onChangeText={setDays} keyboardType="number-pad" />
+          <TextInput style={s.input} value={days} onChangeText={setDays} keyboardType="number-pad" editable={!busy} />
         </View>
 
-        <TouchableOpacity style={[s.submit, status !== 'idle' && s.submitDisabled]} onPress={generate} disabled={status !== 'idle'}>
-          <Text style={s.submitText}>{status === 'generating' ? 'Generating…' : '✨ Generate'}</Text>
+        <TouchableOpacity style={[s.submit, busy && s.submitDisabled]} onPress={generate} disabled={busy}>
+          <Text style={s.submitText}>{streaming ? 'Generating…' : '✨ Generate'}</Text>
         </TouchableOpacity>
 
-        {status === 'generating' ? <ActivityIndicator color={theme.accent} /> : null}
-        {error ? <Text style={s.error}>{error}</Text> : null}
+        {streaming ? <ActivityIndicator color={theme.accent} /> : null}
+        {gen.status === 'error' ? <Text style={s.error}>{gen.error ?? 'Generation failed. Try again.'}</Text> : null}
+        {addError ? <Text style={s.error}>{addError}</Text> : null}
 
-        {result ? (
+        {gen.summary || gen.activities.length > 0 ? (
           <View style={{ gap: 10 }}>
-            {result.summary ? <Text style={{ color: theme.text, fontSize: 14 }}>{result.summary}</Text> : null}
-            {(result.activities as GeneratedActivity[]).map((a, i) => (
+            {gen.summary ? <Text style={{ color: theme.text, fontSize: 14 }}>{gen.summary}</Text> : null}
+            {gen.activities.map((a, i) => (
               <View key={i} style={{ borderWidth: 1, borderColor: theme.border, borderRadius: 10, padding: 12 }}>
                 <Text style={{ fontWeight: '700', color: theme.textStrong }}>
                   {CATEGORY_ICONS[a.category] ?? '📌'} {a.name}
@@ -105,9 +104,11 @@ export default function GenerateScreen() {
                 {a.description ? <Text style={{ color: theme.text, fontSize: 13, marginTop: 4 }}>{a.description}</Text> : null}
               </View>
             ))}
-            <TouchableOpacity style={[s.submit, status === 'adding' && s.submitDisabled]} onPress={addAll} disabled={status === 'adding'}>
-              <Text style={s.submitText}>{status === 'adding' ? 'Adding…' : `Add all ${result.activities.length} to itinerary`}</Text>
-            </TouchableOpacity>
+            {gen.status === 'done' && gen.activities.length > 0 ? (
+              <TouchableOpacity style={[s.submit, adding && s.submitDisabled]} onPress={addAll} disabled={adding}>
+                <Text style={s.submitText}>{adding ? 'Adding…' : `Add all ${gen.activities.length} to itinerary`}</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         ) : null}
       </ScrollView>
