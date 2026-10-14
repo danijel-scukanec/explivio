@@ -8,6 +8,7 @@ import type {
   GenerateItineraryRequest,
   GeneratedItinerary,
 } from '@explivio/shared';
+import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
 
 // On web (expo start --web) the device is the host, so localhost works. For a real device/emulator,
 // set EXPO_PUBLIC_API_URL to the host's LAN IP (emulators also have their own aliases). The dev API
@@ -15,46 +16,72 @@ import type {
 export const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:5298';
 const API_URL = `${API_BASE}/v1`;
 
-async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`);
-  if (!res.ok) throw new Error(`Request failed (${res.status})`);
-  return res.json() as Promise<T>;
-}
-
-async function postJson<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+function rawSend(method: string, path: string, body?: unknown): Promise<Response> {
+  return fetch(`${API_URL}${path}`, {
+    method,
+    headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (!res.ok) throw new Error(`Request failed (${res.status})`);
-  return res.json() as Promise<T>;
 }
 
-async function del(path: string): Promise<void> {
-  const res = await fetch(`${API_URL}${path}`, { method: 'DELETE' });
+// GET with a read-through cache — serves the last-known data when the network is unavailable (F31).
+function getJson<T>(path: string): Promise<T> {
+  return cachedFetch<T>(`GET ${path}`, async () => {
+    const res = await rawSend('GET', path);
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    return res.json() as Promise<T>;
+  });
+}
+
+// A mutation that queues itself for replay when the device can't reach the server. We split the two
+// failure modes by WHERE they happen rather than by error type (RN/Hermes doesn't reliably throw a
+// `TypeError` for a dropped network): if `fetch` rejects before we get a Response, the server was
+// unreachable — treat it as offline and queue. If we got a Response with a non-2xx status, the server
+// was reached and rejected the request — that's a real failure, so surface it.
+async function mutate<T>(method: string, path: string, body?: unknown): Promise<T | null> {
+  let res: Response;
+  try {
+    res = await rawSend(method, path, body);
+  } catch {
+    await enqueue({ method, path, body });
+    return null; // offline — queued, will sync on reconnect
+  }
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return method === 'DELETE' ? null : ((await res.json()) as T);
+}
+
+// Replay queued mutations against the server (called on reconnect). Returns how many were flushed.
+export function syncQueue(): Promise<number> {
+  return flushQueue(async (m: QueuedMutation) => {
+    const res = await rawSend(m.method, m.path, m.body);
+    // A replayed delete whose target is already gone (404) is fine; other non-2xx is a real failure.
+    if (!res.ok && res.status !== 404) throw new Error(`replay failed (${res.status})`);
+  });
 }
 
 // Trips
 export const getTrips = () => getJson<Trip[]>('/trips');
 export const getTrip = (tripId: string) => getJson<Trip>(`/trips/${tripId}`);
-export const createTrip = (data: CreateTripRequest) => postJson<{ id: string }>('/trips', data);
-export const deleteTrip = (tripId: string) => del(`/trips/${tripId}`);
+export const createTrip = (data: CreateTripRequest) => mutate<{ id: string }>('POST', '/trips', data);
+export const deleteTrip = (tripId: string) => mutate('DELETE', `/trips/${tripId}`);
 
 // Itinerary
 export const getActivities = (tripId: string) => getJson<Activity[]>(`/trips/${tripId}/activities`);
 export const createActivity = (tripId: string, data: CreateActivityRequest) =>
-  postJson<{ id: string }>(`/trips/${tripId}/activities`, { ...data, tripId });
+  mutate<{ id: string }>('POST', `/trips/${tripId}/activities`, { ...data, tripId });
 export const deleteActivity = (tripId: string, id: string) =>
-  del(`/trips/${tripId}/activities/${id}`);
-// F12: synchronous AI generation — returns a draft itinerary (not persisted).
-export const generateItinerary = (tripId: string, data: GenerateItineraryRequest) =>
-  postJson<GeneratedItinerary>(`/trips/${tripId}/activities/generate`, { ...data, tripId });
+  mutate('DELETE', `/trips/${tripId}/activities/${id}`);
+
+// F12: synchronous AI generation — a draft, needed immediately, so it is never cached or queued.
+export async function generateItinerary(tripId: string, data: GenerateItineraryRequest): Promise<GeneratedItinerary> {
+  const res = await rawSend('POST', `/trips/${tripId}/activities/generate`, { ...data, tripId });
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return res.json() as Promise<GeneratedItinerary>;
+}
 
 // Budget
 export const getBudget = (tripId: string) => getJson<BudgetSummary>(`/trips/${tripId}/expenses`);
 export const addExpense = (tripId: string, data: AddExpenseRequest) =>
-  postJson<{ id: string }>(`/trips/${tripId}/expenses`, { ...data, tripId });
+  mutate<{ id: string }>('POST', `/trips/${tripId}/expenses`, { ...data, tripId });
 export const deleteExpense = (tripId: string, id: string) =>
-  del(`/trips/${tripId}/expenses/${id}`);
+  mutate('DELETE', `/trips/${tripId}/expenses/${id}`);
