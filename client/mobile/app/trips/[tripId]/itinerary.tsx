@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import type { Trip, Activity } from '@explivio/shared';
-import { formatActivityTime, formatTripDate, getDaysInRange } from '@explivio/shared';
-import { getTrip, getActivities, deleteActivity } from '../../../src/api';
+import type { Trip, Activity, TripStatus } from '@explivio/shared';
+import { formatActivityTime, formatTripDate, getDaysInRange, TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
+import { getTrip, getActivities, deleteActivity, setTripStatus } from '../../../src/api';
 import { useTripCollaboration } from '../../../src/useTripCollaboration';
 import { ItineraryMap } from '../../../src/ItineraryMap';
 import { theme } from '../../../src/theme';
@@ -52,6 +52,17 @@ export default function ItineraryScreen() {
     load();
   }
 
+  // F22: change the trip's status, updating the local copy optimistically.
+  async function handleStatusChange(status: TripStatus) {
+    if (!tripId || !trip) return;
+    setTrip({ ...trip, status });
+    try {
+      await setTripStatus(tripId, status);
+    } catch {
+      load(); // revert to the server's truth on failure
+    }
+  }
+
   const days = useMemo(() => (trip ? getDaysInRange(trip.startDate, trip.endDate) : []), [trip]);
   const sections = useMemo<DaySection[]>(
     () => days.map((date, i) => ({ title: date, dayNumber: i + 1, data: activities.filter(a => a.date === date) })),
@@ -89,6 +100,23 @@ export default function ItineraryScreen() {
         <View style={styles.presence}>
           <View style={styles.presenceDot} />
           <Text style={styles.presenceText}>{othersViewing} other{othersViewing > 1 ? 's' : ''} viewing</Text>
+        </View>
+      ) : null}
+
+      {trip ? (
+        <View style={styles.statusRow}>
+          {TRIP_STATUSES.map(s => {
+            const active = trip.status === s;
+            return (
+              <TouchableOpacity
+                key={s}
+                style={[styles.statusChip, active && { backgroundColor: tripStatusColor(s), borderColor: tripStatusColor(s) }]}
+                onPress={() => handleStatusChange(s)}
+              >
+                <Text style={[styles.statusChipText, active && styles.statusChipTextActive]}>{s}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       ) : null}
 
@@ -145,6 +173,10 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', gap: 16 },
   headerButton: { color: '#fff', fontSize: 15, fontWeight: '600' },
   presence: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.accentBg },
+  statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 16, paddingTop: 12 },
+  statusChip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  statusChipText: { fontSize: 12, fontWeight: '600', color: theme.text },
+  statusChipTextActive: { color: '#fff' },
   presenceDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22c55e' },
   presenceText: { fontSize: 13, color: theme.accent, fontWeight: '500' },
   dayHeader: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 16, marginBottom: 4 },

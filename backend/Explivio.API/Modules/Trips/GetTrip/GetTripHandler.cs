@@ -11,7 +11,7 @@ public class GetTripHandler(AppDbContext db) : IRequestHandler<GetTripQuery, Res
     {
         var trip = await db.Trips
             .Where(t => t.Id == query.TripId)
-            .Select(t => new TripResponse(t.Id, t.Name, t.Destination, t.StartDate, t.EndDate, t.TravelerCount, t.CreatedAt))
+            .Select(t => new TripResponse(t.Id, t.Name, t.Destination, t.StartDate, t.EndDate, t.TravelerCount, t.Status, t.CreatedAt))
             .FirstOrDefaultAsync(cancellationToken);
 
         return trip is null

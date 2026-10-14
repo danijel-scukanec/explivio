@@ -84,4 +84,27 @@
 .itinerary-page__actions {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
+}
+
+/* F22: trip status selector — a coloured pill (colour set inline from tripStatusColor). */
+.itinerary-page__status {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.itinerary-page__status option {
+  background: var(--bg);
+  color: var(--text-h);
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
 }

@@ -5,6 +5,7 @@ import type {
   CreateTripRequest,
   CreateActivityRequest,
   AddExpenseRequest,
+  TripStatus,
 } from '@explivio/shared';
 import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
 
@@ -45,7 +46,8 @@ async function mutate<T>(method: string, path: string, body?: unknown): Promise<
     return null; // offline — queued, will sync on reconnect
   }
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
-  return method === 'DELETE' ? null : ((await res.json()) as T);
+  // DELETE and 204 No Content carry no body to parse.
+  return method === 'DELETE' || res.status === 204 ? null : ((await res.json()) as T);
 }
 
 // Replay queued mutations against the server (called on reconnect). Returns how many were flushed.
@@ -62,6 +64,9 @@ export const getTrips = () => getJson<Trip[]>('/trips');
 export const getTrip = (tripId: string) => getJson<Trip>(`/trips/${tripId}`);
 export const createTrip = (data: CreateTripRequest) => mutate<{ id: string }>('POST', '/trips', data);
 export const deleteTrip = (tripId: string) => mutate('DELETE', `/trips/${tripId}`);
+// F22: change a trip's lifecycle status (queues offline like any other mutation).
+export const setTripStatus = (tripId: string, status: TripStatus) =>
+  mutate('PATCH', `/trips/${tripId}/status`, { status });
 
 // Itinerary
 export const getActivities = (tripId: string) => getJson<Activity[]>(`/trips/${tripId}/activities`);

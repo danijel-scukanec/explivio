@@ -28,6 +28,14 @@ Trips are shareable with role-based membership. When another member edits a shar
 
 ---
 
+## ✨ Demo — trip status lifecycle
+
+Every trip carries an explicit lifecycle status — **Draft, Planned, Active, Completed, or Cancelled** — set by the user independently of its dates. Changing it updates the colour-coded badge everywhere, and the trips list can be filtered by status.
+
+![Changing a trip's status and filtering the trips list by status](docs/assets/f22-trip-status.gif)
+
+---
+
 ## Highlights
 
 - **Event-driven core with a transactional outbox** — domain events are persisted in the same transaction as the business change, then relayed to **Azure Service Bus**; consumers dedupe on message id for exactly-once *effect* over at-least-once delivery.
@@ -87,7 +95,7 @@ This is an evolving portfolio project. The **committed target** — the foundati
 | AI | Itinerary generation (structured output) + **live streaming over SignalR**, with accept-to-itinerary flow in the web UI |
 | RAG | Itinerary grounding by **vector search** — embeddings + place retrieval over **Azure Cosmos DB** when deployed, in-memory over a seeded corpus locally |
 | Collaboration | Shareable trips with role-based membership (Owner/Editor/Viewer) + **real-time presence and live updates over SignalR** |
-| Web | Trips, Itinerary (day-by-day + AI generate + **map**), Budget, Google Places search; map via **Leaflet + OpenStreetMap** (keyless) |
+| Web | Trips (with **status lifecycle** badge + filter), Itinerary (day-by-day + AI generate + **map**), Budget, Google Places search; map via **Leaflet + OpenStreetMap** (keyless) |
 | Quality | Testcontainers integration tests + GitHub Actions CI |
 
 **Roadmap (planned, not yet built)**

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import type { Trip } from '@explivio/shared';
-import { formatTripDate, getTripDuration } from '@explivio/shared';
+import { formatTripDate, getTripDuration, tripStatusColor } from '@explivio/shared';
 import './TripCard.css';
 
 interface Props {
@@ -13,7 +13,17 @@ export function TripCard({ trip }: Props) {
   return (
     <div className="trip-card" onClick={() => navigate(`/trips/${trip.id}/itinerary`)}>
       <div className="trip-card__header">
-        <h3 className="trip-card__name">{trip.name}</h3>
+        <div className="trip-card__title">
+          <h3 className="trip-card__name">{trip.name}</h3>
+          {trip.status && (
+            <span
+              className="trip-card__status"
+              style={{ backgroundColor: tripStatusColor(trip.status) }}
+            >
+              {trip.status}
+            </span>
+          )}
+        </div>
         <span className="trip-card__destination">{trip.destination}</span>
       </div>
       <div className="trip-card__meta">

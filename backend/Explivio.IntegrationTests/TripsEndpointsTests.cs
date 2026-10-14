@@ -105,8 +105,54 @@ public sealed class TripsEndpointsTests(ExplivioApiFactory factory) : IClassFixt
         Assert.Null(outboxMessage.ProcessedOnUtc);
     }
 
+    [Fact]
+    public async Task Set_status_defaults_to_planned_then_updates()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        var create = await _client.PostAsJsonAsync("/v1/trips", new
+        {
+            name = "Status Trip",
+            destination = "Rome",
+            startDate = "2026-11-01",
+            endDate = "2026-11-03",
+            travelerCount = 1,
+            userId = ExplivioApiFactory.DevUserId,
+        }, ct);
+        var created = await create.Content.ReadFromJsonAsync<CreatedResponse>(ct);
+
+        var initial = await _client.GetFromJsonAsync<TripResponse>($"/v1/trips/{created!.Id}", ct);
+        Assert.Equal("Planned", initial!.Status);
+
+        var patch = await _client.PatchAsJsonAsync($"/v1/trips/{created.Id}/status", new { status = "Active" }, ct);
+        Assert.Equal(HttpStatusCode.NoContent, patch.StatusCode);
+
+        var updated = await _client.GetFromJsonAsync<TripResponse>($"/v1/trips/{created.Id}", ct);
+        Assert.Equal("Active", updated!.Status);
+    }
+
+    [Fact]
+    public async Task Set_status_with_invalid_value_returns_400()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        var create = await _client.PostAsJsonAsync("/v1/trips", new
+        {
+            name = "Bad Status Trip",
+            destination = "Rome",
+            startDate = "2026-11-01",
+            endDate = "2026-11-03",
+            travelerCount = 1,
+            userId = ExplivioApiFactory.DevUserId,
+        }, ct);
+        var created = await create.Content.ReadFromJsonAsync<CreatedResponse>(ct);
+
+        var patch = await _client.PatchAsJsonAsync($"/v1/trips/{created!.Id}/status", new { status = "Nope" }, ct);
+        Assert.Equal(HttpStatusCode.BadRequest, patch.StatusCode);
+    }
+
     private sealed record CreatedResponse(Guid Id);
 
     private sealed record TripResponse(
-        Guid Id, string Name, string Destination, int TravelerCount);
+        Guid Id, string Name, string Destination, int TravelerCount, string Status);
 }

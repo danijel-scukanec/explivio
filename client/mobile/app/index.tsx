@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import type { Trip } from '@explivio/shared';
-import { formatTripDate, getTripDuration } from '@explivio/shared';
+import { formatTripDate, getTripDuration, tripStatusColor } from '@explivio/shared';
 import { getTrips, deleteTrip } from '../src/api';
 import { theme } from '../src/theme';
 
@@ -62,7 +62,14 @@ export default function TripsScreen() {
                 onPress={() => router.push(`/trips/${item.id}/itinerary`)}
                 onLongPress={() => confirmDelete(item)}
               >
-                <Text style={styles.cardTitle}>{item.name}</Text>
+                <View style={styles.cardTitleRow}>
+                  <Text style={styles.cardTitle}>{item.name}</Text>
+                  {item.status ? (
+                    <View style={[styles.statusBadge, { backgroundColor: tripStatusColor(item.status) }]}>
+                      <Text style={styles.statusBadgeText}>{item.status}</Text>
+                    </View>
+                  ) : null}
+                </View>
                 <Text style={styles.cardDestination}>{item.destination}</Text>
                 <Text style={styles.cardMeta}>
                   {formatTripDate(item.startDate)} – {formatTripDate(item.endDate)}
@@ -90,7 +97,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
-  cardTitle: { fontSize: 18, fontWeight: '700', color: theme.textStrong },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  cardTitle: { flex: 1, fontSize: 18, fontWeight: '700', color: theme.textStrong },
+  statusBadge: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
+  statusBadgeText: { color: '#fff', fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.3 },
   cardDestination: { fontSize: 14, color: theme.accent, marginTop: 2 },
   cardMeta: { fontSize: 13, color: theme.text, marginTop: 8 },
 });

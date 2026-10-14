@@ -6,6 +6,7 @@ using Explivio.API.Modules.Trips.CreateTrip;
 using Explivio.API.Modules.Trips.DeleteTrip;
 using Explivio.API.Modules.Trips.GetTrip;
 using Explivio.API.Modules.Trips.GetTrips;
+using Explivio.API.Modules.Trips.SetTripStatus;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -58,6 +59,14 @@ public static class TripsModule
             var id = await mediator.Send(command with { UserId = ctx.GetUserId() });
             return Results.Created($"/trips/{id}", new CreatedResponse(id));
         }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
+
+        // F22: change a trip's lifecycle status. Editor+ (changing status is an edit, not ownership).
+        group.MapPatch("/{id:guid}/status", async (Guid id, SetTripStatusRequest body, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new SetTripStatusCommand(id, body.Status));
+            return result.ToHttpResult();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor, "id"))
+          .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound).ProducesValidationProblem();
 
         group.MapDelete("/{id:guid}", async (Guid id, IMediator mediator) =>
         {

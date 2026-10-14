@@ -41,3 +41,32 @@
   text-align: center;
   color: var(--text);
 }
+
+/* F22: status filter pills */
+.trips-page__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.trips-page__filter {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.trips-page__filter:hover {
+  border-color: var(--accent);
+}
+
+.trips-page__filter--active {
+  border-color: var(--accent);
+  color: var(--accent);
+}

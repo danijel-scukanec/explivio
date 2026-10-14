@@ -185,6 +185,11 @@ namespace Explivio.API.Migrations
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<int>("TravelerCount")
                         .HasColumnType("int");
 
@@ -196,7 +201,7 @@ namespace Explivio.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Trips");
+                    b.ToTable("Trips", (string)null);
                 });
 
             modelBuilder.Entity("Explivio.API.Modules.Trips.TripMember", b =>

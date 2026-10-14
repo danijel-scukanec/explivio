@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import type { Trip, Activity } from '@explivio/shared';
-import { getDaysInRange } from '@explivio/shared';
-import { getTrip } from '../../trips/services/tripsApi';
+import type { Trip, Activity, TripStatus } from '@explivio/shared';
+import { getDaysInRange, TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
+import { getTrip, setTripStatus } from '../../trips/services/tripsApi';
 import { getActivities, deleteActivity } from '../services/itineraryApi';
 import { DaySchedule } from '../components/DaySchedule';
 import { AddActivityModal } from '../components/AddActivityModal';
@@ -49,6 +49,17 @@ export function ItineraryPage() {
     setActivities(prev => prev.filter(a => a.id !== id));
   }
 
+  // F22: change the trip's status, updating the local copy optimistically.
+  async function handleStatusChange(status: TripStatus) {
+    if (!tripId) return;
+    setTrip(prev => (prev ? { ...prev, status } : prev));
+    try {
+      await setTripStatus(tripId, status);
+    } catch {
+      load(); // revert to the server's truth on failure
+    }
+  }
+
   function handleCreated() {
     setShowModal(false);
     load();
@@ -79,6 +90,19 @@ export function ItineraryPage() {
           )}
         </div>
         <div className="itinerary-page__actions">
+          {trip.status && (
+            <select
+              className="itinerary-page__status"
+              style={{ backgroundColor: tripStatusColor(trip.status) }}
+              value={trip.status}
+              onChange={e => handleStatusChange(e.target.value as TripStatus)}
+              aria-label="Trip status"
+            >
+              {TRIP_STATUSES.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          )}
           <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 Budget</Link>
           <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ Generate with AI</button>
           <button className="btn btn--primary" onClick={() => setShowModal(true)}>+ Add activity</button>

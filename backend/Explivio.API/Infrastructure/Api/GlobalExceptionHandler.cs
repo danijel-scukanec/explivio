@@ -24,6 +24,10 @@ public sealed class GlobalExceptionHandler(
         var (statusCode, title) = exception switch
         {
             ValidationException => (StatusCodes.Status400BadRequest, "One or more validation errors occurred."),
+            // An unreadable/malformed request body (e.g. a bad enum value failing JSON binding before
+            // the validation behavior runs) surfaces as BadHttpRequestException; honour the status it
+            // carries (400) rather than letting a client error fall through to a 500.
+            BadHttpRequestException badRequest => (badRequest.StatusCode, "Bad request"),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred")
         };

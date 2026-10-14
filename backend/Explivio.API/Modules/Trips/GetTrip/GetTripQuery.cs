@@ -13,5 +13,6 @@ public record TripResponse(
     DateOnly StartDate,
     DateOnly EndDate,
     int TravelerCount,
+    TripStatus Status,
     DateTime CreatedAt
 );
