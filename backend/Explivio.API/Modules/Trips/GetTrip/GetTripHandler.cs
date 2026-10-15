@@ -10,12 +10,11 @@ public class GetTripHandler(AppDbContext db) : IRequestHandler<GetTripQuery, Res
     public async Task<Result<TripResponse>> Handle(GetTripQuery query, CancellationToken cancellationToken)
     {
         var trip = await db.Trips
-            .Where(t => t.Id == query.TripId)
-            .Select(t => new TripResponse(t.Id, t.Name, t.Destination, t.StartDate, t.EndDate, t.TravelerCount, t.Status, t.HasCoverPhoto, t.CreatedAt))
-            .FirstOrDefaultAsync(cancellationToken);
+            .Include(t => t.Stops)
+            .FirstOrDefaultAsync(t => t.Id == query.TripId, cancellationToken);
 
         return trip is null
             ? Error.NotFound("Trip.NotFound", $"No trip with id '{query.TripId}' was found.")
-            : trip;
+            : trip.ToResponse();
     }
 }

@@ -24,11 +24,13 @@ public sealed class ItineraryGroundingProvider(
 
     public async Task<string> BuildAsync(GenerateItineraryCommand command, CancellationToken cancellationToken)
     {
-        var destination = await db.Trips
-            .Where(t => t.Id == command.TripId)
-            .Select(t => t.Destination)
-            .FirstOrDefaultAsync(cancellationToken);
+        // F22: a trip's destination is now its ordered stops; derive the summary the retriever filters
+        // on (e.g. "Lisbon → Porto", which matches seeded places in either city).
+        var trip = await db.Trips
+            .Include(t => t.Stops)
+            .FirstOrDefaultAsync(t => t.Id == command.TripId, cancellationToken);
 
+        var destination = trip?.DestinationSummary();
         if (string.IsNullOrWhiteSpace(destination))
         {
             return string.Empty;

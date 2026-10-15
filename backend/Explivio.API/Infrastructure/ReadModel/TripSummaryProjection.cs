@@ -21,6 +21,13 @@ public static class TripSummaryProjection
         UpdatedAt = DateTime.UtcNow,
     };
 
+    // F22: a trip's stops changed — refresh the denormalized destination summary.
+    public static void ApplyStopsChanged(TripSummary summary, string destination)
+    {
+        summary.Destination = destination;
+        summary.UpdatedAt = DateTime.UtcNow;
+    }
+
     public static void ApplyActivityAdded(TripSummary summary)
     {
         summary.ActivityCount++;

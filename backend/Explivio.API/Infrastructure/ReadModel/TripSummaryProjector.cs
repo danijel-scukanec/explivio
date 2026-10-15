@@ -35,6 +35,11 @@ public sealed class TripSummaryProjector(
                 db.TripSummaries.Add(TripSummaryProjection.Create(created));
                 break;
 
+            case nameof(TripStopsChangedDomainEvent):
+                var stopsChanged = Deserialize<TripStopsChangedDomainEvent>(body);
+                await MutateAsync(db, stopsChanged.TripId, s => TripSummaryProjection.ApplyStopsChanged(s, stopsChanged.Destination), subject, cancellationToken);
+                break;
+
             case nameof(ActivityAddedDomainEvent):
                 var added = Deserialize<ActivityAddedDomainEvent>(body);
                 await MutateAsync(db, added.TripId, TripSummaryProjection.ApplyActivityAdded, subject, cancellationToken);

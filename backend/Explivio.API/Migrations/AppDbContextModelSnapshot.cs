@@ -171,10 +171,6 @@ namespace Explivio.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Destination")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
 
@@ -230,6 +226,42 @@ namespace Explivio.API.Migrations
                     b.ToTable("TripMembers", (string)null);
                 });
 
+            modelBuilder.Entity("Explivio.API.Modules.Trips.TripStop", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("ArriveDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("DepartDate")
+                        .HasColumnType("date");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Place")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("TripId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TripId", "Order");
+
+                    b.ToTable("TripStops", (string)null);
+                });
+
             modelBuilder.Entity("Explivio.API.Modules.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -250,6 +282,20 @@ namespace Explivio.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Explivio.API.Modules.Trips.TripStop", b =>
+                {
+                    b.HasOne("Explivio.API.Modules.Trips.Trip", null)
+                        .WithMany("Stops")
+                        .HasForeignKey("TripId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Explivio.API.Modules.Trips.Trip", b =>
+                {
+                    b.Navigation("Stops");
                 });
 #pragma warning restore 612, 618
         }

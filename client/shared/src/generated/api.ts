@@ -237,6 +237,63 @@ export interface paths {
         };
         trace?: never;
     };
+    "/v1/trips/{id}/stops": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SetTripStopsRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/trips/{id}/cover": {
         parameters: {
             query?: never;
@@ -892,13 +949,13 @@ export interface components {
         };
         CreateTripCommand: {
             name: string;
-            destination: string;
             /** Format: date */
             startDate: string;
             /** Format: date */
             endDate: string;
             /** Format: int32 */
             travelerCount: number | string;
+            stops: components["schemas"]["TripStopInput"][];
             /** Format: uuid */
             userId: string;
         };
@@ -970,6 +1027,9 @@ export interface components {
         SetTripStatusRequest: {
             status: components["schemas"]["TripStatus"];
         };
+        SetTripStopsRequest: {
+            stops: components["schemas"]["TripStopInput"][];
+        };
         TripMemberResponse: {
             /** Format: uuid */
             userId: string;
@@ -990,11 +1050,38 @@ export interface components {
             hasCoverPhoto: boolean;
             /** Format: date-time */
             createdAt: string;
+            stops: components["schemas"]["TripStopResponse"][];
         };
         /** @enum {unknown} */
         TripRole: "Viewer" | "Editor" | "Owner";
         /** @enum {unknown} */
         TripStatus: "Draft" | "Planned" | "Active" | "Completed" | "Cancelled";
+        TripStopInput: {
+            place: string;
+            /** Format: date */
+            arriveDate: null | string;
+            /** Format: date */
+            departDate: null | string;
+            /** Format: double */
+            latitude: null | number | string;
+            /** Format: double */
+            longitude: null | number | string;
+        };
+        TripStopResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            order: number | string;
+            place: string;
+            /** Format: date */
+            arriveDate: null | string;
+            /** Format: date */
+            departDate: null | string;
+            /** Format: double */
+            latitude: null | number | string;
+            /** Format: double */
+            longitude: null | number | string;
+        };
         TripSummaryResponse: {
             /** Format: uuid */
             tripId: string;

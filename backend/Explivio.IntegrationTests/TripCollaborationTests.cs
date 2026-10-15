@@ -31,10 +31,10 @@ public sealed class TripCollaborationTests(ExplivioApiFactory factory) : IClassF
         var response = await Send(HttpMethod.Post, "/v1/trips", user, new
         {
             name = "Shared Trip",
-            destination = "Lisbon",
             startDate = "2026-09-01",
             endDate = "2026-09-07",
             travelerCount = 2,
+            stops = new[] { new { place = "Lisbon" } },
             userId = user,
         }, ct);
 

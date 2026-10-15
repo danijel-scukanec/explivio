@@ -9,11 +9,11 @@ public class CreateTripHandler(AppDbContext db) : IRequestHandler<CreateTripComm
     {
         var trip = Trip.Create(
             command.Name,
-            command.Destination,
             command.StartDate,
             command.EndDate,
             command.TravelerCount,
-            command.UserId);
+            command.UserId,
+            command.Stops);
 
         db.Trips.Add(trip);
 

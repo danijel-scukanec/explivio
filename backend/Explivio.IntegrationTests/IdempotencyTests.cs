@@ -65,10 +65,10 @@ public sealed class IdempotencyTests(ExplivioApiFactory factory) : IClassFixture
             Content = JsonContent.Create(new
             {
                 name,
-                destination = "Lisbon",
                 startDate = "2026-09-01",
                 endDate = "2026-09-07",
                 travelerCount = 2,
+                stops = new[] { new { place = "Lisbon" } },
                 userId = ExplivioApiFactory.DevUserId,
             }),
         };

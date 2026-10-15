@@ -12,5 +12,11 @@ public sealed class TripConfiguration : IEntityTypeConfiguration<Trip>
         // F22: stored as its name ("Planned"/"Active"/…) so the column is readable and stable if the
         // enum's numeric values ever change — same convention as TripMember.Role.
         builder.Property(t => t.Status).HasConversion<string>().HasMaxLength(20);
+
+        // F22: a trip owns its ordered stops; deleting the trip removes them.
+        builder.HasMany(t => t.Stops)
+            .WithOne()
+            .HasForeignKey(s => s.TripId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

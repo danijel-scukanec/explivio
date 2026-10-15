@@ -66,10 +66,10 @@ public sealed class TripCoverTests(ExplivioApiFactory factory) : IClassFixture<E
         var create = await _client.PostAsJsonAsync("/v1/trips", new
         {
             name = "Cover Trip",
-            destination = "Porto",
             startDate = "2026-11-01",
             endDate = "2026-11-03",
             travelerCount = 1,
+            stops = new[] { new { place = "Porto" } },
             userId = ExplivioApiFactory.DevUserId,
         }, ct);
         var created = await create.Content.ReadFromJsonAsync<CreatedResponse>(ct);

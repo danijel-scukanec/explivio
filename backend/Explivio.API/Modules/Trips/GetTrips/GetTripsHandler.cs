@@ -10,10 +10,14 @@ public class GetTripsHandler(AppDbContext db) : IRequestHandler<GetTripsQuery, L
     public async Task<List<TripResponse>> Handle(GetTripsQuery query, CancellationToken cancellationToken)
     {
         // F15: return every trip the user is a member of (owner or shared), not just ones they own.
-        return await db.Trips
+        var trips = await db.Trips
             .Where(t => db.TripMembers.Any(m => m.TripId == t.Id && m.UserId == query.UserId))
+            .Include(t => t.Stops)
             .OrderByDescending(t => t.CreatedAt)
-            .Select(t => new TripResponse(t.Id, t.Name, t.Destination, t.StartDate, t.EndDate, t.TravelerCount, t.Status, t.HasCoverPhoto, t.CreatedAt))
             .ToListAsync(cancellationToken);
+
+        // F22: the destination summary is derived from each trip's stops (string.Join doesn't
+        // translate to SQL), so map in memory after loading. A user's trip list is small.
+        return trips.Select(t => t.ToResponse()).ToList();
     }
 }

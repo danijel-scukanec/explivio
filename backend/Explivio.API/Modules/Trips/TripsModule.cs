@@ -8,6 +8,7 @@ using Explivio.API.Modules.Trips.DeleteTrip;
 using Explivio.API.Modules.Trips.GetTrip;
 using Explivio.API.Modules.Trips.GetTrips;
 using Explivio.API.Modules.Trips.SetTripStatus;
+using Explivio.API.Modules.Trips.SetTripStops;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,6 +76,14 @@ public static class TripsModule
             return result.ToHttpResult();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Owner, "id"))
           .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound);
+
+        // F22: replace a trip's ordered stops (multi-destination route). Editor+ (editing the trip).
+        group.MapPut("/{id:guid}/stops", async (Guid id, SetTripStopsRequest body, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new SetTripStopsCommand(id, body.Stops));
+            return result.ToHttpResult();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor, "id"))
+          .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound).ProducesValidationProblem();
 
         // F22: trip cover photo upload/serve/delete.
         group.MapTripCoverEndpoints();

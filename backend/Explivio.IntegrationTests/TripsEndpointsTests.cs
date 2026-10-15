@@ -22,10 +22,10 @@ public sealed class TripsEndpointsTests(ExplivioApiFactory factory) : IClassFixt
         var create = await _client.PostAsJsonAsync("/v1/trips", new
         {
             name = "Summer in Portugal",
-            destination = "Lisbon",
             startDate = "2026-09-01",
             endDate = "2026-09-07",
             travelerCount = 2,
+            stops = new[] { new { place = "Lisbon" } },
             userId = ExplivioApiFactory.DevUserId,
         }, ct);
 
@@ -41,6 +41,90 @@ public sealed class TripsEndpointsTests(ExplivioApiFactory factory) : IClassFixt
         Assert.NotNull(trip);
         Assert.Equal("Lisbon", trip!.Destination);
         Assert.Equal("Summer in Portugal", trip.Name);
+        Assert.Single(trip.Stops);
+        Assert.Equal("Lisbon", trip.Stops[0].Place);
+    }
+
+    [Fact]
+    public async Task Create_multi_stop_trip_returns_ordered_stops_and_derived_destination()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        var create = await _client.PostAsJsonAsync("/v1/trips", new
+        {
+            name = "Iberian Tour",
+            startDate = "2026-09-01",
+            endDate = "2026-09-14",
+            travelerCount = 2,
+            stops = new[]
+            {
+                new { place = "Lisbon", arriveDate = "2026-09-01", departDate = "2026-09-05" },
+                new { place = "Porto", arriveDate = "2026-09-05", departDate = "2026-09-09" },
+                new { place = "Madrid", arriveDate = "2026-09-09", departDate = "2026-09-14" },
+            },
+            userId = ExplivioApiFactory.DevUserId,
+        }, ct);
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        var created = await create.Content.ReadFromJsonAsync<CreatedResponse>(ct);
+
+        var trip = await _client.GetFromJsonAsync<TripResponse>($"/v1/trips/{created!.Id}", ct);
+        Assert.NotNull(trip);
+        Assert.Equal("Lisbon → Porto → Madrid", trip!.Destination);
+        Assert.Equal(new[] { "Lisbon", "Porto", "Madrid" }, trip.Stops.Select(s => s.Place));
+        Assert.Equal(new[] { 0, 1, 2 }, trip.Stops.Select(s => s.Order));
+    }
+
+    [Fact]
+    public async Task Replace_stops_updates_the_route_and_derived_destination()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        var create = await _client.PostAsJsonAsync("/v1/trips", new
+        {
+            name = "Reroute",
+            startDate = "2026-09-01",
+            endDate = "2026-09-07",
+            travelerCount = 1,
+            stops = new[] { new { place = "Lisbon" } },
+            userId = ExplivioApiFactory.DevUserId,
+        }, ct);
+        var created = await create.Content.ReadFromJsonAsync<CreatedResponse>(ct);
+
+        var put = await _client.PutAsJsonAsync($"/v1/trips/{created!.Id}/stops", new
+        {
+            stops = new[]
+            {
+                new { place = "Barcelona" },
+                new { place = "Rome" },
+            },
+        }, ct);
+        Assert.Equal(HttpStatusCode.NoContent, put.StatusCode);
+
+        var trip = await _client.GetFromJsonAsync<TripResponse>($"/v1/trips/{created.Id}", ct);
+        Assert.Equal("Barcelona → Rome", trip!.Destination);
+        Assert.Equal(new[] { "Barcelona", "Rome" }, trip.Stops.Select(s => s.Place));
+    }
+
+    [Fact]
+    public async Task Replace_stops_with_empty_list_returns_400()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        var create = await _client.PostAsJsonAsync("/v1/trips", new
+        {
+            name = "No Stops",
+            startDate = "2026-09-01",
+            endDate = "2026-09-07",
+            travelerCount = 1,
+            stops = new[] { new { place = "Lisbon" } },
+            userId = ExplivioApiFactory.DevUserId,
+        }, ct);
+        var created = await create.Content.ReadFromJsonAsync<CreatedResponse>(ct);
+
+        var put = await _client.PutAsJsonAsync($"/v1/trips/{created!.Id}/stops",
+            new { stops = Array.Empty<object>() }, ct);
+
+        Assert.Equal(HttpStatusCode.BadRequest, put.StatusCode);
     }
 
     [Fact]
@@ -62,10 +146,10 @@ public sealed class TripsEndpointsTests(ExplivioApiFactory factory) : IClassFixt
         var response = await _client.PostAsJsonAsync("/v1/trips", new
         {
             name = "",
-            destination = "",
             startDate = "2026-09-07",
             endDate = "2026-09-01", // end before start
             travelerCount = 0,
+            stops = Array.Empty<object>(), // a trip needs at least one stop
             userId = ExplivioApiFactory.DevUserId,
         }, ct);
 
@@ -81,10 +165,10 @@ public sealed class TripsEndpointsTests(ExplivioApiFactory factory) : IClassFixt
         var create = await _client.PostAsJsonAsync("/v1/trips", new
         {
             name = "Outbox Trip",
-            destination = "Porto",
             startDate = "2026-10-01",
             endDate = "2026-10-05",
             travelerCount = 1,
+            stops = new[] { new { place = "Porto" } },
             userId = ExplivioApiFactory.DevUserId,
         }, ct);
 
@@ -113,10 +197,10 @@ public sealed class TripsEndpointsTests(ExplivioApiFactory factory) : IClassFixt
         var create = await _client.PostAsJsonAsync("/v1/trips", new
         {
             name = "Status Trip",
-            destination = "Rome",
             startDate = "2026-11-01",
             endDate = "2026-11-03",
             travelerCount = 1,
+            stops = new[] { new { place = "Rome" } },
             userId = ExplivioApiFactory.DevUserId,
         }, ct);
         var created = await create.Content.ReadFromJsonAsync<CreatedResponse>(ct);
@@ -139,10 +223,10 @@ public sealed class TripsEndpointsTests(ExplivioApiFactory factory) : IClassFixt
         var create = await _client.PostAsJsonAsync("/v1/trips", new
         {
             name = "Bad Status Trip",
-            destination = "Rome",
             startDate = "2026-11-01",
             endDate = "2026-11-03",
             travelerCount = 1,
+            stops = new[] { new { place = "Rome" } },
             userId = ExplivioApiFactory.DevUserId,
         }, ct);
         var created = await create.Content.ReadFromJsonAsync<CreatedResponse>(ct);
@@ -154,5 +238,8 @@ public sealed class TripsEndpointsTests(ExplivioApiFactory factory) : IClassFixt
     private sealed record CreatedResponse(Guid Id);
 
     private sealed record TripResponse(
-        Guid Id, string Name, string Destination, int TravelerCount, string Status);
+        Guid Id, string Name, string Destination, int TravelerCount, string Status,
+        IReadOnlyList<TripStopDto> Stops);
+
+    private sealed record TripStopDto(Guid Id, int Order, string Place);
 }
