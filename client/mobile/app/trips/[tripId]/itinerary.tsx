@@ -76,6 +76,9 @@ export default function ItineraryScreen() {
           title: trip?.name ?? 'Itinerary',
           headerRight: () => (
             <View style={styles.headerActions}>
+              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/edit-route`)} hitSlop={10}>
+                <Text style={styles.headerButton}>🧭</Text>
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/budget`)} hitSlop={10}>
                 <Text style={styles.headerButton}>Budget</Text>
               </TouchableOpacity>
@@ -100,6 +103,19 @@ export default function ItineraryScreen() {
         <View style={styles.presence}>
           <View style={styles.presenceDot} />
           <Text style={styles.presenceText}>{othersViewing} other{othersViewing > 1 ? 's' : ''} viewing</Text>
+        </View>
+      ) : null}
+
+      {trip && trip.stops.length > 0 ? (
+        <View style={styles.routeRow}>
+          {trip.stops.map((stop, i) => (
+            <View key={stop.id} style={styles.routeChip}>
+              <View style={styles.routeNum}>
+                <Text style={styles.routeNumText}>{i + 1}</Text>
+              </View>
+              <Text style={styles.routePlace}>{stop.place}</Text>
+            </View>
+          ))}
         </View>
       ) : null}
 
@@ -173,6 +189,11 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', gap: 16 },
   headerButton: { color: '#fff', fontSize: 15, fontWeight: '600' },
   presence: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.accentBg },
+  routeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 16, paddingTop: 12 },
+  routeChip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  routeNum: { width: 18, height: 18, borderRadius: 9, backgroundColor: theme.accent, alignItems: 'center', justifyContent: 'center' },
+  routeNumText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  routePlace: { fontSize: 13, fontWeight: '600', color: theme.textStrong },
   statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 16, paddingTop: 12 },
   statusChip: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   statusChipText: { fontSize: 12, fontWeight: '600', color: theme.text },

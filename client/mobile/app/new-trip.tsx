@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import type { CreateTripRequest } from '@explivio/shared';
+import type { CreateTripRequest, TripStopInput } from '@explivio/shared';
 import { createTrip } from '../src/api';
+import { TripStopsEditor } from '../src/TripStopsEditor';
 import { formStyles as s } from '../src/formStyles';
 import { theme } from '../src/theme';
 
@@ -11,7 +12,11 @@ const PLACEHOLDER_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 export default function NewTripScreen() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: '', destination: '', startDate: '', endDate: '', travelerCount: '1' });
+  const [form, setForm] = useState({ name: '', startDate: '', endDate: '', travelerCount: '1' });
+  // F22: a trip is an ordered route of stops; start with one empty stop.
+  const [stops, setStops] = useState<TripStopInput[]>([
+    { place: '', arriveDate: null, departDate: null, latitude: null, longitude: null },
+  ]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -19,17 +24,26 @@ export default function NewTripScreen() {
 
   async function submit() {
     setError(null);
-    if (!form.name || !form.destination || !form.startDate || !form.endDate) {
-      setError('Please fill in name, destination and dates.');
+    const cleanedStops = stops
+      .map(stop => ({ ...stop, place: stop.place.trim() }))
+      .filter(stop => stop.place.length > 0);
+
+    if (!form.name || !form.startDate || !form.endDate) {
+      setError('Please fill in name and dates.');
       return;
     }
+    if (cleanedStops.length === 0) {
+      setError('Add at least one destination.');
+      return;
+    }
+
     setSubmitting(true);
     const data: CreateTripRequest = {
       name: form.name,
-      destination: form.destination,
       startDate: form.startDate,
       endDate: form.endDate,
       travelerCount: Number(form.travelerCount) || 1,
+      stops: cleanedStops,
       userId: PLACEHOLDER_USER_ID,
     };
     try {
@@ -49,10 +63,6 @@ export default function NewTripScreen() {
           <Text style={s.label}>Trip name</Text>
           <TextInput style={s.input} value={form.name} onChangeText={set('name')} placeholder="e.g. Summer in Japan" placeholderTextColor={theme.border} />
         </View>
-        <View>
-          <Text style={s.label}>Destination</Text>
-          <TextInput style={s.input} value={form.destination} onChangeText={set('destination')} placeholder="e.g. Tokyo, Japan" placeholderTextColor={theme.border} />
-        </View>
         <View style={s.row}>
           <View style={s.rowItem}>
             <Text style={s.label}>Start date</Text>
@@ -66,6 +76,11 @@ export default function NewTripScreen() {
         <View>
           <Text style={s.label}>Travellers</Text>
           <TextInput style={s.input} value={form.travelerCount} onChangeText={set('travelerCount')} keyboardType="number-pad" />
+        </View>
+
+        <View>
+          <Text style={s.label}>Destinations</Text>
+          <TripStopsEditor stops={stops} onChange={setStops} />
         </View>
 
         {error ? <Text style={s.error}>{error}</Text> : null}

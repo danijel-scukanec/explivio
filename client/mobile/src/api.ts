@@ -6,6 +6,7 @@ import type {
   CreateActivityRequest,
   AddExpenseRequest,
   TripStatus,
+  TripStopInput,
 } from '@explivio/shared';
 import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
 
@@ -67,6 +68,10 @@ export const deleteTrip = (tripId: string) => mutate('DELETE', `/trips/${tripId}
 // F22: change a trip's lifecycle status (queues offline like any other mutation).
 export const setTripStatus = (tripId: string, status: TripStatus) =>
   mutate('PATCH', `/trips/${tripId}/status`, { status });
+
+// F22: replace a trip's ordered route (multi-destination).
+export const setTripStops = (tripId: string, stops: TripStopInput[]) =>
+  mutate('PUT', `/trips/${tripId}/stops`, { stops });
 
 // Itinerary
 export const getActivities = (tripId: string) => getJson<Activity[]>(`/trips/${tripId}/activities`);
