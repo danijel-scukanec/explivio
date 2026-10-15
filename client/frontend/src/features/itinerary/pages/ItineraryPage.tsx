@@ -6,6 +6,7 @@ import { getTrip, setTripStatus, setTripCover, tripCoverUrl } from '../../trips/
 import { getActivities, deleteActivity } from '../services/itineraryApi';
 import { DaySchedule } from '../components/DaySchedule';
 import { AddActivityModal } from '../components/AddActivityModal';
+import { EditStopsModal } from '../../trips/components/EditStopsModal';
 import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
 import { ItineraryMap } from '../components/ItineraryMap';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
@@ -19,6 +20,7 @@ export function ItineraryPage() {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showGenerate, setShowGenerate] = useState(false);
+  const [showEditStops, setShowEditStops] = useState(false);
   // F22: bumps on each cover upload so the <img> reloads past the browser cache (the blob URL is stable).
   const [coverVersion, setCoverVersion] = useState(() => Date.now());
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -130,6 +132,7 @@ export function ItineraryPage() {
           <button className="btn btn--ghost" onClick={() => coverInputRef.current?.click()}>
             🖼️ {trip.hasCoverPhoto ? 'Change cover' : 'Add cover'}
           </button>
+          <button className="btn btn--ghost" onClick={() => setShowEditStops(true)}>🧭 Edit route</button>
           <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 Budget</Link>
           <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ Generate with AI</button>
           <button className="btn btn--primary" onClick={() => setShowModal(true)}>+ Add activity</button>
@@ -138,6 +141,22 @@ export function ItineraryPage() {
 
       {trip.hasCoverPhoto && (
         <img className="itinerary-page__cover" src={tripCoverUrl(trip.id, coverVersion)} alt="" />
+      )}
+
+      {trip.stops.length > 0 && (
+        <ol className="itinerary-page__route">
+          {trip.stops.map((stop, i) => (
+            <li key={stop.id} className="itinerary-page__route-stop">
+              <span className="itinerary-page__route-num">{i + 1}</span>
+              <span className="itinerary-page__route-place">{stop.place}</span>
+              {stop.arriveDate && (
+                <span className="itinerary-page__route-dates">
+                  {stop.arriveDate}{stop.departDate ? ` – ${stop.departDate}` : ''}
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
       )}
 
       <ItineraryMap activities={activities} days={days} />
@@ -171,6 +190,17 @@ export function ItineraryPage() {
           endDate={trip.endDate}
           onClose={() => setShowGenerate(false)}
           onAdded={() => { setShowGenerate(false); load(); }}
+        />
+      )}
+
+      {showEditStops && (
+        <EditStopsModal
+          tripId={tripId!}
+          initialStops={trip.stops}
+          minDate={trip.startDate}
+          maxDate={trip.endDate}
+          onClose={() => setShowEditStops(false)}
+          onSaved={() => { setShowEditStops(false); load(); }}
         />
       )}
     </div>

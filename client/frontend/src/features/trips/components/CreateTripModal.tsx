@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import type { CreateTripRequest } from '@explivio/shared';
+import type { CreateTripRequest, TripStopInput } from '@explivio/shared';
 import { createTrip } from '../services/tripsApi';
+import { TripStopsEditor } from './TripStopsEditor';
 import './CreateTripModal.css';
 
 interface Props {
@@ -13,11 +14,14 @@ const PLACEHOLDER_USER_ID = '00000000-0000-0000-0000-000000000001';
 export function CreateTripModal({ onClose, onCreated }: Props) {
   const [form, setForm] = useState({
     name: '',
-    destination: '',
     startDate: '',
     endDate: '',
     travelerCount: 1,
   });
+  // F22: a trip is an ordered route of stops; start with one empty stop.
+  const [stops, setStops] = useState<TripStopInput[]>([
+    { place: '', arriveDate: null, departDate: null, latitude: null, longitude: null },
+  ]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -29,9 +33,17 @@ export function CreateTripModal({ onClose, onCreated }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setSubmitting(true);
 
-    const data: CreateTripRequest = { ...form, userId: PLACEHOLDER_USER_ID };
+    const cleanedStops = stops
+      .map(s => ({ ...s, place: s.place.trim() }))
+      .filter(s => s.place.length > 0);
+    if (cleanedStops.length === 0) {
+      setError('Add at least one destination.');
+      return;
+    }
+
+    setSubmitting(true);
+    const data: CreateTripRequest = { ...form, stops: cleanedStops, userId: PLACEHOLDER_USER_ID };
 
     try {
       await createTrip(data);
@@ -57,11 +69,6 @@ export function CreateTripModal({ onClose, onCreated }: Props) {
             <input name="name" value={form.name} onChange={handleChange} required placeholder="e.g. Summer in Japan" />
           </label>
 
-          <label>
-            Destination
-            <input name="destination" value={form.destination} onChange={handleChange} required placeholder="e.g. Tokyo, Japan" />
-          </label>
-
           <div className="modal__row">
             <label>
               Start date
@@ -77,6 +84,16 @@ export function CreateTripModal({ onClose, onCreated }: Props) {
             Travellers
             <input type="number" name="travelerCount" value={form.travelerCount} onChange={handleChange} min={1} max={100} required />
           </label>
+
+          <div className="modal__stops">
+            <span className="modal__stops-label">Destinations</span>
+            <TripStopsEditor
+              stops={stops}
+              onChange={setStops}
+              minDate={form.startDate || undefined}
+              maxDate={form.endDate || undefined}
+            />
+          </div>
 
           {error && <p className="modal__error">{error}</p>}
 

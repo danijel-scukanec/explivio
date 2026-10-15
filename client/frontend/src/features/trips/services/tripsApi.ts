@@ -1,4 +1,4 @@
-import type { Trip, CreateTripRequest, TripStatus } from '@explivio/shared';
+import type { Trip, CreateTripRequest, TripStatus, TripStopInput } from '@explivio/shared';
 import { withDevUser, devUserQuery } from '../../../shared/devUser';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
@@ -24,6 +24,16 @@ export async function createTrip(data: CreateTripRequest): Promise<string> {
   if (!res.ok) throw new Error('Failed to create trip');
   const { id } = await res.json();
   return id;
+}
+
+// F22: replace a trip's ordered route (multi-destination).
+export async function setTripStops(id: string, stops: TripStopInput[]): Promise<void> {
+  const res = await fetch(`${API_URL}/trips/${id}/stops`, {
+    method: 'PUT',
+    headers: withDevUser({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ stops }),
+  });
+  if (!res.ok) throw new Error('Failed to update trip route');
 }
 
 // F22: change a trip's lifecycle status.
