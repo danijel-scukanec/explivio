@@ -13,7 +13,7 @@ public class GetTripsHandler(AppDbContext db) : IRequestHandler<GetTripsQuery, L
         return await db.Trips
             .Where(t => db.TripMembers.Any(m => m.TripId == t.Id && m.UserId == query.UserId))
             .OrderByDescending(t => t.CreatedAt)
-            .Select(t => new TripResponse(t.Id, t.Name, t.Destination, t.StartDate, t.EndDate, t.TravelerCount, t.Status, t.CreatedAt))
+            .Select(t => new TripResponse(t.Id, t.Name, t.Destination, t.StartDate, t.EndDate, t.TravelerCount, t.Status, t.HasCoverPhoto, t.CreatedAt))
             .ToListAsync(cancellationToken);
     }
 }

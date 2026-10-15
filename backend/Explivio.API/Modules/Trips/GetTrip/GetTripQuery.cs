@@ -14,5 +14,6 @@ public record TripResponse(
     DateOnly EndDate,
     int TravelerCount,
     TripStatus Status,
+    bool HasCoverPhoto,
     DateTime CreatedAt
 );

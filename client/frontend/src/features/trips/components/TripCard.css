@@ -6,10 +6,20 @@
   text-align: left;
   transition: box-shadow 0.2s;
   cursor: pointer;
+  overflow: hidden;
 
   &:hover {
     box-shadow: var(--shadow);
   }
+}
+
+/* F22: full-bleed cover image above the padded content (negative margins cancel the card padding). */
+.trip-card__cover {
+  display: block;
+  width: calc(100% + 40px);
+  height: 140px;
+  object-fit: cover;
+  margin: -20px -20px 16px;
 }
 
 .trip-card__header {

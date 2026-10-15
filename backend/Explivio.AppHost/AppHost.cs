@@ -13,6 +13,15 @@ var sql = builder.AddAzureSqlServer("sql")
 // (configuration keys are case-insensitive), while the physical database keeps its "Explivio" name.
 var database = sql.AddDatabase("sqlserver", "Explivio");
 
+// F22: Azure Blob Storage for trip cover photos. Like SQL and Service Bus it has a local emulator
+// (Azurite), so it runs as a container during `aspire run` and provisions real Azure Storage when
+// deployed. The API uploads covers here and streams them back through its own endpoint; the resource
+// is named "blobs" so its injected connection string lands under ConnectionStrings:blobs, which the
+// API's blob client reads.
+var blobs = builder.AddAzureStorage("storage")
+    .RunAsEmulator()
+    .AddBlobs("blobs");
+
 // F02/F11: Application Insights for distributed telemetry once deployed. Only added in publish mode
 // (azd deploy): it has no local emulator, so referencing it during `aspire run` would leave each
 // service waiting on an Azure resource that can't be provisioned locally. Locally, telemetry goes to
@@ -82,7 +91,9 @@ var api = builder.AddProject<Projects.Explivio_API>("api")
     .WithReference(database)
     .WaitFor(database)
     .WithReference(serviceBus)
-    .WaitFor(serviceBus);
+    .WaitFor(serviceBus)
+    .WithReference(blobs)
+    .WaitFor(blobs);
 
 // F14: give the API the Cosmos connection when Cosmos exists (real in publish mode, or the opt-in
 // local emulator). Without it the API uses the in-memory retriever. Only wait on the local emulator —

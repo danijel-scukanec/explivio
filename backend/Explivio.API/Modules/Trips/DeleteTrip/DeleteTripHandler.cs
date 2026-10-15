@@ -1,11 +1,14 @@
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Outcomes;
+using Explivio.API.Infrastructure.Storage;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Explivio.API.Modules.Trips.DeleteTrip;
 
-public class DeleteTripHandler(AppDbContext db) : IRequestHandler<DeleteTripCommand, Result>
+// F22: storage is injected as nullable so deletion still works when the cover-photo feature isn't
+// configured (no "blobs" connection string).
+public class DeleteTripHandler(AppDbContext db, IPhotoStorage? storage = null) : IRequestHandler<DeleteTripCommand, Result>
 {
     public async Task<Result> Handle(DeleteTripCommand command, CancellationToken cancellationToken)
     {
@@ -22,6 +25,20 @@ public class DeleteTripHandler(AppDbContext db) : IRequestHandler<DeleteTripComm
         trip.Delete();
         db.Trips.Remove(trip);
         await db.SaveChangesAsync(cancellationToken);
+
+        // F22: best-effort cover-photo cleanup so a deleted trip doesn't orphan its blob. Done after
+        // the delete commits; a storage hiccup here must not fail the (already-succeeded) deletion.
+        if (storage is not null && trip.HasCoverPhoto)
+        {
+            try
+            {
+                await storage.DeleteCoverAsync(trip.Id, cancellationToken);
+            }
+            catch
+            {
+                // Swallowed: the trip is gone; an orphaned blob is harmless and can be reaped later.
+            }
+        }
 
         return Result.Success();
     }

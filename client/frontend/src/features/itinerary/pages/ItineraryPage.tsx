@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import type { Trip, Activity, TripStatus } from '@explivio/shared';
 import { getDaysInRange, TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
-import { getTrip, setTripStatus } from '../../trips/services/tripsApi';
+import { getTrip, setTripStatus, setTripCover, tripCoverUrl } from '../../trips/services/tripsApi';
 import { getActivities, deleteActivity } from '../services/itineraryApi';
 import { DaySchedule } from '../components/DaySchedule';
 import { AddActivityModal } from '../components/AddActivityModal';
@@ -19,6 +19,9 @@ export function ItineraryPage() {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showGenerate, setShowGenerate] = useState(false);
+  // F22: bumps on each cover upload so the <img> reloads past the browser cache (the blob URL is stable).
+  const [coverVersion, setCoverVersion] = useState(() => Date.now());
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     if (!tripId) return;
@@ -57,6 +60,20 @@ export function ItineraryPage() {
       await setTripStatus(tripId, status);
     } catch {
       load(); // revert to the server's truth on failure
+    }
+  }
+
+  // F22: upload a cover photo, then reveal it (and bust the image cache).
+  async function handleCoverSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // let the same file be picked again later
+    if (!file || !tripId) return;
+    try {
+      await setTripCover(tripId, file);
+      setCoverVersion(Date.now());
+      setTrip(prev => (prev ? { ...prev, hasCoverPhoto: true } : prev));
+    } catch {
+      setError('Could not upload the cover photo.');
     }
   }
 
@@ -103,11 +120,25 @@ export function ItineraryPage() {
               ))}
             </select>
           )}
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            hidden
+            onChange={handleCoverSelected}
+          />
+          <button className="btn btn--ghost" onClick={() => coverInputRef.current?.click()}>
+            🖼️ {trip.hasCoverPhoto ? 'Change cover' : 'Add cover'}
+          </button>
           <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 Budget</Link>
           <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ Generate with AI</button>
           <button className="btn btn--primary" onClick={() => setShowModal(true)}>+ Add activity</button>
         </div>
       </div>
+
+      {trip.hasCoverPhoto && (
+        <img className="itinerary-page__cover" src={tripCoverUrl(trip.id, coverVersion)} alt="" />
+      )}
 
       <ItineraryMap activities={activities} days={days} />
 

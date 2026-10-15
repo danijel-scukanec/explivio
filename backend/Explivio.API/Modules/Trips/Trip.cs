@@ -11,6 +11,7 @@ public class Trip : Entity
     public DateOnly EndDate { get; set; }
     public int TravelerCount { get; set; }
     public TripStatus Status { get; set; }
+    public bool HasCoverPhoto { get; set; }
     public Guid UserId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
@@ -42,6 +43,20 @@ public class Trip : Entity
     public void SetStatus(TripStatus status)
     {
         Status = status;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    // F22: the trip's cover photo is stored in blob storage keyed by the trip id; the entity only
+    // records whether one exists so reads can tell clients without touching storage.
+    public void SetCoverPhoto()
+    {
+        HasCoverPhoto = true;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void ClearCoverPhoto()
+    {
+        HasCoverPhoto = false;
         UpdatedAt = DateTime.UtcNow;
     }
 

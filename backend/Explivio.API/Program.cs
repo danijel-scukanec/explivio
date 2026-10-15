@@ -11,6 +11,7 @@ using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Outbox;
 using Explivio.API.Infrastructure.Rag;
 using Explivio.API.Infrastructure.ReadModel;
+using Explivio.API.Infrastructure.Storage;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Trips.Collaboration;
 using Explivio.API.Modules.Users;
@@ -115,6 +116,15 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("cosmos
     builder.Services.RemoveAll<IPlaceRetriever>();
     builder.Services.AddSingleton<IPlaceRetriever, CosmosPlaceRetriever>();
     builder.Services.AddHostedService<PlaceSeeder>();
+}
+
+// F22: blob storage for trip cover photos. The Aspire AppHost injects "blobs" (Azurite locally,
+// real Azure Storage when deployed); without it the cover-photo endpoints report 503/404 and the
+// rest of the API is unaffected — same gating posture as Cosmos and Service Bus.
+if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("blobs")))
+{
+    builder.AddAzureBlobServiceClient("blobs");
+    builder.Services.AddScoped<IPhotoStorage, BlobPhotoStorage>();
 }
 
 // F13: SignalR for streaming AI itinerary generation to the client (in-process; Azure SignalR is a

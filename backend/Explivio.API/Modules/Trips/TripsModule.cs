@@ -2,6 +2,7 @@ using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Outcomes;
 using Explivio.API.Infrastructure.ReadModel;
+using Explivio.API.Modules.Trips.Cover;
 using Explivio.API.Modules.Trips.CreateTrip;
 using Explivio.API.Modules.Trips.DeleteTrip;
 using Explivio.API.Modules.Trips.GetTrip;
@@ -74,6 +75,9 @@ public static class TripsModule
             return result.ToHttpResult();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Owner, "id"))
           .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound);
+
+        // F22: trip cover photo upload/serve/delete.
+        group.MapTripCoverEndpoints();
 
         return app;
     }

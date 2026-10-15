@@ -1,9 +1,13 @@
+using Azure.Storage.Blobs;
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Infrastructure.Storage;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Testcontainers.Azurite;
 using Testcontainers.MsSql;
 using Xunit;
 
@@ -20,6 +24,11 @@ public sealed class ExplivioApiFactory : WebApplicationFactory<Program>, IAsyncL
     private readonly MsSqlContainer _sqlServer =
         new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest").Build();
 
+    // F22: Azurite (the Azure Storage emulator) so the cover-photo endpoints run against real blob
+    // storage in integration tests, the same way SQL is a real container.
+    private readonly AzuriteContainer _azurite =
+        new AzuriteBuilder("mcr.microsoft.com/azure-storage/azurite:latest").Build();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Development enables the fake identity middleware so RequireAuthorization passes.
@@ -32,11 +41,21 @@ public sealed class ExplivioApiFactory : WebApplicationFactory<Program>, IAsyncL
                 ["ConnectionStrings:SqlServer"] = _sqlServer.GetConnectionString(),
             });
         });
+
+        // F22: turn on the cover-photo feature against Azurite. The production gate reads the "blobs"
+        // connection string at app-build time (Aspire injects it as an env var, visible then), but the
+        // factory's in-memory config is layered in too late for that immediate read — so register the
+        // blob client and storage directly in the test host instead.
+        builder.ConfigureTestServices(services =>
+        {
+            services.AddSingleton(new BlobServiceClient(_azurite.GetConnectionString()));
+            services.AddScoped<IPhotoStorage, BlobPhotoStorage>();
+        });
     }
 
     public async ValueTask InitializeAsync()
     {
-        await _sqlServer.StartAsync();
+        await Task.WhenAll(_sqlServer.StartAsync(), _azurite.StartAsync());
 
         // Accessing Services builds the host with the container connection string applied.
         using var scope = Services.CreateScope();
@@ -47,6 +66,7 @@ public sealed class ExplivioApiFactory : WebApplicationFactory<Program>, IAsyncL
     public override async ValueTask DisposeAsync()
     {
         await _sqlServer.DisposeAsync();
+        await _azurite.DisposeAsync();
         await base.DisposeAsync();
     }
 }

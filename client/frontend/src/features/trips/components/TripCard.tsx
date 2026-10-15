@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { Trip } from '@explivio/shared';
 import { formatTripDate, getTripDuration, tripStatusColor } from '@explivio/shared';
+import { tripCoverUrl } from '../services/tripsApi';
 import './TripCard.css';
 
 interface Props {
@@ -12,6 +13,9 @@ export function TripCard({ trip }: Props) {
 
   return (
     <div className="trip-card" onClick={() => navigate(`/trips/${trip.id}/itinerary`)}>
+      {trip.hasCoverPhoto && (
+        <img className="trip-card__cover" src={tripCoverUrl(trip.id)} alt="" loading="lazy" />
+      )}
       <div className="trip-card__header">
         <div className="trip-card__title">
           <h3 className="trip-card__name">{trip.name}</h3>
