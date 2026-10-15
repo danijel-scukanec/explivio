@@ -1,5 +1,6 @@
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Infrastructure.Features;
 using Explivio.API.Infrastructure.Storage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +50,7 @@ public static class TripCoverEndpoints
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         })
+        .AddEndpointFilter(new RequireFeature(FeatureFlags.TripCoverPhotos))
         .AddEndpointFilter(new RequireTripRole(TripRole.Editor, "id"))
         .DisableAntiforgery()
         .Produces(StatusCodes.Status204NoContent)
@@ -68,6 +70,7 @@ public static class TripCoverEndpoints
                 ? Results.NotFound()
                 : Results.Stream(cover.Content, cover.ContentType);
         })
+        .AddEndpointFilter(new RequireFeature(FeatureFlags.TripCoverPhotos))
         .AddEndpointFilter(new RequireTripRole(TripRole.Viewer, "id"))
         .Produces(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound);
@@ -87,6 +90,7 @@ public static class TripCoverEndpoints
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         })
+        .AddEndpointFilter(new RequireFeature(FeatureFlags.TripCoverPhotos))
         .AddEndpointFilter(new RequireTripRole(TripRole.Editor, "id"))
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status404NotFound);

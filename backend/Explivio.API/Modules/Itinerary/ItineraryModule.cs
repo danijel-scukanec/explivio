@@ -1,4 +1,5 @@
 using Explivio.API.Infrastructure.Api;
+using Explivio.API.Infrastructure.Features;
 using Explivio.API.Modules.Itinerary.CreateActivity;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Trips;
@@ -35,12 +36,15 @@ public static class ItineraryModule
 
         // F12: AI itinerary generation. Synchronous — the caller waits for the draft. Returns a
         // draft only; the user reviews it and creates activities via POST above. F13 will stream this.
+        // F32: gated behind the AiItineraryGeneration feature flag (filter runs before the role check,
+        // so a disabled feature 404s regardless of membership).
         group.MapPost("/generate", async (Guid tripId, GenerateItineraryCommand command, IMediator mediator) =>
         {
             var draft = await mediator.Send(command with { TripId = tripId });
             return Results.Ok(draft);
-        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
-          .Produces<GeneratedItinerary>().ProducesValidationProblem();
+        }).AddEndpointFilter(new RequireFeature(FeatureFlags.AiItineraryGeneration))
+          .AddEndpointFilter(new RequireTripRole(TripRole.Editor))
+          .Produces<GeneratedItinerary>().ProducesValidationProblem().ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db, ITripCollaborationNotifier collaboration) =>
         {

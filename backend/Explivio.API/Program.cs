@@ -8,6 +8,7 @@ using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Behaviors;
 using Explivio.API.Infrastructure.Idempotency;
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Infrastructure.Features;
 using Explivio.API.Infrastructure.Outbox;
 using Explivio.API.Infrastructure.Rag;
 using Explivio.API.Infrastructure.ReadModel;
@@ -19,6 +20,7 @@ using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Budget;
 using FluentValidation;
+using Microsoft.FeatureManagement;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -127,6 +129,11 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("blobs"
     builder.Services.AddScoped<IPhotoStorage, BlobPhotoStorage>();
 }
 
+// F32: feature flags evaluated from the "FeatureManagement" config section (appsettings / env /
+// user-secrets; Azure App Configuration is the optional cloud source, not wired). Endpoints gate with
+// the RequireFeature filter; GET /features exposes the states to the client.
+builder.Services.AddFeatureManagement();
+
 // F13: SignalR for streaming AI itinerary generation to the client (in-process; Azure SignalR is a
 // later scaling swap). The ItineraryGenerationHub streams the generation token-by-token.
 builder.Services.AddSignalR();
@@ -224,6 +231,7 @@ var versionSet = app.NewApiVersionSet()
     .Build();
 var api = app.MapGroup("/v{version:apiVersion}").WithApiVersionSet(versionSet);
 
+api.MapFeaturesEndpoints();
 api.MapTripsEndpoints();
 api.MapTripMembersEndpoints();
 api.MapUsersEndpoints();

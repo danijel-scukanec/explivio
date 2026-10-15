@@ -10,6 +10,7 @@ import { EditStopsModal } from '../../trips/components/EditStopsModal';
 import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
 import { ItineraryMap } from '../components/ItineraryMap';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
+import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
 import './ItineraryPage.css';
 
 export function ItineraryPage() {
@@ -43,6 +44,9 @@ export function ItineraryPage() {
   }
 
   useEffect(() => { load(); }, [tripId]);
+
+  // F32: hide controls whose feature flag is off on the server (unknown flags default to on).
+  const features = useFeatures();
 
   // F15 Phase B: live collaboration — refetch when another member edits, and show who's viewing.
   const { presentUserIds } = useTripCollaboration(tripId, load);
@@ -129,12 +133,16 @@ export function ItineraryPage() {
             hidden
             onChange={handleCoverSelected}
           />
-          <button className="btn btn--ghost" onClick={() => coverInputRef.current?.click()}>
-            🖼️ {trip.hasCoverPhoto ? 'Change cover' : 'Add cover'}
-          </button>
+          {isFeatureOn(features, 'TripCoverPhotos') && (
+            <button className="btn btn--ghost" onClick={() => coverInputRef.current?.click()}>
+              🖼️ {trip.hasCoverPhoto ? 'Change cover' : 'Add cover'}
+            </button>
+          )}
           <button className="btn btn--ghost" onClick={() => setShowEditStops(true)}>🧭 Edit route</button>
           <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 Budget</Link>
-          <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ Generate with AI</button>
+          {isFeatureOn(features, 'AiItineraryGeneration') && (
+            <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ Generate with AI</button>
+          )}
           <button className="btn btn--primary" onClick={() => setShowModal(true)}>+ Add activity</button>
         </div>
       </div>
