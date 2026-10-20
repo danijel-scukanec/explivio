@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { theme } from './theme';
 
 // Native place search over the SAME Google Places (New) API the web client uses — called via REST
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export function PlaceSearch({ onSelect }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState(false);
@@ -85,7 +87,7 @@ export function PlaceSearch({ onSelect }: Props) {
         style={styles.input}
         value={query}
         onChangeText={onChange}
-        placeholder={KEY ? 'Search restaurants, hotels, attractions…' : 'Place search unavailable (no key)'}
+        placeholder={KEY ? t('addActivity.searchPlaceholder') : t('mobile.placeSearchUnavailable')}
         placeholderTextColor={theme.border}
         editable={!!KEY}
       />

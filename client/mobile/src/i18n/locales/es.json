@@ -1,0 +1,252 @@
+{
+  "common": {
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "loading": "Cargando…",
+    "backToTrips": "← Viajes",
+    "optionalNotes": "Notas opcionales",
+    "somethingWrong": "Algo salió mal. Inténtalo de nuevo.",
+    "location": "Ubicación",
+    "optional": "Opcional",
+    "enterNameDate": "Introduce un nombre y una fecha."
+  },
+  "language": {
+    "label": "Idioma"
+  },
+  "enums": {
+    "tripStatus": {
+      "Draft": "Borrador",
+      "Planned": "Planeado",
+      "Active": "Activo",
+      "Completed": "Completado",
+      "Cancelled": "Cancelado"
+    },
+    "activityCategory": {
+      "Sightseeing": "Turismo",
+      "Food": "Comida",
+      "Transport": "Transporte",
+      "Accommodation": "Alojamiento",
+      "Adventure": "Aventura",
+      "Other": "Otro"
+    },
+    "expenseCategory": {
+      "Transport": "Transporte",
+      "Accommodation": "Alojamiento",
+      "Food": "Comida",
+      "Activities": "Actividades",
+      "Shopping": "Compras",
+      "Other": "Otro"
+    },
+    "reservationType": {
+      "Flight": "Vuelo",
+      "Accommodation": "Alojamiento",
+      "CarRental": "Alquiler de coche",
+      "Restaurant": "Restaurante",
+      "Transport": "Transporte",
+      "Tour": "Tour",
+      "Other": "Otro"
+    },
+    "reservationStatus": {
+      "Reserved": "Reservado",
+      "Confirmed": "Confirmado",
+      "Cancelled": "Cancelado"
+    }
+  },
+  "trips": {
+    "title": "Mis viajes",
+    "newTrip": "+ Nuevo viaje",
+    "couldNotLoad": "No se pudieron cargar los viajes.",
+    "empty": "Aún no hay viajes. ¡Crea el primero!",
+    "filterAll": "Todos",
+    "noneForFilter": "No hay viajes {{status}}."
+  },
+  "tripCard": {
+    "summary": "{{count}} días · {{travelers}}",
+    "travelers_one": "{{count}} viajero",
+    "travelers_other": "{{count}} viajeros"
+  },
+  "createTrip": {
+    "title": "Nuevo viaje",
+    "name": "Nombre del viaje",
+    "namePlaceholder": "p. ej. Verano en Japón",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
+    "travellers": "Viajeros",
+    "destinations": "Destinos",
+    "needDestination": "Añade al menos un destino.",
+    "create": "Crear viaje",
+    "creating": "Creando…"
+  },
+  "editRoute": {
+    "title": "Editar ruta",
+    "needDestination": "Un viaje necesita al menos un destino.",
+    "save": "Guardar ruta",
+    "saving": "Guardando…"
+  },
+  "stops": {
+    "cityPlace": "Ciudad o lugar",
+    "searchAutofill": "Busca para autocompletar + fijar en el mapa",
+    "arrive": "Llegada",
+    "depart": "Salida",
+    "addStop": "+ Añadir parada",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "removeStop": "Eliminar parada"
+  },
+  "itinerary": {
+    "title": "Itinerario",
+    "couldNotLoad": "No se pudo cargar el itinerario.",
+    "couldNotUploadCover": "No se pudo subir la foto de portada.",
+    "notFound": "Viaje no encontrado.",
+    "changeCover": "Cambiar portada",
+    "addCover": "Añadir portada",
+    "editRoute": "Editar ruta",
+    "bookings": "Reservas",
+    "budget": "Presupuesto",
+    "generate": "Generar con IA",
+    "addActivity": "+ Añadir actividad",
+    "othersViewing_one": "{{count}} persona más viendo",
+    "othersViewing_other": "{{count}} personas más viendo",
+    "filter": "Filtrar",
+    "clear": "Limpiar",
+    "clearToReorder": "Quita el filtro para reordenar las actividades.",
+    "day": "Día {{number}}",
+    "noActivities": "Sin actividades planeadas",
+    "noTime": "Sin hora"
+  },
+  "activity": {
+    "edit": "Editar actividad",
+    "delete": "Eliminar actividad",
+    "dragToReorder": "Arrastra para reordenar"
+  },
+  "addActivity": {
+    "title": "Añadir actividad",
+    "searchPlace": "Buscar un lugar",
+    "searchPlaceholder": "Busca restaurantes, hoteles, atracciones…",
+    "name": "Nombre de la actividad",
+    "namePlaceholder": "p. ej. Visitar el templo Senso-ji",
+    "date": "Fecha",
+    "category": "Categoría",
+    "startTime": "Hora de inicio",
+    "endTime": "Hora de fin",
+    "notes": "Notas",
+    "add": "Añadir actividad",
+    "adding": "Añadiendo…"
+  },
+  "editActivity": {
+    "title": "Editar actividad",
+    "changePlace": "Cambiar lugar",
+    "save": "Guardar cambios",
+    "saving": "Guardando…"
+  },
+  "budget": {
+    "title": "Presupuesto",
+    "itinerary": "Itinerario",
+    "addExpense": "+ Añadir gasto",
+    "couldNotLoad": "No se pudo cargar el presupuesto.",
+    "totalSpend": "Gasto total",
+    "expenses": "Gastos",
+    "empty": "Aún no hay gastos. Añade el primero."
+  },
+  "expense": {
+    "fromBooking": "de reserva",
+    "delete": "Eliminar gasto",
+    "managedFromBooking": "Se gestiona desde la reserva"
+  },
+  "addExpense": {
+    "title": "Añadir gasto",
+    "description": "Descripción",
+    "descriptionPlaceholder": "p. ej. Billetes de tren",
+    "amount": "Importe",
+    "currency": "Moneda",
+    "category": "Categoría",
+    "date": "Fecha",
+    "amountGtZero": "Introduce un importe mayor que cero.",
+    "add": "Añadir gasto",
+    "adding": "Añadiendo…"
+  },
+  "bookings": {
+    "title": "Reservas",
+    "itinerary": "Itinerario",
+    "budget": "Presupuesto",
+    "addBooking": "+ Añadir reserva",
+    "couldNotLoad": "No se pudieron cargar las reservas.",
+    "notFound": "Viaje no encontrado.",
+    "empty": "Aún no hay reservas. Añade vuelos, alojamientos, alquiler de coches y más."
+  },
+  "reservation": {
+    "edit": "Editar reserva",
+    "delete": "Eliminar reserva",
+    "openBooking": "Abrir reserva ↗"
+  },
+  "reservationModal": {
+    "addTitle": "Añadir reserva",
+    "editTitle": "Editar reserva",
+    "type": "Tipo",
+    "status": "Estado",
+    "title": "Título",
+    "titlePlaceholder": "p. ej. IB3456 MAD→BCN",
+    "starts": "Comienza",
+    "ends": "Termina (opcional)",
+    "provider": "Proveedor",
+    "providerPlaceholder": "p. ej. Hilton, Iberia",
+    "confirmation": "N.º de confirmación",
+    "confirmationPlaceholder": "p. ej. ABC123",
+    "cost": "Coste (opcional)",
+    "currency": "Moneda",
+    "costHint": "Añadir un coste registra un gasto equivalente en el presupuesto del viaje.",
+    "bookingLink": "Enlace de la reserva",
+    "notes": "Notas",
+    "add": "Añadir reserva",
+    "adding": "Guardando…",
+    "save": "Guardar cambios"
+  },
+  "generate": {
+    "title": "✨ Generar itinerario con IA",
+    "whatKind": "¿Qué tipo de viaje?",
+    "promptPlaceholder": "p. ej. Un fin de semana gastronómico y relajado en Zagreb con algo de historia",
+    "days": "Días",
+    "style": "Estilo",
+    "stylePlaceholder": "relajado, intenso…",
+    "budget": "Presupuesto",
+    "budgetPlaceholder": "medio…",
+    "generate": "Generar",
+    "generating": "Generando…",
+    "regenerate": "Regenerar",
+    "day": "Día {{number}}",
+    "addAll": "Añadir las {{count}} al itinerario",
+    "adding": "Añadiendo…",
+    "couldNotAddAll": "No se pudieron añadir todas las actividades. Inténtalo de nuevo."
+  },
+  "mobile": {
+    "tripsTitle": "Viajes",
+    "addShort": "+ Añadir",
+    "newShort": "+ Nuevo",
+    "tripsEmpty": "Aún no hay viajes. Toca «+ Nuevo».",
+    "nights_one": "{{count}} noche",
+    "nights_other": "{{count}} noches",
+    "deleteTripTitle": "Eliminar viaje",
+    "deleteTripConfirm": "¿Eliminar «{{name}}»? No se puede deshacer.",
+    "delete": "Eliminar",
+    "fillNameDates": "Completa el nombre y las fechas.",
+    "couldNotLoadRoute": "No se pudo cargar la ruta.",
+    "generateTitle": "Generar con IA",
+    "describeTrip": "Describe tu viaje",
+    "generatePromptPlaceholder": "p. ej. 3 días relajados en Lisboa, comida e historia",
+    "generateBtn": "✨ Generar",
+    "generationFailed": "La generación falló. Inténtalo de nuevo.",
+    "couldNotAddActivities": "No se pudieron añadir todas las actividades.",
+    "placeSearchUnavailable": "Búsqueda de lugares no disponible (sin clave)",
+    "offlinePending_one": "Sin conexión — {{count}} cambio se sincronizará más tarde",
+    "offlinePending_other": "Sin conexión — {{count}} cambios se sincronizarán más tarde",
+    "offlineNoPending": "Sin conexión — mostrando datos guardados",
+    "syncing_one": "Sincronizando {{count}} cambio…",
+    "syncing_other": "Sincronizando {{count}} cambios…",
+    "activityNotFound": "Actividad no encontrada.",
+    "couldNotLoadActivity": "No se pudo cargar la actividad.",
+    "bookingNotFound": "Reserva no encontrada.",
+    "couldNotLoadBooking": "No se pudo cargar la reserva.",
+    "enterDescDate": "Introduce una descripción y una fecha.",
+    "enterTitleStart": "Introduce un título y una fecha de inicio."
+  }
+}

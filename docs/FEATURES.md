@@ -3,12 +3,12 @@
 Prioritized feature catalogue for the Explivio showcase. Each feature notes the **capability it demonstrates**, so the roadmap doubles as a map of "what this repo proves I can do."
 
 > ### ⭐ Committed target vs. roadmap
-> A half-finished portfolio repo reads worse than a smaller, polished one. The original **committed target** was **all of P0 + F12 + F13**; in practice the build went well beyond it. See the **Done** column for what has actually shipped — **all of P0; F12–F15 and F19 in P1; F22, F23, F31, F32 in P2.** The unticked rows are **roadmap: genuinely planned, may not be built** — kept to show direction, not promised.
+> A half-finished portfolio repo reads worse than a smaller, polished one. The original **committed target** was **all of P0 + F12 + F13**; in practice the build went well beyond it. See the **Done** column for what has actually shipped — **all of P0; F12–F15 and F19 in P1; F22, F23, F30, F31, F32 in P2.** The unticked rows are **roadmap: genuinely planned, may not be built** — kept to show direction, not promised.
 
 **Priority tiers**
 - **P0 — Foundation:** the distributed/AI spine + core product. Must exist for the showcase to land. **(shipped)**
 - **P1 — Showcase:** the features a reviewer stops scrolling for. **(F12–F15, F19 shipped; rest roadmap)**
-- **P2 — Stretch:** breadth once the spine is impressive. **(F22, F23, F31, F32 shipped; rest roadmap)**
+- **P2 — Stretch:** breadth once the spine is impressive. **(F22, F23, F30, F31, F32 shipped; rest roadmap)**
 
 Legend for _Proves_: 🧩 distributed-systems · 🤖 AI · 🎨 full-stack · 🛠️ engineering-discipline
 
@@ -70,7 +70,7 @@ Legend for _Proves_: 🧩 distributed-systems · 🤖 AI · 🎨 full-stack · �
 | F27 | Calendar sync (.ics / Google / Outlook), **PDF itinerary** export | 🎨 | |
 | F28 | Per-day weather, timezone/currency awareness | 🎨 | |
 | F29 | Auto **trip recap** with photos (AI summary) | 🤖🎨 | |
-| F30 | **i18n / localization** | 🎨 | |
+| F30 | **i18n / localization** (en/es/de; web + mobile, locale-aware dates/currency) | 🎨 | ✅ |
 | F31 | Mobile feature parity + **offline sync** | 🎨 | ✅ |
 | F32 | Feature flags (config-driven); optional **YARP BFF** not built | 🧩 | ✅ |
 | P-Auth | **Real auth — Microsoft Entra External ID** (replaces fake dev identity) | 🛠️ | |

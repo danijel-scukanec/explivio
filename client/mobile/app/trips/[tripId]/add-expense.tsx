@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import type { AddExpenseRequest, ExpenseCategory } from '@explivio/shared';
 import { addExpense } from '../../../src/api';
 import { formStyles as s } from '../../../src/formStyles';
@@ -11,6 +12,7 @@ const CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY'];
 
 export default function AddExpenseScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [form, setForm] = useState({
     description: '',
@@ -28,11 +30,11 @@ export default function AddExpenseScreen() {
     setError(null);
     const amount = Number(form.amount);
     if (!form.description || !form.date) {
-      setError('Please enter a description and date.');
+      setError(t('mobile.enterDescDate'));
       return;
     }
     if (!(amount > 0)) {
-      setError('Enter an amount greater than zero.');
+      setError(t('addExpense.amountGtZero'));
       return;
     }
     setSubmitting(true);
@@ -48,31 +50,31 @@ export default function AddExpenseScreen() {
       await addExpense(tripId!, data);
       router.back();
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(t('common.somethingWrong'));
       setSubmitting(false);
     }
   }
 
   return (
     <View style={s.screen}>
-      <Stack.Screen options={{ title: 'Add expense' }} />
+      <Stack.Screen options={{ title: t('addExpense.title') }} />
       <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
         <View>
-          <Text style={s.label}>Description</Text>
-          <TextInput style={s.input} value={form.description} onChangeText={set('description')} placeholder="e.g. Train tickets" placeholderTextColor={theme.border} />
+          <Text style={s.label}>{t('addExpense.description')}</Text>
+          <TextInput style={s.input} value={form.description} onChangeText={set('description')} placeholder={t('addExpense.descriptionPlaceholder')} placeholderTextColor={theme.border} />
         </View>
         <View style={s.row}>
           <View style={s.rowItem}>
-            <Text style={s.label}>Amount</Text>
+            <Text style={s.label}>{t('addExpense.amount')}</Text>
             <TextInput style={s.input} value={form.amount} onChangeText={set('amount')} placeholder="0.00" placeholderTextColor={theme.border} keyboardType="decimal-pad" />
           </View>
           <View style={s.rowItem}>
-            <Text style={s.label}>Date</Text>
+            <Text style={s.label}>{t('addExpense.date')}</Text>
             <TextInput style={s.input} value={form.date} onChangeText={set('date')} placeholder="YYYY-MM-DD" placeholderTextColor={theme.border} autoCapitalize="none" />
           </View>
         </View>
         <View>
-          <Text style={s.label}>Currency</Text>
+          <Text style={s.label}>{t('addExpense.currency')}</Text>
           <View style={s.chipRow}>
             {CURRENCIES.map(c => {
               const active = form.currency === c;
@@ -85,13 +87,13 @@ export default function AddExpenseScreen() {
           </View>
         </View>
         <View>
-          <Text style={s.label}>Category</Text>
+          <Text style={s.label}>{t('addExpense.category')}</Text>
           <View style={s.chipRow}>
             {CATEGORIES.map(c => {
               const active = form.category === c;
               return (
                 <TouchableOpacity key={c} style={[s.chip, active && s.chipActive]} onPress={() => setForm(p => ({ ...p, category: c }))}>
-                  <Text style={[s.chipText, active && s.chipTextActive]}>{c}</Text>
+                  <Text style={[s.chipText, active && s.chipTextActive]}>{t(`enums.expenseCategory.${c}`)}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -101,7 +103,7 @@ export default function AddExpenseScreen() {
         {error ? <Text style={s.error}>{error}</Text> : null}
 
         <TouchableOpacity style={[s.submit, submitting && s.submitDisabled]} onPress={submit} disabled={submitting}>
-          <Text style={s.submitText}>{submitting ? 'Adding…' : 'Add expense'}</Text>
+          <Text style={s.submitText}>{submitting ? t('addExpense.adding') : t('addExpense.add')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

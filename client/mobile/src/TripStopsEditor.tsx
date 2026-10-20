@@ -1,4 +1,5 @@
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import type { TripStopInput } from '@explivio/shared';
 import { PlaceSearch } from './PlaceSearch';
 import { formStyles as s } from './formStyles';
@@ -21,6 +22,7 @@ const EMPTY_STOP: TripStopInput = {
 // from Google Places so it gets map coordinates) and optional arrive/depart dates. Reused by the
 // new-trip and edit-route screens. Mirrors the web TripStopsEditor.
 export function TripStopsEditor({ stops, onChange }: Props) {
+  const { t } = useTranslation();
   const update = (index: number, patch: Partial<TripStopInput>) =>
     onChange(stops.map((stop, i) => (i === index ? { ...stop, ...patch } : stop)));
 
@@ -48,7 +50,7 @@ export function TripStopsEditor({ stops, onChange }: Props) {
               style={[s.input, styles.place]}
               value={stop.place}
               onChangeText={text => update(i, { place: text })}
-              placeholder="City or place"
+              placeholder={t('stops.cityPlace')}
               placeholderTextColor={theme.border}
             />
             <TouchableOpacity style={styles.ctrl} onPress={() => move(i, -1)} disabled={i === 0} hitSlop={6}>
@@ -74,7 +76,7 @@ export function TripStopsEditor({ stops, onChange }: Props) {
 
           <View style={s.row}>
             <View style={s.rowItem}>
-              <Text style={s.label}>Arrive</Text>
+              <Text style={s.label}>{t('stops.arrive')}</Text>
               <TextInput
                 style={s.input}
                 value={stop.arriveDate ?? ''}
@@ -85,7 +87,7 @@ export function TripStopsEditor({ stops, onChange }: Props) {
               />
             </View>
             <View style={s.rowItem}>
-              <Text style={s.label}>Depart</Text>
+              <Text style={s.label}>{t('stops.depart')}</Text>
               <TextInput
                 style={s.input}
                 value={stop.departDate ?? ''}
@@ -100,7 +102,7 @@ export function TripStopsEditor({ stops, onChange }: Props) {
       ))}
 
       <TouchableOpacity style={styles.addBtn} onPress={add}>
-        <Text style={styles.addText}>+ Add stop</Text>
+        <Text style={styles.addText}>{t('stops.addStop')}</Text>
       </TouchableOpacity>
     </View>
   );

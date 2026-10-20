@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
+import '../src/i18n'; // F30: initialise i18next before any screen renders
 import { OfflineBanner } from '../src/OfflineBanner';
 import { theme } from '../src/theme';
 

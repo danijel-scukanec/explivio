@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import type { Trip, Activity, ActivityCategory, Reservation, TripStatus } from '@explivio/shared';
 import { formatActivityTime, formatCurrency, formatTripDate, getDaysInRange, TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
 import { getTrip, getActivities, getReservations, deleteActivity, deleteReservation, reorderActivities, setTripStatus } from '../../../src/api';
-import { TYPE_ICONS, TYPE_LABELS, reservationStatusColor, formatReservationTime, reservationDateKey } from '../../../src/reservationMeta';
+import { TYPE_ICONS, reservationStatusColor, formatReservationTime, reservationDateKey } from '../../../src/reservationMeta';
 import { useTripCollaboration } from '../../../src/useTripCollaboration';
 import { ItineraryMap } from '../../../src/ItineraryMap';
 import { theme } from '../../../src/theme';
@@ -22,6 +23,7 @@ interface DaySection { title: string; dayNumber: number; data: Row[] }
 
 export default function ItineraryScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -36,7 +38,7 @@ export default function ItineraryScreen() {
       .then(([tripData, activityData, reservationData]) => {
         setTrip(tripData); setActivities(activityData); setReservations(reservationData); setError(null);
       })
-      .catch(() => setError('Could not load itinerary.'))
+      .catch(() => setError(t('itinerary.couldNotLoad')))
       .finally(() => setLoading(false));
   }, [tripId]);
 
@@ -120,7 +122,7 @@ export default function ItineraryScreen() {
     <View style={styles.screen}>
       <Stack.Screen
         options={{
-          title: trip?.name ?? 'Itinerary',
+          title: trip?.name ?? t('itinerary.title'),
           headerRight: () => (
             <View style={styles.headerActions}>
               <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/edit-route`)} hitSlop={10}>
@@ -152,7 +154,7 @@ export default function ItineraryScreen() {
       {othersViewing > 0 ? (
         <View style={styles.presence}>
           <View style={styles.presenceDot} />
-          <Text style={styles.presenceText}>{othersViewing} other{othersViewing > 1 ? 's' : ''} viewing</Text>
+          <Text style={styles.presenceText}>{t('itinerary.othersViewing', { count: othersViewing })}</Text>
         </View>
       ) : null}
 
@@ -177,7 +179,7 @@ export default function ItineraryScreen() {
                 style={[styles.statusChip, active && { backgroundColor: tripStatusColor(st), borderColor: tripStatusColor(st) }]}
                 onPress={() => handleStatusChange(st)}
               >
-                <Text style={[styles.statusChipText, active && styles.statusChipTextActive]}>{st}</Text>
+                <Text style={[styles.statusChipText, active && styles.statusChipTextActive]}>{t(`enums.tripStatus.${st}`)}</Text>
               </TouchableOpacity>
             );
           })}
@@ -187,7 +189,7 @@ export default function ItineraryScreen() {
       {loading ? (
         <ActivityIndicator style={styles.center} color={theme.accent} />
       ) : error || !trip ? (
-        <Text style={[styles.center, styles.error]}>{error ?? 'Trip not found.'}</Text>
+        <Text style={[styles.center, styles.error]}>{error ?? t('itinerary.notFound')}</Text>
       ) : (
         <SectionList
           sections={sections}
@@ -202,25 +204,25 @@ export default function ItineraryScreen() {
                   const on = categoryFilter.has(c);
                   return (
                     <TouchableOpacity key={c} style={[styles.filterChip, on && styles.filterChipOn]} onPress={() => toggleCategory(c)}>
-                      <Text style={[styles.filterChipText, on && styles.filterChipTextOn]}>{CATEGORY_ICONS[c]} {c}</Text>
+                      <Text style={[styles.filterChipText, on && styles.filterChipTextOn]}>{CATEGORY_ICONS[c]} {t(`enums.activityCategory.${c}`)}</Text>
                     </TouchableOpacity>
                   );
                 })}
                 {filterActive ? (
-                  <TouchableOpacity onPress={() => setCategoryFilter(new Set())}><Text style={styles.filterClear}>Clear</Text></TouchableOpacity>
+                  <TouchableOpacity onPress={() => setCategoryFilter(new Set())}><Text style={styles.filterClear}>{t('itinerary.clear')}</Text></TouchableOpacity>
                 ) : null}
               </View>
-              {filterActive ? <Text style={styles.filterHint}>Clear the filter to reorder activities.</Text> : null}
+              {filterActive ? <Text style={styles.filterHint}>{t('itinerary.clearToReorder')}</Text> : null}
             </View>
           }
           renderSectionHeader={({ section }) => (
             <View style={styles.dayHeader}>
-              <Text style={styles.dayNumber}>Day {section.dayNumber}</Text>
+              <Text style={styles.dayNumber}>{t('itinerary.day', { number: section.dayNumber })}</Text>
               <Text style={styles.dayDate}>{formatTripDate(section.title)}</Text>
             </View>
           )}
           renderSectionFooter={({ section }) =>
-            section.data.length === 0 ? <Text style={styles.empty}>No activities planned</Text> : null
+            section.data.length === 0 ? <Text style={styles.empty}>{t('itinerary.noActivities')}</Text> : null
           }
           renderItem={({ item }) => {
             if (item.kind === 'reservation') {
@@ -231,7 +233,7 @@ export default function ItineraryScreen() {
                   <View style={styles.activityBody}>
                     <Text style={styles.bookingTitle}>{r.title}</Text>
                     <Text style={styles.activityMeta}>
-                      {TYPE_LABELS[r.type]} · {formatReservationTime(r.startsAt)} · {r.status}
+                      {t(`enums.reservationType.${r.type}`)} · {formatReservationTime(r.startsAt)} · {t(`enums.reservationStatus.${r.status}`)}
                       {r.cost != null ? ` · ${formatCurrency(Number(r.cost), r.currency)}` : ''}
                     </Text>
                   </View>
@@ -259,7 +261,7 @@ export default function ItineraryScreen() {
                     </TouchableOpacity>
                   </View>
                 ) : null}
-                <Text style={styles.time}>{start ? `${start}${end ? ` – ${end}` : ''}` : 'No time'}</Text>
+                <Text style={styles.time}>{start ? `${start}${end ? ` – ${end}` : ''}` : t('itinerary.noTime')}</Text>
                 <View style={styles.activityBody}>
                   <Text style={styles.activityName}>{CATEGORY_ICONS[a.category] ?? '📌'} {a.name}</Text>
                   {a.location ? <Text style={styles.activityMeta}>📍 {a.location}</Text> : null}

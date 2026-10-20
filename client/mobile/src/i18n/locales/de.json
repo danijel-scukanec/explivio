@@ -1,0 +1,252 @@
+{
+  "common": {
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "loading": "Wird geladen…",
+    "backToTrips": "← Reisen",
+    "optionalNotes": "Optionale Notizen",
+    "somethingWrong": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "location": "Ort",
+    "optional": "Optional",
+    "enterNameDate": "Bitte Name und Datum eingeben."
+  },
+  "language": {
+    "label": "Sprache"
+  },
+  "enums": {
+    "tripStatus": {
+      "Draft": "Entwurf",
+      "Planned": "Geplant",
+      "Active": "Aktiv",
+      "Completed": "Abgeschlossen",
+      "Cancelled": "Storniert"
+    },
+    "activityCategory": {
+      "Sightseeing": "Sightseeing",
+      "Food": "Essen",
+      "Transport": "Transport",
+      "Accommodation": "Unterkunft",
+      "Adventure": "Abenteuer",
+      "Other": "Sonstiges"
+    },
+    "expenseCategory": {
+      "Transport": "Transport",
+      "Accommodation": "Unterkunft",
+      "Food": "Essen",
+      "Activities": "Aktivitäten",
+      "Shopping": "Einkaufen",
+      "Other": "Sonstiges"
+    },
+    "reservationType": {
+      "Flight": "Flug",
+      "Accommodation": "Unterkunft",
+      "CarRental": "Mietwagen",
+      "Restaurant": "Restaurant",
+      "Transport": "Transport",
+      "Tour": "Tour",
+      "Other": "Sonstiges"
+    },
+    "reservationStatus": {
+      "Reserved": "Reserviert",
+      "Confirmed": "Bestätigt",
+      "Cancelled": "Storniert"
+    }
+  },
+  "trips": {
+    "title": "Meine Reisen",
+    "newTrip": "+ Neue Reise",
+    "couldNotLoad": "Reisen konnten nicht geladen werden.",
+    "empty": "Noch keine Reisen. Erstelle deine erste!",
+    "filterAll": "Alle",
+    "noneForFilter": "Keine {{status}} Reisen."
+  },
+  "tripCard": {
+    "summary": "{{count}} Tage · {{travelers}}",
+    "travelers_one": "{{count}} Reisender",
+    "travelers_other": "{{count}} Reisende"
+  },
+  "createTrip": {
+    "title": "Neue Reise",
+    "name": "Reisename",
+    "namePlaceholder": "z. B. Sommer in Japan",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "travellers": "Reisende",
+    "destinations": "Reiseziele",
+    "needDestination": "Füge mindestens ein Reiseziel hinzu.",
+    "create": "Reise erstellen",
+    "creating": "Wird erstellt…"
+  },
+  "editRoute": {
+    "title": "Route bearbeiten",
+    "needDestination": "Eine Reise braucht mindestens ein Reiseziel.",
+    "save": "Route speichern",
+    "saving": "Wird gespeichert…"
+  },
+  "stops": {
+    "cityPlace": "Stadt oder Ort",
+    "searchAutofill": "Suchen zum Ausfüllen + Karten-Pin setzen",
+    "arrive": "Ankunft",
+    "depart": "Abreise",
+    "addStop": "+ Stopp hinzufügen",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "removeStop": "Stopp entfernen"
+  },
+  "itinerary": {
+    "title": "Reiseplan",
+    "couldNotLoad": "Reiseplan konnte nicht geladen werden.",
+    "couldNotUploadCover": "Das Titelbild konnte nicht hochgeladen werden.",
+    "notFound": "Reise nicht gefunden.",
+    "changeCover": "Titelbild ändern",
+    "addCover": "Titelbild hinzufügen",
+    "editRoute": "Route bearbeiten",
+    "bookings": "Buchungen",
+    "budget": "Budget",
+    "generate": "Mit KI erstellen",
+    "addActivity": "+ Aktivität hinzufügen",
+    "othersViewing_one": "{{count}} weitere Person sieht zu",
+    "othersViewing_other": "{{count}} weitere Personen sehen zu",
+    "filter": "Filter",
+    "clear": "Zurücksetzen",
+    "clearToReorder": "Setze den Filter zurück, um Aktivitäten neu zu ordnen.",
+    "day": "Tag {{number}}",
+    "noActivities": "Keine Aktivitäten geplant",
+    "noTime": "Keine Zeit"
+  },
+  "activity": {
+    "edit": "Aktivität bearbeiten",
+    "delete": "Aktivität löschen",
+    "dragToReorder": "Zum Umsortieren ziehen"
+  },
+  "addActivity": {
+    "title": "Aktivität hinzufügen",
+    "searchPlace": "Nach einem Ort suchen",
+    "searchPlaceholder": "Restaurants, Hotels, Sehenswürdigkeiten suchen…",
+    "name": "Name der Aktivität",
+    "namePlaceholder": "z. B. Senso-ji-Tempel besuchen",
+    "date": "Datum",
+    "category": "Kategorie",
+    "startTime": "Startzeit",
+    "endTime": "Endzeit",
+    "notes": "Notizen",
+    "add": "Aktivität hinzufügen",
+    "adding": "Wird hinzugefügt…"
+  },
+  "editActivity": {
+    "title": "Aktivität bearbeiten",
+    "changePlace": "Ort ändern",
+    "save": "Änderungen speichern",
+    "saving": "Wird gespeichert…"
+  },
+  "budget": {
+    "title": "Budget",
+    "itinerary": "Reiseplan",
+    "addExpense": "+ Ausgabe hinzufügen",
+    "couldNotLoad": "Budget konnte nicht geladen werden.",
+    "totalSpend": "Gesamtausgaben",
+    "expenses": "Ausgaben",
+    "empty": "Noch keine Ausgaben. Füge die erste hinzu."
+  },
+  "expense": {
+    "fromBooking": "aus Buchung",
+    "delete": "Ausgabe löschen",
+    "managedFromBooking": "Wird über die Buchung verwaltet"
+  },
+  "addExpense": {
+    "title": "Ausgabe hinzufügen",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "z. B. Zugtickets",
+    "amount": "Betrag",
+    "currency": "Währung",
+    "category": "Kategorie",
+    "date": "Datum",
+    "amountGtZero": "Gib einen Betrag größer als null ein.",
+    "add": "Ausgabe hinzufügen",
+    "adding": "Wird hinzugefügt…"
+  },
+  "bookings": {
+    "title": "Buchungen",
+    "itinerary": "Reiseplan",
+    "budget": "Budget",
+    "addBooking": "+ Buchung hinzufügen",
+    "couldNotLoad": "Buchungen konnten nicht geladen werden.",
+    "notFound": "Reise nicht gefunden.",
+    "empty": "Noch keine Buchungen. Füge Flüge, Unterkünfte, Mietwagen und mehr hinzu."
+  },
+  "reservation": {
+    "edit": "Buchung bearbeiten",
+    "delete": "Buchung löschen",
+    "openBooking": "Buchung öffnen ↗"
+  },
+  "reservationModal": {
+    "addTitle": "Buchung hinzufügen",
+    "editTitle": "Buchung bearbeiten",
+    "type": "Typ",
+    "status": "Status",
+    "title": "Titel",
+    "titlePlaceholder": "z. B. LH123 MUC→BER",
+    "starts": "Beginnt",
+    "ends": "Endet (optional)",
+    "provider": "Anbieter",
+    "providerPlaceholder": "z. B. Hilton, Lufthansa",
+    "confirmation": "Bestätigungsnr.",
+    "confirmationPlaceholder": "z. B. ABC123",
+    "cost": "Kosten (optional)",
+    "currency": "Währung",
+    "costHint": "Das Hinzufügen von Kosten erfasst eine passende Ausgabe im Reisebudget.",
+    "bookingLink": "Buchungslink",
+    "notes": "Notizen",
+    "add": "Buchung hinzufügen",
+    "adding": "Wird gespeichert…",
+    "save": "Änderungen speichern"
+  },
+  "generate": {
+    "title": "✨ Reiseplan mit KI erstellen",
+    "whatKind": "Welche Art von Reise?",
+    "promptPlaceholder": "z. B. Ein entspanntes Feinschmecker-Wochenende in Zagreb mit etwas Geschichte",
+    "days": "Tage",
+    "style": "Stil",
+    "stylePlaceholder": "entspannt, voll…",
+    "budget": "Budget",
+    "budgetPlaceholder": "mittel…",
+    "generate": "Erstellen",
+    "generating": "Wird erstellt…",
+    "regenerate": "Neu erstellen",
+    "day": "Tag {{number}}",
+    "addAll": "Alle {{count}} zum Reiseplan hinzufügen",
+    "adding": "Wird hinzugefügt…",
+    "couldNotAddAll": "Es konnten nicht alle Aktivitäten hinzugefügt werden. Bitte versuche es erneut."
+  },
+  "mobile": {
+    "tripsTitle": "Reisen",
+    "addShort": "+ Hinzufügen",
+    "newShort": "+ Neu",
+    "tripsEmpty": "Noch keine Reisen. Tippe auf „+ Neu“.",
+    "nights_one": "{{count}} Nacht",
+    "nights_other": "{{count}} Nächte",
+    "deleteTripTitle": "Reise löschen",
+    "deleteTripConfirm": "„{{name}}“ löschen? Das kann nicht rückgängig gemacht werden.",
+    "delete": "Löschen",
+    "fillNameDates": "Bitte Name und Daten ausfüllen.",
+    "couldNotLoadRoute": "Route konnte nicht geladen werden.",
+    "generateTitle": "Mit KI erstellen",
+    "describeTrip": "Beschreibe deine Reise",
+    "generatePromptPlaceholder": "z. B. 3 entspannte Tage in Lissabon, Essen und Geschichte",
+    "generateBtn": "✨ Erstellen",
+    "generationFailed": "Erstellung fehlgeschlagen. Bitte erneut versuchen.",
+    "couldNotAddActivities": "Es konnten nicht alle Aktivitäten hinzugefügt werden.",
+    "placeSearchUnavailable": "Ortssuche nicht verfügbar (kein Schlüssel)",
+    "offlinePending_one": "Offline — {{count}} Änderung wird später synchronisiert",
+    "offlinePending_other": "Offline — {{count}} Änderungen werden später synchronisiert",
+    "offlineNoPending": "Offline — gespeicherte Daten werden angezeigt",
+    "syncing_one": "Synchronisiere {{count}} Änderung…",
+    "syncing_other": "Synchronisiere {{count}} Änderungen…",
+    "activityNotFound": "Aktivität nicht gefunden.",
+    "couldNotLoadActivity": "Aktivität konnte nicht geladen werden.",
+    "bookingNotFound": "Buchung nicht gefunden.",
+    "couldNotLoadBooking": "Buchung konnte nicht geladen werden.",
+    "enterDescDate": "Bitte Beschreibung und Datum eingeben.",
+    "enterTitleStart": "Bitte Titel und Startdatum eingeben."
+  }
+}

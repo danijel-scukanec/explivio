@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import type { BudgetSummary, Expense } from '@explivio/shared';
 import { formatCurrency, formatTripDate } from '@explivio/shared';
 import { getBudget, deleteExpense } from '../../../src/api';
@@ -18,6 +19,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 export default function BudgetScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [budget, setBudget] = useState<BudgetSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,7 +29,7 @@ export default function BudgetScreen() {
     if (!tripId) return;
     return getBudget(tripId)
       .then(data => { setBudget(data); setError(null); })
-      .catch(() => setError('Could not load budget.'))
+      .catch(() => setError(t('budget.couldNotLoad')))
       .finally(() => setLoading(false));
   }, [tripId]);
 
@@ -46,10 +48,10 @@ export default function BudgetScreen() {
   const header = (
     <Stack.Screen
       options={{
-        title: 'Budget',
+        title: t('budget.title'),
         headerRight: () => (
           <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/add-expense`)} hitSlop={10}>
-            <Text style={styles.headerButton}>+ Add</Text>
+            <Text style={styles.headerButton}>{t('mobile.addShort')}</Text>
           </TouchableOpacity>
         ),
       }}
@@ -57,7 +59,7 @@ export default function BudgetScreen() {
   );
 
   if (loading) return <View style={styles.screen}>{header}<ActivityIndicator style={styles.center} color={theme.accent} /></View>;
-  if (error || !budget) return <View style={styles.screen}>{header}<Text style={[styles.center, styles.error]}>{error ?? 'Not found.'}</Text></View>;
+  if (error || !budget) return <View style={styles.screen}>{header}<Text style={[styles.center, styles.error]}>{error ?? t('itinerary.notFound')}</Text></View>;
 
   const total = Number(budget.total);
   const categories = [...budget.byCategory]
@@ -73,16 +75,16 @@ export default function BudgetScreen() {
       {othersViewing > 0 ? (
         <View style={styles.presence}>
           <View style={styles.presenceDot} />
-          <Text style={styles.presenceText}>{othersViewing} other{othersViewing > 1 ? 's' : ''} viewing</Text>
+          <Text style={styles.presenceText}>{t('itinerary.othersViewing', { count: othersViewing })}</Text>
         </View>
       ) : null}
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.summary}>
-          <Text style={styles.totalLabel}>TOTAL SPEND</Text>
+          <Text style={styles.totalLabel}>{t('budget.totalSpend')}</Text>
           <Text style={styles.totalValue}>{formatCurrency(total, currency)}</Text>
           {categories.map(c => (
             <View style={styles.catRow} key={c.category}>
-              <Text style={styles.catLabel}>{c.category}</Text>
+              <Text style={styles.catLabel}>{t(`enums.expenseCategory.${c.category}`)}</Text>
               <View style={styles.barTrack}>
                 <View style={[styles.barFill, { width: maxCategory > 0 ? `${(c.total / maxCategory) * 100}%` : '0%' }]} />
               </View>
@@ -91,9 +93,9 @@ export default function BudgetScreen() {
           ))}
         </View>
 
-        <Text style={styles.sectionTitle}>Expenses</Text>
+        <Text style={styles.sectionTitle}>{t('budget.expenses')}</Text>
         {expenses.length === 0 ? (
-          <Text style={styles.empty}>No expenses yet. Tap “+ Add”.</Text>
+          <Text style={styles.empty}>{t('budget.empty')}</Text>
         ) : (
           expenses.map(e => {
             // F23: expenses created from a booking's cost are managed from the booking, not here.
@@ -104,7 +106,7 @@ export default function BudgetScreen() {
                 <View style={styles.expenseBody}>
                   <View style={styles.expenseDescRow}>
                     <Text style={styles.expenseDesc}>{e.description}</Text>
-                    {fromBooking ? <Text style={styles.bookingTag}>from booking</Text> : null}
+                    {fromBooking ? <Text style={styles.bookingTag}>{t('expense.fromBooking')}</Text> : null}
                   </View>
                   <Text style={styles.expenseMeta}>{e.category} · {formatTripDate(e.date)}</Text>
                 </View>

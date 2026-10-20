@@ -1,16 +1,18 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import type { Reservation } from '@explivio/shared';
 import { formatCurrency, formatTripDate } from '@explivio/shared';
 import { getTrip, getReservations, deleteReservation } from '../../../src/api';
-import { TYPE_ICONS, TYPE_LABELS, reservationStatusColor, formatReservationTime, reservationDateKey } from '../../../src/reservationMeta';
+import { TYPE_ICONS, reservationStatusColor, formatReservationTime, reservationDateKey } from '../../../src/reservationMeta';
 import { theme } from '../../../src/theme';
 
 interface DaySection { title: string; data: Reservation[] }
 
 export default function BookingsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [tripName, setTripName] = useState('Bookings');
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -21,7 +23,7 @@ export default function BookingsScreen() {
     if (!tripId) return;
     return Promise.all([getTrip(tripId), getReservations(tripId)])
       .then(([trip, data]) => { setTripName(trip.name); setReservations(data); setError(null); })
-      .catch(() => setError('Could not load bookings.'))
+      .catch(() => setError(t('bookings.couldNotLoad')))
       .finally(() => setLoading(false));
   }, [tripId]);
 
@@ -52,7 +54,7 @@ export default function BookingsScreen() {
           title: tripName,
           headerRight: () => (
             <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/add-booking`)} hitSlop={10}>
-              <Text style={styles.headerButton}>+ Add</Text>
+              <Text style={styles.headerButton}>{t('mobile.addShort')}</Text>
             </TouchableOpacity>
           ),
         }}
@@ -63,7 +65,7 @@ export default function BookingsScreen() {
       ) : error ? (
         <Text style={[styles.center, styles.error]}>{error}</Text>
       ) : reservations.length === 0 ? (
-        <Text style={styles.center}>No bookings yet. Add flights, stays, car hire and more.</Text>
+        <Text style={styles.center}>{t('bookings.empty')}</Text>
       ) : (
         <SectionList
           sections={sections}
@@ -80,11 +82,11 @@ export default function BookingsScreen() {
                 <View style={styles.headerRow}>
                   <Text style={[styles.title, r.status === 'Cancelled' && styles.titleCancelled]}>{r.title}</Text>
                   <View style={[styles.statusPill, { backgroundColor: reservationStatusColor(r.status) }]}>
-                    <Text style={styles.statusText}>{r.status}</Text>
+                    <Text style={styles.statusText}>{t(`enums.reservationStatus.${r.status}`)}</Text>
                   </View>
                 </View>
                 <Text style={styles.meta}>
-                  {TYPE_LABELS[r.type]} · {formatReservationTime(r.startsAt)}
+                  {t(`enums.reservationType.${r.type}`)} · {formatReservationTime(r.startsAt)}
                   {r.provider ? ` · ${r.provider}` : ''}
                   {r.confirmationNumber ? ` · #${r.confirmationNumber}` : ''}
                   {r.cost != null ? ` · ${formatCurrency(Number(r.cost), r.currency)}` : ''}

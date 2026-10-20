@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { createActivity } from '../../../src/api';
 import { useItineraryGeneration } from '../../../src/useItineraryGeneration';
 import { formStyles as s } from '../../../src/formStyles';
@@ -18,6 +19,7 @@ function addDays(dateStr: string, n: number): string {
 
 export default function GenerateScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { tripId, startDate, days: daysParam } = useLocalSearchParams<{ tripId: string; startDate?: string; days?: string }>();
   const [prompt, setPrompt] = useState('');
   const [days, setDays] = useState(daysParam ?? '3');
@@ -53,7 +55,7 @@ export default function GenerateScreen() {
       }
       router.back();
     } catch {
-      setAddError('Could not add all activities.');
+      setAddError(t('mobile.couldNotAddActivities'));
       setAdding(false);
     }
   }
@@ -63,31 +65,31 @@ export default function GenerateScreen() {
 
   return (
     <View style={s.screen}>
-      <Stack.Screen options={{ title: 'Generate with AI' }} />
+      <Stack.Screen options={{ title: t('mobile.generateTitle') }} />
       <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
         <View>
-          <Text style={s.label}>Describe your trip</Text>
+          <Text style={s.label}>{t('mobile.describeTrip')}</Text>
           <TextInput
             style={[s.input, { minHeight: 80, textAlignVertical: 'top' }]}
             value={prompt}
             onChangeText={setPrompt}
-            placeholder="e.g. 3 relaxed days in Lisbon, food and history"
+            placeholder={t('mobile.generatePromptPlaceholder')}
             placeholderTextColor={theme.border}
             multiline
             editable={!busy}
           />
         </View>
         <View style={{ width: 120 }}>
-          <Text style={s.label}>Days</Text>
+          <Text style={s.label}>{t('generate.days')}</Text>
           <TextInput style={s.input} value={days} onChangeText={setDays} keyboardType="number-pad" editable={!busy} />
         </View>
 
         <TouchableOpacity style={[s.submit, busy && s.submitDisabled]} onPress={generate} disabled={busy}>
-          <Text style={s.submitText}>{streaming ? 'Generating…' : '✨ Generate'}</Text>
+          <Text style={s.submitText}>{streaming ? t('generate.generating') : t('mobile.generateBtn')}</Text>
         </TouchableOpacity>
 
         {streaming ? <ActivityIndicator color={theme.accent} /> : null}
-        {gen.status === 'error' ? <Text style={s.error}>{gen.error ?? 'Generation failed. Try again.'}</Text> : null}
+        {gen.status === 'error' ? <Text style={s.error}>{gen.error ?? t('mobile.generationFailed')}</Text> : null}
         {addError ? <Text style={s.error}>{addError}</Text> : null}
 
         {gen.summary || gen.activities.length > 0 ? (
@@ -99,14 +101,14 @@ export default function GenerateScreen() {
                   {CATEGORY_ICONS[a.category] ?? '📌'} {a.name}
                 </Text>
                 <Text style={{ color: theme.text, fontSize: 13, marginTop: 2 }}>
-                  Day {a.day}{a.suggestedStartTime ? ` · ${a.suggestedStartTime}` : ''}
+                  {t('generate.day', { number: a.day })}{a.suggestedStartTime ? ` · ${a.suggestedStartTime}` : ''}
                 </Text>
                 {a.description ? <Text style={{ color: theme.text, fontSize: 13, marginTop: 4 }}>{a.description}</Text> : null}
               </View>
             ))}
             {gen.status === 'done' && gen.activities.length > 0 ? (
               <TouchableOpacity style={[s.submit, adding && s.submitDisabled]} onPress={addAll} disabled={adding}>
-                <Text style={s.submitText}>{adding ? 'Adding…' : `Add all ${gen.activities.length} to itinerary`}</Text>
+                <Text style={s.submitText}>{adding ? t('generate.adding') : t('generate.addAll', { count: gen.activities.length })}</Text>
               </TouchableOpacity>
             ) : null}
           </View>

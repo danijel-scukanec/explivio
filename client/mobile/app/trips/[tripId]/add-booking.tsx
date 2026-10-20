@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import type { ReservationType, ReservationStatus, CreateReservationRequest } from '@explivio/shared';
 import { getReservations, createReservation, updateReservation } from '../../../src/api';
-import { RESERVATION_TYPES, RESERVATION_STATUSES, TYPE_LABELS } from '../../../src/reservationMeta';
+import { RESERVATION_TYPES, RESERVATION_STATUSES } from '../../../src/reservationMeta';
 import { formStyles as s } from '../../../src/formStyles';
 import { theme } from '../../../src/theme';
 
@@ -21,6 +22,7 @@ type FormState = {
 
 export default function AddBookingScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { tripId, bookingId, startDate } = useLocalSearchParams<{ tripId: string; bookingId?: string; startDate?: string }>();
   const editing = !!bookingId;
   const [form, setForm] = useState<FormState | null>(
@@ -39,7 +41,7 @@ export default function AddBookingScreen() {
     getReservations(tripId)
       .then(list => {
         const r = list.find(x => x.id === bookingId);
-        if (!r) { setError('Booking not found.'); return; }
+        if (!r) { setError(t('mobile.bookingNotFound')); return; }
         setForm({
           type: r.type, status: r.status, title: r.title,
           startDate: dOf(r.startsAt), startTime: tOf(r.startsAt),
@@ -49,7 +51,7 @@ export default function AddBookingScreen() {
           bookingUrl: r.bookingUrl ?? '', notes: r.notes ?? '',
         });
       })
-      .catch(() => setError('Could not load the booking.'));
+      .catch(() => setError(t('mobile.couldNotLoadBooking')));
   }, [editing, tripId, bookingId]);
 
   const set = (key: keyof FormState) => (value: string) =>
@@ -59,7 +61,7 @@ export default function AddBookingScreen() {
     if (!form || !tripId) return;
     setError(null);
     if (!form.title || !form.startDate) {
-      setError('Please enter a title and start date.');
+      setError(t('mobile.enterTitleStart'));
       return;
     }
     setSubmitting(true);
@@ -82,103 +84,103 @@ export default function AddBookingScreen() {
       else await createReservation(tripId, data);
       router.back();
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(t('common.somethingWrong'));
       setSubmitting(false);
     }
   }
 
   return (
     <View style={s.screen}>
-      <Stack.Screen options={{ title: editing ? 'Edit booking' : 'Add booking' }} />
+      <Stack.Screen options={{ title: editing ? t('reservationModal.editTitle') : t('reservationModal.addTitle') }} />
       {!form ? (
         error ? <Text style={[s.error, { padding: 16 }]}>{error}</Text>
               : <ActivityIndicator style={{ marginTop: 40 }} color={theme.accent} />
       ) : (
         <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
           <View>
-            <Text style={s.label}>Type</Text>
+            <Text style={s.label}>{t('reservationModal.type')}</Text>
             <View style={s.chipRow}>
-              {RESERVATION_TYPES.map(t => {
-                const active = form.type === t;
+              {RESERVATION_TYPES.map(rt => {
+                const active = form.type === rt;
                 return (
-                  <TouchableOpacity key={t} style={[s.chip, active && s.chipActive]} onPress={() => setForm(p => (p ? { ...p, type: t } : p))}>
-                    <Text style={[s.chipText, active && s.chipTextActive]}>{TYPE_LABELS[t]}</Text>
+                  <TouchableOpacity key={rt} style={[s.chip, active && s.chipActive]} onPress={() => setForm(p => (p ? { ...p, type: rt } : p))}>
+                    <Text style={[s.chipText, active && s.chipTextActive]}>{t(`enums.reservationType.${rt}`)}</Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
           </View>
           <View>
-            <Text style={s.label}>Status</Text>
+            <Text style={s.label}>{t('reservationModal.status')}</Text>
             <View style={s.chipRow}>
               {RESERVATION_STATUSES.map(st => {
                 const active = form.status === st;
                 return (
                   <TouchableOpacity key={st} style={[s.chip, active && s.chipActive]} onPress={() => setForm(p => (p ? { ...p, status: st } : p))}>
-                    <Text style={[s.chipText, active && s.chipTextActive]}>{st}</Text>
+                    <Text style={[s.chipText, active && s.chipTextActive]}>{t(`enums.reservationStatus.${st}`)}</Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
           </View>
           <View>
-            <Text style={s.label}>Title</Text>
-            <TextInput style={s.input} value={form.title} onChangeText={set('title')} placeholder="e.g. TAP TP1234 LIS→OPO" placeholderTextColor={theme.border} />
+            <Text style={s.label}>{t('reservationModal.title')}</Text>
+            <TextInput style={s.input} value={form.title} onChangeText={set('title')} placeholder={t('reservationModal.titlePlaceholder')} placeholderTextColor={theme.border} />
           </View>
           <View style={s.row}>
             <View style={s.rowItem}>
-              <Text style={s.label}>Start date</Text>
+              <Text style={s.label}>{t('createTrip.startDate')}</Text>
               <TextInput style={s.input} value={form.startDate} onChangeText={set('startDate')} placeholder="YYYY-MM-DD" placeholderTextColor={theme.border} autoCapitalize="none" />
             </View>
             <View style={s.rowItem}>
-              <Text style={s.label}>Start time</Text>
+              <Text style={s.label}>{t('addActivity.startTime')}</Text>
               <TextInput style={s.input} value={form.startTime} onChangeText={set('startTime')} placeholder="HH:mm" placeholderTextColor={theme.border} autoCapitalize="none" />
             </View>
           </View>
           <View style={s.row}>
             <View style={s.rowItem}>
-              <Text style={s.label}>End date</Text>
-              <TextInput style={s.input} value={form.endDate} onChangeText={set('endDate')} placeholder="Optional" placeholderTextColor={theme.border} autoCapitalize="none" />
+              <Text style={s.label}>{t('createTrip.endDate')}</Text>
+              <TextInput style={s.input} value={form.endDate} onChangeText={set('endDate')} placeholder={t('common.optional')} placeholderTextColor={theme.border} autoCapitalize="none" />
             </View>
             <View style={s.rowItem}>
-              <Text style={s.label}>End time</Text>
-              <TextInput style={s.input} value={form.endTime} onChangeText={set('endTime')} placeholder="Optional" placeholderTextColor={theme.border} autoCapitalize="none" />
-            </View>
-          </View>
-          <View style={s.row}>
-            <View style={s.rowItem}>
-              <Text style={s.label}>Provider</Text>
-              <TextInput style={s.input} value={form.provider} onChangeText={set('provider')} placeholder="e.g. Hilton" placeholderTextColor={theme.border} />
-            </View>
-            <View style={s.rowItem}>
-              <Text style={s.label}>Confirmation #</Text>
-              <TextInput style={s.input} value={form.confirmationNumber} onChangeText={set('confirmationNumber')} placeholder="e.g. ABC123" placeholderTextColor={theme.border} autoCapitalize="characters" />
+              <Text style={s.label}>{t('addActivity.endTime')}</Text>
+              <TextInput style={s.input} value={form.endTime} onChangeText={set('endTime')} placeholder={t('common.optional')} placeholderTextColor={theme.border} autoCapitalize="none" />
             </View>
           </View>
           <View style={s.row}>
             <View style={s.rowItem}>
-              <Text style={s.label}>Cost</Text>
-              <TextInput style={s.input} value={form.cost} onChangeText={set('cost')} placeholder="Optional" placeholderTextColor={theme.border} keyboardType="decimal-pad" />
+              <Text style={s.label}>{t('reservationModal.provider')}</Text>
+              <TextInput style={s.input} value={form.provider} onChangeText={set('provider')} placeholder={t('reservationModal.providerPlaceholder')} placeholderTextColor={theme.border} />
             </View>
             <View style={s.rowItem}>
-              <Text style={s.label}>Currency</Text>
+              <Text style={s.label}>{t('reservationModal.confirmation')}</Text>
+              <TextInput style={s.input} value={form.confirmationNumber} onChangeText={set('confirmationNumber')} placeholder={t('reservationModal.confirmationPlaceholder')} placeholderTextColor={theme.border} autoCapitalize="characters" />
+            </View>
+          </View>
+          <View style={s.row}>
+            <View style={s.rowItem}>
+              <Text style={s.label}>{t('reservationModal.cost')}</Text>
+              <TextInput style={s.input} value={form.cost} onChangeText={set('cost')} placeholder={t('common.optional')} placeholderTextColor={theme.border} keyboardType="decimal-pad" />
+            </View>
+            <View style={s.rowItem}>
+              <Text style={s.label}>{t('reservationModal.currency')}</Text>
               <TextInput style={s.input} value={form.currency} onChangeText={set('currency')} placeholder="USD" placeholderTextColor={theme.border} autoCapitalize="characters" maxLength={3} />
             </View>
           </View>
-          <Text style={s.hint}>Adding a cost records a matching expense in the trip budget.</Text>
+          <Text style={s.hint}>{t('reservationModal.costHint')}</Text>
           <View>
-            <Text style={s.label}>Booking link</Text>
+            <Text style={s.label}>{t('reservationModal.bookingLink')}</Text>
             <TextInput style={s.input} value={form.bookingUrl} onChangeText={set('bookingUrl')} placeholder="https://…" placeholderTextColor={theme.border} autoCapitalize="none" keyboardType="url" />
           </View>
           <View>
-            <Text style={s.label}>Notes</Text>
-            <TextInput style={s.input} value={form.notes} onChangeText={set('notes')} placeholder="Optional" placeholderTextColor={theme.border} />
+            <Text style={s.label}>{t('reservationModal.notes')}</Text>
+            <TextInput style={s.input} value={form.notes} onChangeText={set('notes')} placeholder={t('common.optional')} placeholderTextColor={theme.border} />
           </View>
 
           {error ? <Text style={s.error}>{error}</Text> : null}
 
           <TouchableOpacity style={[s.submit, submitting && s.submitDisabled]} onPress={submit} disabled={submitting}>
-            <Text style={s.submitText}>{submitting ? 'Saving…' : editing ? 'Save changes' : 'Add booking'}</Text>
+            <Text style={s.submitText}>{submitting ? t('reservationModal.adding') : editing ? t('reservationModal.save') : t('reservationModal.add')}</Text>
           </TouchableOpacity>
         </ScrollView>
       )}

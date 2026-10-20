@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import type { CreateTripRequest, TripStopInput } from '@explivio/shared';
 import { createTrip } from '../src/api';
 import { TripStopsEditor } from '../src/TripStopsEditor';
@@ -12,6 +13,7 @@ const PLACEHOLDER_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 export default function NewTripScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [form, setForm] = useState({ name: '', startDate: '', endDate: '', travelerCount: '1' });
   // F22: a trip is an ordered route of stops; start with one empty stop.
   const [stops, setStops] = useState<TripStopInput[]>([
@@ -29,11 +31,11 @@ export default function NewTripScreen() {
       .filter(stop => stop.place.length > 0);
 
     if (!form.name || !form.startDate || !form.endDate) {
-      setError('Please fill in name and dates.');
+      setError(t('mobile.fillNameDates'));
       return;
     }
     if (cleanedStops.length === 0) {
-      setError('Add at least one destination.');
+      setError(t('createTrip.needDestination'));
       return;
     }
 
@@ -50,43 +52,43 @@ export default function NewTripScreen() {
       await createTrip(data);
       router.back();
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(t('common.somethingWrong'));
       setSubmitting(false);
     }
   }
 
   return (
     <View style={s.screen}>
-      <Stack.Screen options={{ title: 'New trip' }} />
+      <Stack.Screen options={{ title: t('createTrip.title') }} />
       <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
         <View>
-          <Text style={s.label}>Trip name</Text>
-          <TextInput style={s.input} value={form.name} onChangeText={set('name')} placeholder="e.g. Summer in Japan" placeholderTextColor={theme.border} />
+          <Text style={s.label}>{t('createTrip.name')}</Text>
+          <TextInput style={s.input} value={form.name} onChangeText={set('name')} placeholder={t('createTrip.namePlaceholder')} placeholderTextColor={theme.border} />
         </View>
         <View style={s.row}>
           <View style={s.rowItem}>
-            <Text style={s.label}>Start date</Text>
+            <Text style={s.label}>{t('createTrip.startDate')}</Text>
             <TextInput style={s.input} value={form.startDate} onChangeText={set('startDate')} placeholder="YYYY-MM-DD" placeholderTextColor={theme.border} autoCapitalize="none" />
           </View>
           <View style={s.rowItem}>
-            <Text style={s.label}>End date</Text>
+            <Text style={s.label}>{t('createTrip.endDate')}</Text>
             <TextInput style={s.input} value={form.endDate} onChangeText={set('endDate')} placeholder="YYYY-MM-DD" placeholderTextColor={theme.border} autoCapitalize="none" />
           </View>
         </View>
         <View>
-          <Text style={s.label}>Travellers</Text>
+          <Text style={s.label}>{t('createTrip.travellers')}</Text>
           <TextInput style={s.input} value={form.travelerCount} onChangeText={set('travelerCount')} keyboardType="number-pad" />
         </View>
 
         <View>
-          <Text style={s.label}>Destinations</Text>
+          <Text style={s.label}>{t('createTrip.destinations')}</Text>
           <TripStopsEditor stops={stops} onChange={setStops} />
         </View>
 
         {error ? <Text style={s.error}>{error}</Text> : null}
 
         <TouchableOpacity style={[s.submit, submitting && s.submitDisabled]} onPress={submit} disabled={submitting}>
-          <Text style={s.submitText}>{submitting ? 'Creating…' : 'Create trip'}</Text>
+          <Text style={s.submitText}>{submitting ? t('createTrip.creating') : t('createTrip.create')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

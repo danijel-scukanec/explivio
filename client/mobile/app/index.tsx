@@ -1,13 +1,16 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import type { Trip } from '@explivio/shared';
 import { formatTripDate, getTripDuration, tripStatusColor } from '@explivio/shared';
 import { getTrips, deleteTrip } from '../src/api';
+import { LanguageSwitcher } from '../src/LanguageSwitcher';
 import { theme } from '../src/theme';
 
 export default function TripsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,17 +19,17 @@ export default function TripsScreen() {
     setError(null);
     return getTrips()
       .then(setTrips)
-      .catch(() => setError('Could not load trips.'))
+      .catch(() => setError(t('trips.couldNotLoad')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   // Refetch every time the screen regains focus, so a trip created on the form screen shows on return.
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   function confirmDelete(trip: Trip) {
-    Alert.alert('Delete trip', `Delete “${trip.name}”? This can't be undone.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => void deleteTrip(trip.id).then(load).catch(() => {}) },
+    Alert.alert(t('mobile.deleteTripTitle'), t('mobile.deleteTripConfirm', { name: trip.name }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('mobile.delete'), style: 'destructive', onPress: () => void deleteTrip(trip.id).then(load).catch(() => {}) },
     ]);
   }
 
@@ -34,10 +37,10 @@ export default function TripsScreen() {
     <View style={styles.screen}>
       <Stack.Screen
         options={{
-          title: 'Trips',
+          title: t('mobile.tripsTitle'),
           headerRight: () => (
             <TouchableOpacity onPress={() => router.push('/new-trip')} hitSlop={12}>
-              <Text style={styles.headerButton}>+ New</Text>
+              <Text style={styles.headerButton}>{t('mobile.newShort')}</Text>
             </TouchableOpacity>
           ),
         }}
@@ -50,9 +53,10 @@ export default function TripsScreen() {
       ) : (
         <FlatList
           data={trips}
-          keyExtractor={t => t.id}
+          keyExtractor={trip => trip.id}
           contentContainerStyle={styles.list}
-          ListEmptyComponent={<Text style={styles.center}>No trips yet. Tap “+ New”.</Text>}
+          ListHeaderComponent={<View style={styles.langRow}><LanguageSwitcher /></View>}
+          ListEmptyComponent={<Text style={styles.center}>{t('mobile.tripsEmpty')}</Text>}
           renderItem={({ item }) => {
             const nights = getTripDuration(item.startDate, item.endDate);
             return (
@@ -66,14 +70,14 @@ export default function TripsScreen() {
                   <Text style={styles.cardTitle}>{item.name}</Text>
                   {item.status ? (
                     <View style={[styles.statusBadge, { backgroundColor: tripStatusColor(item.status) }]}>
-                      <Text style={styles.statusBadgeText}>{item.status}</Text>
+                      <Text style={styles.statusBadgeText}>{t(`enums.tripStatus.${item.status}`)}</Text>
                     </View>
                   ) : null}
                 </View>
                 <Text style={styles.cardDestination}>{item.destination}</Text>
                 <Text style={styles.cardMeta}>
                   {formatTripDate(item.startDate)} – {formatTripDate(item.endDate)}
-                  {nights > 0 ? ` · ${nights} night${nights > 1 ? 's' : ''}` : ''}
+                  {nights > 0 ? ` · ${t('mobile.nights', { count: nights })}` : ''}
                 </Text>
               </TouchableOpacity>
             );
@@ -87,6 +91,7 @@ export default function TripsScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   list: { padding: 16, gap: 12 },
+  langRow: { alignItems: 'flex-end', marginBottom: 4 },
   center: { textAlign: 'center', marginTop: 40, color: theme.text },
   error: { color: theme.danger },
   headerButton: { color: '#fff', fontSize: 16, fontWeight: '600' },

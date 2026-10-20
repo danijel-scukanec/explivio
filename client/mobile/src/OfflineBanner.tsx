@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useOnline } from './useOnline';
 import { theme } from './theme';
 
@@ -9,13 +10,14 @@ import { theme } from './theme';
 export function OfflineBanner() {
   const { online, pending } = useOnline();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   if (online && pending === 0) return null;
 
   const text = !online
     ? pending > 0
-      ? `Offline — ${pending} change${pending > 1 ? 's' : ''} will sync later`
-      : 'Offline — showing saved data'
-    : `Syncing ${pending} change${pending > 1 ? 's' : ''}…`;
+      ? t('mobile.offlinePending', { count: pending })
+      : t('mobile.offlineNoPending')
+    : t('mobile.syncing', { count: pending });
 
   return (
     <View
