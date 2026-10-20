@@ -3,6 +3,9 @@ import type { components } from '../generated/api';
 export type Activity = Required<components['schemas']['Activity']>;
 export type ActivityCategory = components['schemas']['ActivityCategory'];
 export type CreateActivityRequest = components['schemas']['CreateActivityCommand'];
+// F23: edit an activity in place, and drag-to-reorder a day's activities.
+export type UpdateActivityRequest = components['schemas']['UpdateActivityCommand'];
+export type ReorderActivitiesRequest = components['schemas']['ReorderActivitiesCommand'];
 
 // F12/F13: AI-generated itinerary draft (structured output from the /generate endpoint and the
 // streaming hub). Types come from the OpenAPI schema — do not hand-write.

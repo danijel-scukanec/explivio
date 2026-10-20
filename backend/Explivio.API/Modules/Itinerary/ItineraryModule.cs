@@ -2,6 +2,8 @@ using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Features;
 using Explivio.API.Modules.Itinerary.CreateActivity;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
+using Explivio.API.Modules.Itinerary.ReorderActivities;
+using Explivio.API.Modules.Itinerary.UpdateActivity;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Trips.Collaboration;
 using MediatR;
@@ -19,9 +21,10 @@ public static class ItineraryModule
 
         group.MapGet("/", async (Guid tripId, AppDbContext db) =>
         {
+            // F23: per-day manual order is the sort key; start time is only informational now.
             var activities = await db.Activities
                 .Where(a => a.TripId == tripId)
-                .OrderBy(a => a.Date).ThenBy(a => a.StartTime)
+                .OrderBy(a => a.Date).ThenBy(a => a.SortOrder)
                 .ToListAsync();
             return Results.Ok(activities);
         }).AddEndpointFilter(new RequireTripRole(TripRole.Viewer))
@@ -33,6 +36,23 @@ public static class ItineraryModule
             return Results.Created($"/trips/{tripId}/activities/{id}", new CreatedResponse(id));
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
+
+        // F23: edit an activity in place, including its category and booking details.
+        group.MapPut("/{id:guid}", async (Guid tripId, Guid id, UpdateActivityCommand command, IMediator mediator) =>
+        {
+            var updated = await mediator.Send(command with { TripId = tripId, Id = id });
+            return updated ? Results.NoContent() : Results.NotFound();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
+          .Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound).ProducesValidationProblem();
+
+        // F23: drag-to-reorder. The client sends a day's activity ids in their new order; the handler
+        // rewrites SortOrder to match. Not {id}-scoped, so it sits before the {id:guid} delete below.
+        group.MapPut("/reorder", async (Guid tripId, ReorderActivitiesCommand command, IMediator mediator) =>
+        {
+            await mediator.Send(command with { TripId = tripId });
+            return Results.NoContent();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
+          .Produces(StatusCodes.Status204NoContent).ProducesValidationProblem();
 
         // F12: AI itinerary generation. Synchronous — the caller waits for the draft. Returns a
         // draft only; the user reviews it and creates activities via POST above. F13 will stream this.

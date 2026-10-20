@@ -160,3 +160,58 @@
   letter-spacing: normal;
   font-weight: 500;
 }
+
+/* F23: category view filter. */
+.itinerary-page__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 4px;
+}
+
+.itinerary-page__filters-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-right: 2px;
+}
+
+.itinerary-page__chip {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.itinerary-page__chip:hover {
+  border-color: var(--accent);
+}
+
+.itinerary-page__chip--on {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.itinerary-page__chip-clear {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 5px 8px;
+}
+
+.itinerary-page__filter-hint {
+  font-size: 12px;
+  color: var(--text);
+  margin: 0 0 4px;
+  opacity: 0.8;
+}

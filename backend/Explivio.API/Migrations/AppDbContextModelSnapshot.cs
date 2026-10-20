@@ -151,6 +151,9 @@ namespace Explivio.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
                     b.Property<TimeOnly?>("StartTime")
                         .HasColumnType("time");
 

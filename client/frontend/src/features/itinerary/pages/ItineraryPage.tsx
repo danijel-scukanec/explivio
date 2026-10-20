@@ -1,17 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import type { Trip, Activity, TripStatus } from '@explivio/shared';
+import type { Trip, Activity, ActivityCategory, TripStatus } from '@explivio/shared';
 import { getDaysInRange, TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
 import { getTrip, setTripStatus, setTripCover, tripCoverUrl } from '../../trips/services/tripsApi';
-import { getActivities, deleteActivity } from '../services/itineraryApi';
+import { getActivities, deleteActivity, reorderActivities } from '../services/itineraryApi';
 import { DaySchedule } from '../components/DaySchedule';
 import { AddActivityModal } from '../components/AddActivityModal';
+import { EditActivityModal } from '../components/EditActivityModal';
 import { EditStopsModal } from '../../trips/components/EditStopsModal';
 import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
 import { ItineraryMap } from '../components/ItineraryMap';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
 import './ItineraryPage.css';
+
+// F23: categories available for the itinerary view filter (mirrors the ActivityCategory enum).
+const ACTIVITY_CATEGORIES: { value: ActivityCategory; icon: string }[] = [
+  { value: 'Sightseeing', icon: '🏛' },
+  { value: 'Food', icon: '🍽' },
+  { value: 'Transport', icon: '🚌' },
+  { value: 'Accommodation', icon: '🏨' },
+  { value: 'Adventure', icon: '🧗' },
+  { value: 'Other', icon: '📌' },
+];
 
 export function ItineraryPage() {
   const { tripId } = useParams<{ tripId: string }>();
@@ -22,6 +33,9 @@ export function ItineraryPage() {
   const [showModal, setShowModal] = useState(false);
   const [showGenerate, setShowGenerate] = useState(false);
   const [showEditStops, setShowEditStops] = useState(false);
+  // F23: the activity being edited, and the set of categories to show (empty = show all).
+  const [editing, setEditing] = useState<Activity | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<Set<ActivityCategory>>(new Set());
   // F22: bumps on each cover upload so the <img> reloads past the browser cache (the blob URL is stable).
   const [coverVersion, setCoverVersion] = useState(() => Date.now());
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +72,33 @@ export function ItineraryPage() {
     setActivities(prev => prev.filter(a => a.id !== id));
   }
 
+  // F23: reorder a day's activities. Update local order optimistically (the list is grouped by array
+  // order within a date), then persist; revert to the server's truth on failure.
+  async function handleReorder(date: string, orderedIds: string[]) {
+    if (!tripId) return;
+    setActivities(prev => {
+      const reorderedForDate = orderedIds
+        .map(id => prev.find(a => a.id === id))
+        .filter((a): a is Activity => !!a);
+      let k = 0;
+      return prev.map(a => (a.date === date ? reorderedForDate[k++] : a));
+    });
+    try {
+      await reorderActivities(tripId, orderedIds);
+    } catch {
+      load();
+    }
+  }
+
+  // F23: toggle a category in the view filter.
+  function toggleCategory(category: ActivityCategory) {
+    setCategoryFilter(prev => {
+      const next = new Set(prev);
+      if (next.has(category)) next.delete(category); else next.add(category);
+      return next;
+    });
+  }
+
   // F22: change the trip's status, updating the local copy optimistically.
   async function handleStatusChange(status: TripStatus) {
     if (!tripId) return;
@@ -92,8 +133,12 @@ export function ItineraryPage() {
   if (error || !trip) return <div className="itinerary-page"><p className="itinerary-page__status itinerary-page__status--error">{error ?? 'Trip not found.'}</p></div>;
 
   const days = getDaysInRange(trip.startDate, trip.endDate);
+  // F23: dragging is disabled while a filter is active — reordering a partial list is ambiguous.
+  const filterActive = categoryFilter.size > 0;
   const byDate = Object.fromEntries(days.map(d => [d, [] as Activity[]]));
-  activities.forEach(a => { if (byDate[a.date]) byDate[a.date].push(a); });
+  activities.forEach(a => {
+    if (byDate[a.date] && (!filterActive || categoryFilter.has(a.category))) byDate[a.date].push(a);
+  });
 
   return (
     <div className="itinerary-page">
@@ -169,6 +214,31 @@ export function ItineraryPage() {
 
       <ItineraryMap activities={activities} days={days} />
 
+      {activities.length > 0 && (
+        <div className="itinerary-page__filters">
+          <span className="itinerary-page__filters-label">Filter</span>
+          {ACTIVITY_CATEGORIES.map(c => (
+            <button
+              key={c.value}
+              type="button"
+              className={`itinerary-page__chip${categoryFilter.has(c.value) ? ' itinerary-page__chip--on' : ''}`}
+              onClick={() => toggleCategory(c.value)}
+              aria-pressed={categoryFilter.has(c.value)}
+            >
+              {c.icon} {c.value}
+            </button>
+          ))}
+          {filterActive && (
+            <button type="button" className="itinerary-page__chip-clear" onClick={() => setCategoryFilter(new Set())}>
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+      {filterActive && (
+        <p className="itinerary-page__filter-hint">Clear the filter to drag activities into a new order.</p>
+      )}
+
       <div className="itinerary-page__days">
         {days.map((date, i) => (
           <DaySchedule
@@ -177,6 +247,8 @@ export function ItineraryPage() {
             dayNumber={i + 1}
             activities={byDate[date]}
             onDelete={handleDelete}
+            onEdit={setEditing}
+            onReorder={filterActive ? undefined : handleReorder}
           />
         ))}
       </div>
@@ -188,6 +260,17 @@ export function ItineraryPage() {
           maxDate={trip.endDate}
           onClose={() => setShowModal(false)}
           onCreated={handleCreated}
+        />
+      )}
+
+      {editing && (
+        <EditActivityModal
+          tripId={tripId!}
+          activity={editing}
+          minDate={trip.startDate}
+          maxDate={trip.endDate}
+          onClose={() => setEditing(null)}
+          onSaved={() => { setEditing(null); load(); }}
         />
       )}
 

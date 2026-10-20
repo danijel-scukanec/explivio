@@ -1,0 +1,16 @@
+using FluentValidation;
+
+namespace Explivio.API.Modules.Itinerary.UpdateActivity;
+
+public class UpdateActivityValidator : AbstractValidator<UpdateActivityCommand>
+{
+    public UpdateActivityValidator()
+    {
+        RuleFor(x => x.TripId).NotEmpty();
+        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.Date).NotEmpty();
+        RuleFor(x => x.Description).MaximumLength(1000).When(x => x.Description is not null);
+        RuleFor(x => x.Location).MaximumLength(300).When(x => x.Location is not null);
+    }
+}

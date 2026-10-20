@@ -5,6 +5,16 @@ import './ActivityItem.css';
 interface Props {
   activity: Activity;
   onDelete: (id: string) => void;
+  onEdit: (activity: Activity) => void;
+  // F23: drag-to-reorder. Wired by DaySchedule, which owns the drag state; omitted when a category
+  // filter is active (reordering a partial list would be ambiguous).
+  draggable?: boolean;
+  dragging?: boolean;
+  dragOver?: boolean;
+  onDragStart?: () => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDrop?: () => void;
+  onDragEnd?: () => void;
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -16,12 +26,31 @@ const CATEGORY_ICONS: Record<string, string> = {
   Other: '📌',
 };
 
-export function ActivityItem({ activity, onDelete }: Props) {
+export function ActivityItem({
+  activity, onDelete, onEdit,
+  draggable, dragging, dragOver, onDragStart, onDragOver, onDrop, onDragEnd,
+}: Props) {
   const start = formatActivityTime(activity.startTime);
   const end = formatActivityTime(activity.endTime);
 
+  const className = [
+    'activity-item',
+    dragging ? 'activity-item--dragging' : '',
+    dragOver ? 'activity-item--drag-over' : '',
+  ].filter(Boolean).join(' ');
+
   return (
-    <div className="activity-item">
+    <div
+      className={className}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+    >
+      {draggable && (
+        <span className="activity-item__grip" aria-hidden="true" title="Drag to reorder">⠿</span>
+      )}
       <div className="activity-item__time">
         {start ? <span>{start}{end ? ` – ${end}` : ''}</span> : <span className="activity-item__no-time">No time</span>}
       </div>
@@ -34,7 +63,10 @@ export function ActivityItem({ activity, onDelete }: Props) {
         {activity.location && <p className="activity-item__location">📍 {activity.location}</p>}
         {activity.description && <p className="activity-item__description">{activity.description}</p>}
       </div>
-      <button className="activity-item__delete" onClick={() => onDelete(activity.id)} aria-label="Delete activity">✕</button>
+      <div className="activity-item__controls">
+        <button className="activity-item__edit" onClick={() => onEdit(activity)} aria-label="Edit activity">✎</button>
+        <button className="activity-item__delete" onClick={() => onDelete(activity.id)} aria-label="Delete activity">✕</button>
+      </div>
     </div>
   );
 }

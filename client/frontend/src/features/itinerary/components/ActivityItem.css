@@ -58,18 +58,47 @@
   margin: 2px 0 0;
 }
 
+.activity-item__controls {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.activity-item__edit,
 .activity-item__delete {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--border);
+  color: var(--text);
   font-size: 13px;
   padding: 2px 6px;
   border-radius: 4px;
-  flex-shrink: 0;
+}
 
-  &:hover {
-    color: #e53e3e;
-    background: rgba(229, 62, 62, 0.1);
-  }
+.activity-item__edit:hover {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.activity-item__delete:hover {
+  color: #e53e3e;
+  background: rgba(229, 62, 62, 0.1);
+}
+
+/* F23: drag-to-reorder affordance + states. */
+.activity-item__grip {
+  cursor: grab;
+  color: var(--text);
+  font-size: 16px;
+  padding-top: 2px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.activity-item--dragging {
+  opacity: 0.5;
+}
+
+.activity-item--drag-over {
+  border-top: 2px solid var(--accent);
 }
