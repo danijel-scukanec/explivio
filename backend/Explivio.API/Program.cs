@@ -19,6 +19,7 @@ using Explivio.API.Modules.Users;
 using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Budget;
+using Explivio.API.Modules.Reservations;
 using FluentValidation;
 using Microsoft.FeatureManagement;
 using Microsoft.Azure.Cosmos;
@@ -144,6 +145,9 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<TripPresence>();
 builder.Services.AddSingleton<ITripCollaborationNotifier, TripCollaborationNotifier>();
 
+// F23: keeps a booking's cost mirrored into the trip budget as a linked expense.
+builder.Services.AddScoped<ReservationBudgetSync>();
+
 // F09: API versioning via URL segment (/v1/...). C# stays the source of truth for the
 // version; the frontend regenerates types from the versioned OpenAPI spec.
 builder.Services.AddApiVersioning(options =>
@@ -237,6 +241,7 @@ api.MapTripMembersEndpoints();
 api.MapUsersEndpoints();
 api.MapItineraryEndpoints();
 api.MapBudgetEndpoints();
+api.MapReservationEndpoints();
 
 // F13: the streaming itinerary-generation hub. Not versioned like the REST group — SignalR hubs are
 // addressed by a stable path; the default CORS policy and auth apply as for the rest of the app.

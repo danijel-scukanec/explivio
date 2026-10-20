@@ -4,6 +4,7 @@ using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Users;
 using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Budget;
+using Explivio.API.Modules.Reservations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Explivio.API.Infrastructure.Database;
@@ -16,6 +17,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<Activity> Activities => Set<Activity>();
     public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 

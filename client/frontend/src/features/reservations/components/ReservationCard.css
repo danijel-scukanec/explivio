@@ -1,0 +1,116 @@
+.reservation-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent-bg);
+}
+
+.reservation-card--cancelled {
+  opacity: 0.6;
+}
+
+.reservation-card--cancelled .reservation-card__title {
+  text-decoration: line-through;
+}
+
+.reservation-card__icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.reservation-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.reservation-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.reservation-card__title {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 15px;
+}
+
+.reservation-card__status {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.reservation-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.reservation-card__type {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.reservation-card__cost {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.reservation-card__notes {
+  font-size: 13px;
+  color: var(--text);
+  margin: 6px 0 0;
+}
+
+.reservation-card__link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.reservation-card__link:hover {
+  text-decoration: underline;
+}
+
+.reservation-card__controls {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.reservation-card__edit,
+.reservation-card__delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.reservation-card__edit:hover {
+  color: var(--accent);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.reservation-card__delete:hover {
+  color: #e53e3e;
+  background: rgba(229, 62, 62, 0.1);
+}

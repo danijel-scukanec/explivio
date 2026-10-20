@@ -34,3 +34,12 @@
   padding: 12px 0;
   margin: 0;
 }
+
+/* F23: bookings that start on this day, shown above the activity list. */
+.day-schedule__bookings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}

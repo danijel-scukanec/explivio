@@ -1003,6 +1003,160 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/trips/{tripId}/reservations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tripId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Reservation"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tripId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateReservationCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CreatedResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/trips/{tripId}/reservations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tripId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateReservationCommand"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tripId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1083,6 +1237,24 @@ export interface components {
             /** Format: uuid */
             id: string;
         };
+        CreateReservationCommand: {
+            /** Format: uuid */
+            tripId: string;
+            type: components["schemas"]["ReservationType"];
+            title: string;
+            provider: null | string;
+            confirmationNumber: null | string;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: date-time */
+            endsAt: null | string;
+            status: components["schemas"]["ReservationStatus"];
+            bookingUrl: null | string;
+            notes: null | string;
+            /** Format: double */
+            cost: null | number | string;
+            currency: string;
+        };
         CreateTripCommand: {
             name: string;
             /** Format: date */
@@ -1107,6 +1279,8 @@ export interface components {
             category?: components["schemas"]["ExpenseCategory"];
             /** Format: date */
             date?: string;
+            /** Format: uuid */
+            reservationId?: null | string;
             /** Format: date-time */
             createdAt?: string;
             domainEvents?: null | components["schemas"]["IDomainEvent"][];
@@ -1165,6 +1339,32 @@ export interface components {
             tripId: string;
             orderedActivityIds: string[];
         };
+        Reservation: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            tripId?: string;
+            type?: components["schemas"]["ReservationType"];
+            title?: string;
+            provider?: null | string;
+            confirmationNumber?: null | string;
+            /** Format: date-time */
+            startsAt?: string;
+            /** Format: date-time */
+            endsAt?: null | string;
+            status?: components["schemas"]["ReservationStatus"];
+            bookingUrl?: null | string;
+            notes?: null | string;
+            /** Format: double */
+            cost?: null | number | string;
+            currency?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
+        /** @enum {unknown} */
+        ReservationStatus: "Reserved" | "Confirmed" | "Cancelled";
+        /** @enum {unknown} */
+        ReservationType: "Flight" | "Accommodation" | "CarRental" | "Restaurant" | "Transport" | "Tour" | "Other";
         SetTripStatusRequest: {
             status: components["schemas"]["TripStatus"];
         };
@@ -1258,6 +1458,26 @@ export interface components {
             latitude: null | number | string;
             /** Format: double */
             longitude: null | number | string;
+        };
+        UpdateReservationCommand: {
+            /** Format: uuid */
+            tripId: string;
+            /** Format: uuid */
+            id: string;
+            type: components["schemas"]["ReservationType"];
+            title: string;
+            provider: null | string;
+            confirmationNumber: null | string;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: date-time */
+            endsAt: null | string;
+            status: components["schemas"]["ReservationStatus"];
+            bookingUrl: null | string;
+            notes: null | string;
+            /** Format: double */
+            cost: null | number | string;
+            currency: string;
         };
     };
     responses: never;

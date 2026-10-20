@@ -1,0 +1,106 @@
+.bookings-page {
+  padding: 40px 32px;
+  text-align: left;
+
+  @media (max-width: 1024px) {
+    padding: 24px 20px;
+  }
+}
+
+.bookings-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  gap: 16px;
+}
+
+.bookings-page__back {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  a {
+    font-size: 14px;
+    color: var(--text);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--accent);
+    }
+  }
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.bookings-page__destination {
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.bookings-page__actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.bookings-page__status {
+  font-size: 15px;
+  color: var(--text);
+  margin: 0;
+}
+
+.bookings-page__status--error {
+  color: #e53e3e;
+}
+
+/* F15: live presence badge. */
+.bookings-page__presence {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.bookings-page__presence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  animation: presence-pulse 2s ease-in-out infinite;
+}
+
+@keyframes presence-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.bookings-page__empty {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.bookings-page__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bookings-page__group-date {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0 0 10px;
+}
+
+.bookings-page__group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

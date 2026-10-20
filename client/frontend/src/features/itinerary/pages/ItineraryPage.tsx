@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import type { Trip, Activity, ActivityCategory, TripStatus } from '@explivio/shared';
+import type { Trip, Activity, ActivityCategory, Reservation, TripStatus } from '@explivio/shared';
 import { getDaysInRange, TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
 import { getTrip, setTripStatus, setTripCover, tripCoverUrl } from '../../trips/services/tripsApi';
 import { getActivities, deleteActivity, reorderActivities } from '../services/itineraryApi';
+import { getReservations, deleteReservation } from '../../reservations/services/reservationsApi';
+import { reservationDateKey } from '../../reservations/components/reservationMeta';
+import { ReservationModal } from '../../reservations/components/ReservationModal';
 import { DaySchedule } from '../components/DaySchedule';
 import { AddActivityModal } from '../components/AddActivityModal';
 import { EditActivityModal } from '../components/EditActivityModal';
@@ -28,6 +31,7 @@ export function ItineraryPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -36,6 +40,8 @@ export function ItineraryPage() {
   // F23: the activity being edited, and the set of categories to show (empty = show all).
   const [editing, setEditing] = useState<Activity | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<Set<ActivityCategory>>(new Set());
+  // F23: the booking being edited from a day card (adding bookings lives on the Bookings page).
+  const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
   // F22: bumps on each cover upload so the <img> reloads past the browser cache (the blob URL is stable).
   const [coverVersion, setCoverVersion] = useState(() => Date.now());
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -44,12 +50,14 @@ export function ItineraryPage() {
     if (!tripId) return;
     setError(null);
     try {
-      const [tripData, activitiesData] = await Promise.all([
+      const [tripData, activitiesData, reservationsData] = await Promise.all([
         getTrip(tripId),
         getActivities(tripId),
+        getReservations(tripId),
       ]);
       setTrip(tripData);
       setActivities(activitiesData);
+      setReservations(reservationsData);
     } catch {
       setError('Could not load itinerary.');
     } finally {
@@ -88,6 +96,13 @@ export function ItineraryPage() {
     } catch {
       load();
     }
+  }
+
+  // F23: delete a booking from its day card (also removes its linked budget expense, server-side).
+  async function handleDeleteReservation(id: string) {
+    if (!tripId) return;
+    await deleteReservation(tripId, id);
+    setReservations(prev => prev.filter(r => r.id !== id));
   }
 
   // F23: toggle a category in the view filter.
@@ -139,6 +154,15 @@ export function ItineraryPage() {
   activities.forEach(a => {
     if (byDate[a.date] && (!filterActive || categoryFilter.has(a.category))) byDate[a.date].push(a);
   });
+  // F23: bookings surface on the day they start. Hidden while a category filter is active (they have
+  // no category), so the filtered view stays about activities only.
+  const reservationsByDate = Object.fromEntries(days.map(d => [d, [] as Reservation[]]));
+  if (!filterActive) {
+    reservations.forEach(r => {
+      const key = reservationDateKey(r.startsAt);
+      if (reservationsByDate[key]) reservationsByDate[key].push(r);
+    });
+  }
 
   return (
     <div className="itinerary-page">
@@ -184,6 +208,7 @@ export function ItineraryPage() {
             </button>
           )}
           <button className="btn btn--ghost" onClick={() => setShowEditStops(true)}>🧭 Edit route</button>
+          <Link className="btn btn--ghost" to={`/trips/${tripId}/bookings`}>🎫 Bookings</Link>
           <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 Budget</Link>
           {isFeatureOn(features, 'AiItineraryGeneration') && (
             <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ Generate with AI</button>
@@ -249,6 +274,9 @@ export function ItineraryPage() {
             onDelete={handleDelete}
             onEdit={setEditing}
             onReorder={filterActive ? undefined : handleReorder}
+            reservations={reservationsByDate[date]}
+            onEditReservation={setEditingReservation}
+            onDeleteReservation={handleDeleteReservation}
           />
         ))}
       </div>
@@ -271,6 +299,16 @@ export function ItineraryPage() {
           maxDate={trip.endDate}
           onClose={() => setEditing(null)}
           onSaved={() => { setEditing(null); load(); }}
+        />
+      )}
+
+      {editingReservation && (
+        <ReservationModal
+          tripId={tripId!}
+          reservation={editingReservation}
+          defaultDate={trip.startDate}
+          onClose={() => setEditingReservation(null)}
+          onSaved={() => { setEditingReservation(null); load(); }}
         />
       )}
 

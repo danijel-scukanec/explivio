@@ -56,3 +56,21 @@
     background: rgba(229, 62, 62, 0.1);
   }
 }
+
+/* F23: marker for an expense that mirrors a booking's cost. */
+.expense-item__tag {
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 1px 7px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.expense-item__locked {
+  font-size: 12px;
+  padding: 2px 6px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}

@@ -17,15 +17,25 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export function ExpenseItem({ expense, onDelete }: Props) {
+  // F23: expenses created from a booking's cost are managed from that booking, so they can't be
+  // deleted here (deleting would strand the reservation's cost).
+  const fromBooking = expense.reservationId != null;
+
   return (
     <div className="expense-item">
       <span className="expense-item__icon">{CATEGORY_ICONS[expense.category] ?? '📌'}</span>
       <div className="expense-item__body">
-        <span className="expense-item__description">{expense.description}</span>
+        <span className="expense-item__description">
+          {expense.description}
+          {fromBooking && <span className="expense-item__tag">from booking</span>}
+        </span>
         <span className="expense-item__meta">{expense.category} · {formatTripDate(expense.date)}</span>
       </div>
       <span className="expense-item__amount">{formatCurrency(Number(expense.amount), expense.currency)}</span>
-      <button className="expense-item__delete" onClick={() => onDelete(expense.id)} aria-label="Delete expense">✕</button>
+      {fromBooking
+        ? <span className="expense-item__locked" title="Managed from the booking">🔒</span>
+        : <button className="expense-item__delete" onClick={() => onDelete(expense.id)} aria-label="Delete expense">✕</button>
+      }
     </div>
   );
 }
