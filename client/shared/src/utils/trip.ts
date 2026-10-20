@@ -1,4 +1,5 @@
 import type { TripStatus } from '../types/trip';
+import { getLocale } from './locale';
 
 export function getTripDuration(startDate: string, endDate: string): number {
   const start = new Date(startDate).getTime();
@@ -7,7 +8,7 @@ export function getTripDuration(startDate: string, endDate: string): number {
 }
 
 export function formatTripDate(date: string): string {
-  return new Date(date).toLocaleDateString('en-GB', {
+  return new Date(date).toLocaleDateString(getLocale() ?? 'en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

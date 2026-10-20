@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Trip, TripStatus } from '@explivio/shared';
 import { TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
 import { getTrips } from '../services/tripsApi';
 import { TripCard } from '../components/TripCard';
 import { CreateTripModal } from '../components/CreateTripModal';
+import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
 import './TripsPage.css';
 
 export function TripsPage() {
+  const { t } = useTranslation();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +22,7 @@ export function TripsPage() {
       const data = await getTrips();
       setTrips(data);
     } catch {
-      setError('Could not load trips.');
+      setError(t('trips.couldNotLoad'));
     } finally {
       setLoading(false);
     }
@@ -37,18 +40,21 @@ export function TripsPage() {
   return (
     <div className="trips-page">
       <div className="trips-page__header">
-        <h1>My trips</h1>
-        <button className="btn btn--primary" onClick={() => setShowModal(true)}>
-          + New trip
-        </button>
+        <h1>{t('trips.title')}</h1>
+        <div className="trips-page__header-actions">
+          <LanguageSwitcher />
+          <button className="btn btn--primary" onClick={() => setShowModal(true)}>
+            {t('trips.newTrip')}
+          </button>
+        </div>
       </div>
 
-      {loading && <p className="trips-page__status">Loading…</p>}
+      {loading && <p className="trips-page__status">{t('common.loading')}</p>}
       {error && <p className="trips-page__status trips-page__status--error">{error}</p>}
 
       {!loading && !error && trips.length === 0 && (
         <div className="trips-page__empty">
-          <p>No trips yet. Create your first one!</p>
+          <p>{t('trips.empty')}</p>
         </div>
       )}
 
@@ -61,14 +67,14 @@ export function TripsPage() {
               style={filter === s && s !== 'All' ? { backgroundColor: tripStatusColor(s), borderColor: tripStatusColor(s), color: '#fff' } : undefined}
               onClick={() => setFilter(s)}
             >
-              {s}
+              {s === 'All' ? t('trips.filterAll') : t(`enums.tripStatus.${s}`)}
             </button>
           ))}
         </div>
       )}
 
       {trips.length > 0 && visibleTrips.length === 0 && (
-        <p className="trips-page__status">No {filter.toLowerCase()} trips.</p>
+        <p className="trips-page__status">{t('trips.noneForFilter', { status: filter === 'All' ? t('trips.filterAll') : t(`enums.tripStatus.${filter}`) })}</p>
       )}
 
       {visibleTrips.length > 0 && (

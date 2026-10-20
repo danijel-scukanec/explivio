@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { Trip, Reservation } from '@explivio/shared';
 import { formatTripDate } from '@explivio/shared';
 import { getTrip } from '../../trips/services/tripsApi';
@@ -8,9 +9,11 @@ import { ReservationCard } from '../components/ReservationCard';
 import { ReservationModal } from '../components/ReservationModal';
 import { reservationDateKey } from '../components/reservationMeta';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
+import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
 import './BookingsPage.css';
 
 export function BookingsPage() {
+  const { t } = useTranslation();
   const { tripId } = useParams<{ tripId: string }>();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -30,7 +33,7 @@ export function BookingsPage() {
       setTrip(tripData);
       setReservations(reservationsData);
     } catch {
-      setError('Could not load bookings.');
+      setError(t('bookings.couldNotLoad'));
     } finally {
       setLoading(false);
     }
@@ -48,8 +51,8 @@ export function BookingsPage() {
     load();
   }
 
-  if (loading) return <div className="bookings-page"><p className="bookings-page__status">Loading…</p></div>;
-  if (error || !trip) return <div className="bookings-page"><p className="bookings-page__status bookings-page__status--error">{error ?? 'Trip not found.'}</p></div>;
+  if (loading) return <div className="bookings-page"><p className="bookings-page__status">{t('common.loading')}</p></div>;
+  if (error || !trip) return <div className="bookings-page"><p className="bookings-page__status bookings-page__status--error">{error ?? t('bookings.notFound')}</p></div>;
 
   // Group by start day (reservations arrive sorted by StartsAt).
   const groups: { date: string; items: Reservation[] }[] = [];
@@ -70,19 +73,20 @@ export function BookingsPage() {
           {othersViewing > 0 && (
             <span className="bookings-page__presence" title={presentUserIds.join(', ')}>
               <span className="bookings-page__presence-dot" aria-hidden="true" />
-              {othersViewing} other{othersViewing > 1 ? 's' : ''} viewing
+              {t('itinerary.othersViewing', { count: othersViewing })}
             </span>
           )}
         </div>
         <div className="bookings-page__actions">
-          <Link className="btn btn--ghost" to={`/trips/${tripId}/itinerary`}>🗓 Itinerary</Link>
-          <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 Budget</Link>
-          <button className="btn btn--primary" onClick={() => setEditor('new')}>+ Add booking</button>
+          <Link className="btn btn--ghost" to={`/trips/${tripId}/itinerary`}>🗓 {t('bookings.itinerary')}</Link>
+          <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 {t('bookings.budget')}</Link>
+          <LanguageSwitcher />
+          <button className="btn btn--primary" onClick={() => setEditor('new')}>{t('bookings.addBooking')}</button>
         </div>
       </div>
 
       {reservations.length === 0
-        ? <p className="bookings-page__empty">No bookings yet. Add flights, stays, car hire and more.</p>
+        ? <p className="bookings-page__empty">{t('bookings.empty')}</p>
         : (
           <div className="bookings-page__groups">
             {groups.map(g => (

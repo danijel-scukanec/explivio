@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { TripStop, TripStopInput } from '@explivio/shared';
 import { setTripStops } from '../services/tripsApi';
 import { TripStopsEditor } from './TripStopsEditor';
@@ -25,6 +26,7 @@ function toInput(stop: TripStop): TripStopInput {
 
 // F22: edit a trip's ordered route after creation. Reuses TripStopsEditor and PUTs the whole list.
 export function EditStopsModal({ tripId, initialStops, minDate, maxDate, onClose, onSaved }: Props) {
+  const { t } = useTranslation();
   const [stops, setStops] = useState<TripStopInput[]>(
     initialStops.length > 0
       ? initialStops.map(toInput)
@@ -41,7 +43,7 @@ export function EditStopsModal({ tripId, initialStops, minDate, maxDate, onClose
       .map(s => ({ ...s, place: s.place.trim() }))
       .filter(s => s.place.length > 0);
     if (cleaned.length === 0) {
-      setError('A trip needs at least one destination.');
+      setError(t('editRoute.needDestination'));
       return;
     }
 
@@ -50,7 +52,7 @@ export function EditStopsModal({ tripId, initialStops, minDate, maxDate, onClose
       await setTripStops(tripId, cleaned);
       onSaved();
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(t('common.somethingWrong'));
     } finally {
       setSubmitting(false);
     }
@@ -60,8 +62,8 @@ export function EditStopsModal({ tripId, initialStops, minDate, maxDate, onClose
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>Edit route</h2>
-          <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+          <h2>{t('editRoute.title')}</h2>
+          <button className="modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal__form">
@@ -72,9 +74,9 @@ export function EditStopsModal({ tripId, initialStops, minDate, maxDate, onClose
           {error && <p className="modal__error">{error}</p>}
 
           <div className="modal__actions">
-            <button type="button" className="btn btn--ghost" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn btn--ghost" onClick={onClose}>{t('common.cancel')}</button>
             <button type="submit" className="btn btn--primary" disabled={submitting}>
-              {submitting ? 'Saving…' : 'Save route'}
+              {submitting ? t('editRoute.saving') : t('editRoute.save')}
             </button>
           </div>
         </form>

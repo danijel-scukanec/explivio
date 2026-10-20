@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Activity, Reservation } from '@explivio/shared';
 import { formatTripDate } from '@explivio/shared';
 import { ActivityItem } from './ActivityItem';
@@ -24,6 +25,7 @@ export function DaySchedule({
   date, dayNumber, activities, onDelete, onEdit, onReorder,
   reservations = [], onEditReservation, onDeleteReservation,
 }: Props) {
+  const { t } = useTranslation();
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
 
@@ -45,7 +47,7 @@ export function DaySchedule({
   return (
     <div className="day-schedule">
       <div className="day-schedule__header">
-        <span className="day-schedule__day">Day {dayNumber}</span>
+        <span className="day-schedule__day">{t('itinerary.day', { number: dayNumber })}</span>
         <span className="day-schedule__date">{formatTripDate(date)}</span>
       </div>
       {reservations.length > 0 && onEditReservation && onDeleteReservation && (
@@ -63,7 +65,7 @@ export function DaySchedule({
       )}
       <div className="day-schedule__activities">
         {activities.length === 0 && reservations.length === 0
-          ? <p className="day-schedule__empty">No activities planned</p>
+          ? <p className="day-schedule__empty">{t('itinerary.noActivities')}</p>
           : activities.map((a, i) => (
               <ActivityItem
                 key={a.id}

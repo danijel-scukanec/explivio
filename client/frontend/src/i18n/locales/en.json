@@ -1,0 +1,218 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading…",
+    "backToTrips": "← Trips",
+    "optionalNotes": "Optional notes",
+    "somethingWrong": "Something went wrong. Please try again."
+  },
+  "language": {
+    "label": "Language"
+  },
+  "enums": {
+    "tripStatus": {
+      "Draft": "Draft",
+      "Planned": "Planned",
+      "Active": "Active",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "activityCategory": {
+      "Sightseeing": "Sightseeing",
+      "Food": "Food",
+      "Transport": "Transport",
+      "Accommodation": "Accommodation",
+      "Adventure": "Adventure",
+      "Other": "Other"
+    },
+    "expenseCategory": {
+      "Transport": "Transport",
+      "Accommodation": "Accommodation",
+      "Food": "Food",
+      "Activities": "Activities",
+      "Shopping": "Shopping",
+      "Other": "Other"
+    },
+    "reservationType": {
+      "Flight": "Flight",
+      "Accommodation": "Stay",
+      "CarRental": "Car rental",
+      "Restaurant": "Restaurant",
+      "Transport": "Transport",
+      "Tour": "Tour",
+      "Other": "Other"
+    },
+    "reservationStatus": {
+      "Reserved": "Reserved",
+      "Confirmed": "Confirmed",
+      "Cancelled": "Cancelled"
+    }
+  },
+  "trips": {
+    "title": "My trips",
+    "newTrip": "+ New trip",
+    "couldNotLoad": "Could not load trips.",
+    "empty": "No trips yet. Create your first one!",
+    "filterAll": "All",
+    "noneForFilter": "No {{status}} trips."
+  },
+  "tripCard": {
+    "summary": "{{count}} days · {{travelers}}",
+    "travelers_one": "{{count}} traveller",
+    "travelers_other": "{{count}} travellers"
+  },
+  "createTrip": {
+    "title": "New trip",
+    "name": "Trip name",
+    "namePlaceholder": "e.g. Summer in Japan",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "travellers": "Travellers",
+    "destinations": "Destinations",
+    "needDestination": "Add at least one destination.",
+    "create": "Create trip",
+    "creating": "Creating…"
+  },
+  "editRoute": {
+    "title": "Edit route",
+    "needDestination": "A trip needs at least one destination.",
+    "save": "Save route",
+    "saving": "Saving…"
+  },
+  "stops": {
+    "cityPlace": "City or place",
+    "searchAutofill": "Search to autofill + drop a map pin",
+    "arrive": "Arrive",
+    "depart": "Depart",
+    "addStop": "+ Add stop",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "removeStop": "Remove stop"
+  },
+  "itinerary": {
+    "title": "Itinerary",
+    "couldNotLoad": "Could not load itinerary.",
+    "couldNotUploadCover": "Could not upload the cover photo.",
+    "notFound": "Trip not found.",
+    "changeCover": "Change cover",
+    "addCover": "Add cover",
+    "editRoute": "Edit route",
+    "bookings": "Bookings",
+    "budget": "Budget",
+    "generate": "Generate with AI",
+    "addActivity": "+ Add activity",
+    "othersViewing_one": "{{count}} other viewing",
+    "othersViewing_other": "{{count}} others viewing",
+    "filter": "Filter",
+    "clear": "Clear",
+    "clearToReorder": "Clear the filter to drag activities into a new order.",
+    "day": "Day {{number}}",
+    "noActivities": "No activities planned",
+    "noTime": "No time"
+  },
+  "activity": {
+    "edit": "Edit activity",
+    "delete": "Delete activity",
+    "dragToReorder": "Drag to reorder"
+  },
+  "addActivity": {
+    "title": "Add activity",
+    "searchPlace": "Search for a place",
+    "searchPlaceholder": "Search restaurants, hotels, attractions…",
+    "name": "Activity name",
+    "namePlaceholder": "e.g. Visit Senso-ji Temple",
+    "date": "Date",
+    "category": "Category",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "notes": "Notes",
+    "add": "Add activity",
+    "adding": "Adding…"
+  },
+  "editActivity": {
+    "title": "Edit activity",
+    "changePlace": "Change place",
+    "save": "Save changes",
+    "saving": "Saving…"
+  },
+  "budget": {
+    "title": "Budget",
+    "itinerary": "Itinerary",
+    "addExpense": "+ Add expense",
+    "couldNotLoad": "Could not load budget.",
+    "totalSpend": "Total spend",
+    "expenses": "Expenses",
+    "empty": "No expenses yet. Add your first one."
+  },
+  "expense": {
+    "fromBooking": "from booking",
+    "delete": "Delete expense",
+    "managedFromBooking": "Managed from the booking"
+  },
+  "addExpense": {
+    "title": "Add expense",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g. Train tickets",
+    "amount": "Amount",
+    "currency": "Currency",
+    "category": "Category",
+    "date": "Date",
+    "amountGtZero": "Enter an amount greater than zero.",
+    "add": "Add expense",
+    "adding": "Adding…"
+  },
+  "bookings": {
+    "title": "Bookings",
+    "itinerary": "Itinerary",
+    "budget": "Budget",
+    "addBooking": "+ Add booking",
+    "couldNotLoad": "Could not load bookings.",
+    "notFound": "Trip not found.",
+    "empty": "No bookings yet. Add flights, stays, car hire and more."
+  },
+  "reservation": {
+    "edit": "Edit booking",
+    "delete": "Delete booking",
+    "openBooking": "Open booking ↗"
+  },
+  "reservationModal": {
+    "addTitle": "Add booking",
+    "editTitle": "Edit booking",
+    "type": "Type",
+    "status": "Status",
+    "title": "Title",
+    "titlePlaceholder": "e.g. ANA NH211 HND→SFO",
+    "starts": "Starts",
+    "ends": "Ends (optional)",
+    "provider": "Provider",
+    "providerPlaceholder": "e.g. Hilton, ANA",
+    "confirmation": "Confirmation #",
+    "confirmationPlaceholder": "e.g. ABC123",
+    "cost": "Cost (optional)",
+    "currency": "Currency",
+    "costHint": "Adding a cost records a matching expense in the trip budget.",
+    "bookingLink": "Booking link",
+    "notes": "Notes",
+    "add": "Add booking",
+    "adding": "Saving…",
+    "save": "Save changes"
+  },
+  "generate": {
+    "title": "✨ Generate itinerary with AI",
+    "whatKind": "What kind of trip?",
+    "promptPlaceholder": "e.g. A relaxed foodie long-weekend in Zagreb with some history",
+    "days": "Days",
+    "style": "Style",
+    "stylePlaceholder": "relaxed, packed…",
+    "budget": "Budget",
+    "budgetPlaceholder": "mid-range…",
+    "generate": "Generate",
+    "generating": "Generating…",
+    "regenerate": "Regenerate",
+    "day": "Day {{number}}",
+    "addAll": "Add all {{count}} to itinerary",
+    "adding": "Adding…",
+    "couldNotAddAll": "Could not add all activities. Please try again."
+  }
+}

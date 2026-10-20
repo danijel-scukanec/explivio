@@ -70,3 +70,10 @@
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* F30: header actions group (language switcher + new trip). */
+.trips-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

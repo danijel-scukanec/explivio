@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Reservation, ReservationType, ReservationStatus, CreateReservationRequest } from '@explivio/shared';
 import { createReservation, updateReservation } from '../services/reservationsApi';
-import { RESERVATION_TYPES, RESERVATION_STATUSES, TYPE_LABELS } from './reservationMeta';
+import { RESERVATION_TYPES, RESERVATION_STATUSES } from './reservationMeta';
 import '../../trips/components/CreateTripModal.css';
 
 interface Props {
@@ -20,6 +21,7 @@ const toLocalInput = (iso: string) => iso.slice(0, 16);
 const toApiDateTime = (local: string) => (local.length === 16 ? `${local}:00` : local);
 
 export function ReservationModal({ tripId, reservation, defaultDate, onClose, onSaved }: Props) {
+  const { t } = useTranslation();
   const editing = reservation != null;
   const [form, setForm] = useState({
     type: (reservation?.type ?? 'Flight') as ReservationType,
@@ -70,7 +72,7 @@ export function ReservationModal({ tripId, reservation, defaultDate, onClose, on
       }
       onSaved();
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(t('common.somethingWrong'));
     } finally {
       setSubmitting(false);
     }
@@ -80,81 +82,81 @@ export function ReservationModal({ tripId, reservation, defaultDate, onClose, on
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>{editing ? 'Edit booking' : 'Add booking'}</h2>
-          <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+          <h2>{editing ? t('reservationModal.editTitle') : t('reservationModal.addTitle')}</h2>
+          <button className="modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal__form">
           <div className="modal__row">
             <label>
-              Type
+              {t('reservationModal.type')}
               <select name="type" value={form.type} onChange={handleChange}>
-                {RESERVATION_TYPES.map(t => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
+                {RESERVATION_TYPES.map(rt => <option key={rt} value={rt}>{t(`enums.reservationType.${rt}`)}</option>)}
               </select>
             </label>
             <label>
-              Status
+              {t('reservationModal.status')}
               <select name="status" value={form.status} onChange={handleChange}>
-                {RESERVATION_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                {RESERVATION_STATUSES.map(s => <option key={s} value={s}>{t(`enums.reservationStatus.${s}`)}</option>)}
               </select>
             </label>
           </div>
 
           <label>
-            Title
-            <input name="title" value={form.title} onChange={handleChange} required placeholder="e.g. ANA NH211 HND→SFO" />
+            {t('reservationModal.title')}
+            <input name="title" value={form.title} onChange={handleChange} required placeholder={t('reservationModal.titlePlaceholder')} />
           </label>
 
           <div className="modal__row">
             <label>
-              Starts
+              {t('reservationModal.starts')}
               <input type="datetime-local" name="startsAt" value={form.startsAt} onChange={handleChange} required />
             </label>
             <label>
-              Ends (optional)
+              {t('reservationModal.ends')}
               <input type="datetime-local" name="endsAt" value={form.endsAt} min={form.startsAt} onChange={handleChange} />
             </label>
           </div>
 
           <div className="modal__row">
             <label>
-              Provider
-              <input name="provider" value={form.provider} onChange={handleChange} placeholder="e.g. Hilton, ANA" />
+              {t('reservationModal.provider')}
+              <input name="provider" value={form.provider} onChange={handleChange} placeholder={t('reservationModal.providerPlaceholder')} />
             </label>
             <label>
-              Confirmation #
-              <input name="confirmationNumber" value={form.confirmationNumber} onChange={handleChange} placeholder="e.g. ABC123" />
+              {t('reservationModal.confirmation')}
+              <input name="confirmationNumber" value={form.confirmationNumber} onChange={handleChange} placeholder={t('reservationModal.confirmationPlaceholder')} />
             </label>
           </div>
 
           <div className="modal__row">
             <label>
-              Cost (optional)
+              {t('reservationModal.cost')}
               <input type="number" name="cost" value={form.cost} min="0" step="0.01" onChange={handleChange} placeholder="0.00" />
             </label>
             <label>
-              Currency
+              {t('reservationModal.currency')}
               <input name="currency" value={form.currency} onChange={handleChange} maxLength={3} placeholder="USD" />
             </label>
           </div>
-          <p className="modal__hint">Adding a cost records a matching expense in the trip budget.</p>
+          <p className="modal__hint">{t('reservationModal.costHint')}</p>
 
           <label>
-            Booking link
+            {t('reservationModal.bookingLink')}
             <input name="bookingUrl" value={form.bookingUrl} onChange={handleChange} placeholder="https://…" />
           </label>
 
           <label>
-            Notes
-            <input name="notes" value={form.notes} onChange={handleChange} placeholder="Optional notes" />
+            {t('reservationModal.notes')}
+            <input name="notes" value={form.notes} onChange={handleChange} placeholder={t('common.optionalNotes')} />
           </label>
 
           {error && <p className="modal__error">{error}</p>}
 
           <div className="modal__actions">
-            <button type="button" className="btn btn--ghost" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn btn--ghost" onClick={onClose}>{t('common.cancel')}</button>
             <button type="submit" className="btn btn--primary" disabled={submitting}>
-              {submitting ? 'Saving…' : editing ? 'Save changes' : 'Add booking'}
+              {submitting ? t('reservationModal.adding') : editing ? t('reservationModal.save') : t('reservationModal.add')}
             </button>
           </div>
         </form>

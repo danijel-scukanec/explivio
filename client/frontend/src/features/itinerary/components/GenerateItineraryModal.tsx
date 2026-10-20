@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CreateActivityRequest, GeneratedActivity } from '@explivio/shared';
 import { createActivity } from '../services/itineraryApi';
 import { useItineraryGeneration } from '../hooks/useItineraryGeneration';
@@ -17,6 +18,7 @@ interface Props {
 // activity cards appear one-by-one as the model produces them; "Add all" persists them via the
 // existing CreateActivity endpoint (the accept step F12 left as a draft).
 export function GenerateItineraryModal({ tripId, startDate, endDate, onClose, onAdded }: Props) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({ prompt: '', days: 3, style: '', budget: '' });
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
@@ -48,7 +50,7 @@ export function GenerateItineraryModal({ tripId, startDate, endDate, onClose, on
       }
       onAdded();
     } catch {
-      setAddError('Could not add all activities. Please try again.');
+      setAddError(t('generate.couldNotAddAll'));
     } finally {
       setAdding(false);
     }
@@ -61,41 +63,41 @@ export function GenerateItineraryModal({ tripId, startDate, endDate, onClose, on
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal modal--wide" onClick={e => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>✨ Generate itinerary with AI</h2>
-          <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+          <h2>{t('generate.title')}</h2>
+          <button className="modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
         </div>
 
         <form onSubmit={handleGenerate} className="modal__form">
           <label>
-            What kind of trip?
+            {t('generate.whatKind')}
             <textarea
               name="prompt"
               value={form.prompt}
               onChange={handleChange}
               required
               rows={2}
-              placeholder="e.g. A relaxed foodie long-weekend in Zagreb with some history"
+              placeholder={t('generate.promptPlaceholder')}
             />
           </label>
 
           <div className="modal__row">
             <label>
-              Days
+              {t('generate.days')}
               <input type="number" name="days" min={1} max={14} value={form.days} onChange={handleChange} required />
             </label>
             <label>
-              Style
-              <input name="style" value={form.style} onChange={handleChange} placeholder="relaxed, packed…" />
+              {t('generate.style')}
+              <input name="style" value={form.style} onChange={handleChange} placeholder={t('generate.stylePlaceholder')} />
             </label>
             <label>
-              Budget
-              <input name="budget" value={form.budget} onChange={handleChange} placeholder="mid-range…" />
+              {t('generate.budget')}
+              <input name="budget" value={form.budget} onChange={handleChange} placeholder={t('generate.budgetPlaceholder')} />
             </label>
           </div>
 
           <div className="modal__actions">
             <button type="submit" className="btn btn--primary" disabled={isStreaming}>
-              {isStreaming ? 'Generating…' : isDone ? 'Regenerate' : 'Generate'}
+              {isStreaming ? t('generate.generating') : isDone ? t('generate.regenerate') : t('generate.generate')}
             </button>
           </div>
         </form>
@@ -108,9 +110,9 @@ export function GenerateItineraryModal({ tripId, startDate, endDate, onClose, on
               {activities.map((a, i) => (
                 <div className="gen-card" key={`${a.day}-${a.name}-${i}`}>
                   <div className="gen-card__meta">
-                    <span className="gen-card__day">Day {a.day}</span>
+                    <span className="gen-card__day">{t('generate.day', { number: a.day })}</span>
                     {a.suggestedStartTime && <span className="gen-card__time">{a.suggestedStartTime}</span>}
-                    <span className={`gen-card__cat gen-card__cat--${a.category.toLowerCase()}`}>{a.category}</span>
+                    <span className={`gen-card__cat gen-card__cat--${a.category.toLowerCase()}`}>{t(`enums.activityCategory.${a.category}`)}</span>
                   </div>
                   <h4 className="gen-card__name">{a.name}</h4>
                   <p className="gen-card__desc">{a.description}</p>
@@ -124,9 +126,9 @@ export function GenerateItineraryModal({ tripId, startDate, endDate, onClose, on
 
             {isDone && activities.length > 0 && (
               <div className="modal__actions">
-                <button type="button" className="btn btn--ghost" onClick={onClose}>Cancel</button>
+                <button type="button" className="btn btn--ghost" onClick={onClose}>{t('common.cancel')}</button>
                 <button type="button" className="btn btn--primary" onClick={handleAddAll} disabled={adding}>
-                  {adding ? 'Adding…' : `Add all ${activities.length} to itinerary`}
+                  {adding ? t('generate.adding') : t('generate.addAll', { count: activities.length })}
                 </button>
               </div>
             )}

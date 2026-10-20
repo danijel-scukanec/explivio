@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { TripStopInput } from '@explivio/shared';
 import { PlaceSearchInput } from '../../../shared/components/PlaceSearchInput';
 import type { PlaceResult } from '../../../shared/components/PlaceSearchInput';
@@ -23,6 +24,7 @@ const EMPTY_STOP: TripStopInput = {
 // from Google Places so it gets map coordinates) and optional arrive/depart dates. Reused by the
 // create-trip modal and the edit-route modal.
 export function TripStopsEditor({ stops, onChange, minDate, maxDate }: Props) {
+  const { t } = useTranslation();
   function update(index: number, patch: Partial<TripStopInput>) {
     onChange(stops.map((s, i) => (i === index ? { ...s, ...patch } : s)));
   }
@@ -57,24 +59,24 @@ export function TripStopsEditor({ stops, onChange, minDate, maxDate }: Props) {
               className="stop-row__place"
               value={stop.place}
               onChange={e => update(i, { place: e.target.value })}
-              placeholder="City or place"
+              placeholder={t('stops.cityPlace')}
               required
             />
             <div className="stop-row__controls">
-              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Move up">↑</button>
-              <button type="button" onClick={() => move(i, 1)} disabled={i === stops.length - 1} aria-label="Move down">↓</button>
-              <button type="button" onClick={() => remove(i)} disabled={stops.length === 1} aria-label="Remove stop">✕</button>
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={t('stops.moveUp')}>↑</button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === stops.length - 1} aria-label={t('stops.moveDown')}>↓</button>
+              <button type="button" onClick={() => remove(i)} disabled={stops.length === 1} aria-label={t('stops.removeStop')}>✕</button>
             </div>
           </div>
 
           <PlaceSearchInput
             onPlaceSelect={p => handlePlaceSelect(i, p)}
-            placeholder="Search to autofill + drop a map pin"
+            placeholder={t('stops.searchAutofill')}
           />
 
           <div className="stop-row__dates">
             <label>
-              Arrive
+              {t('stops.arrive')}
               <input
                 type="date"
                 value={stop.arriveDate ?? ''}
@@ -84,7 +86,7 @@ export function TripStopsEditor({ stops, onChange, minDate, maxDate }: Props) {
               />
             </label>
             <label>
-              Depart
+              {t('stops.depart')}
               <input
                 type="date"
                 value={stop.departDate ?? ''}
@@ -97,7 +99,7 @@ export function TripStopsEditor({ stops, onChange, minDate, maxDate }: Props) {
         </div>
       ))}
 
-      <button type="button" className="stops-editor__add" onClick={add}>+ Add stop</button>
+      <button type="button" className="stops-editor__add" onClick={add}>{t('stops.addStop')}</button>
     </div>
   );
 }

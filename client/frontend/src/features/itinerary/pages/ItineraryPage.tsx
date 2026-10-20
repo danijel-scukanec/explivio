@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { Trip, Activity, ActivityCategory, Reservation, TripStatus } from '@explivio/shared';
 import { getDaysInRange, TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
 import { getTrip, setTripStatus, setTripCover, tripCoverUrl } from '../../trips/services/tripsApi';
@@ -15,6 +16,7 @@ import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
 import { ItineraryMap } from '../components/ItineraryMap';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
+import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
 import './ItineraryPage.css';
 
 // F23: categories available for the itinerary view filter (mirrors the ActivityCategory enum).
@@ -28,6 +30,7 @@ const ACTIVITY_CATEGORIES: { value: ActivityCategory; icon: string }[] = [
 ];
 
 export function ItineraryPage() {
+  const { t } = useTranslation();
   const { tripId } = useParams<{ tripId: string }>();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -59,7 +62,7 @@ export function ItineraryPage() {
       setActivities(activitiesData);
       setReservations(reservationsData);
     } catch {
-      setError('Could not load itinerary.');
+      setError(t('itinerary.couldNotLoad'));
     } finally {
       setLoading(false);
     }
@@ -135,7 +138,7 @@ export function ItineraryPage() {
       setCoverVersion(Date.now());
       setTrip(prev => (prev ? { ...prev, hasCoverPhoto: true } : prev));
     } catch {
-      setError('Could not upload the cover photo.');
+      setError(t('itinerary.couldNotUploadCover'));
     }
   }
 
@@ -144,8 +147,8 @@ export function ItineraryPage() {
     load();
   }
 
-  if (loading) return <div className="itinerary-page"><p className="itinerary-page__status">Loading…</p></div>;
-  if (error || !trip) return <div className="itinerary-page"><p className="itinerary-page__status itinerary-page__status--error">{error ?? 'Trip not found.'}</p></div>;
+  if (loading) return <div className="itinerary-page"><p className="itinerary-page__status">{t('common.loading')}</p></div>;
+  if (error || !trip) return <div className="itinerary-page"><p className="itinerary-page__status itinerary-page__status--error">{error ?? t('itinerary.notFound')}</p></div>;
 
   const days = getDaysInRange(trip.startDate, trip.endDate);
   // F23: dragging is disabled while a filter is active — reordering a partial list is ambiguous.
@@ -177,7 +180,7 @@ export function ItineraryPage() {
               title={presentUserIds.join(', ')}
             >
               <span className="itinerary-page__presence-dot" aria-hidden="true" />
-              {othersViewing} other{othersViewing > 1 ? 's' : ''} viewing
+              {t('itinerary.othersViewing', { count: othersViewing })}
             </span>
           )}
         </div>
@@ -191,7 +194,7 @@ export function ItineraryPage() {
               aria-label="Trip status"
             >
               {TRIP_STATUSES.map(s => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>{t(`enums.tripStatus.${s}`)}</option>
               ))}
             </select>
           )}
@@ -204,16 +207,17 @@ export function ItineraryPage() {
           />
           {isFeatureOn(features, 'TripCoverPhotos') && (
             <button className="btn btn--ghost" onClick={() => coverInputRef.current?.click()}>
-              🖼️ {trip.hasCoverPhoto ? 'Change cover' : 'Add cover'}
+              🖼️ {trip.hasCoverPhoto ? t('itinerary.changeCover') : t('itinerary.addCover')}
             </button>
           )}
-          <button className="btn btn--ghost" onClick={() => setShowEditStops(true)}>🧭 Edit route</button>
-          <Link className="btn btn--ghost" to={`/trips/${tripId}/bookings`}>🎫 Bookings</Link>
-          <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 Budget</Link>
+          <button className="btn btn--ghost" onClick={() => setShowEditStops(true)}>🧭 {t('itinerary.editRoute')}</button>
+          <Link className="btn btn--ghost" to={`/trips/${tripId}/bookings`}>🎫 {t('itinerary.bookings')}</Link>
+          <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 {t('itinerary.budget')}</Link>
           {isFeatureOn(features, 'AiItineraryGeneration') && (
-            <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ Generate with AI</button>
+            <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ {t('itinerary.generate')}</button>
           )}
-          <button className="btn btn--primary" onClick={() => setShowModal(true)}>+ Add activity</button>
+          <LanguageSwitcher />
+          <button className="btn btn--primary" onClick={() => setShowModal(true)}>{t('itinerary.addActivity')}</button>
         </div>
       </div>
 
@@ -241,7 +245,7 @@ export function ItineraryPage() {
 
       {activities.length > 0 && (
         <div className="itinerary-page__filters">
-          <span className="itinerary-page__filters-label">Filter</span>
+          <span className="itinerary-page__filters-label">{t('itinerary.filter')}</span>
           {ACTIVITY_CATEGORIES.map(c => (
             <button
               key={c.value}
@@ -250,18 +254,18 @@ export function ItineraryPage() {
               onClick={() => toggleCategory(c.value)}
               aria-pressed={categoryFilter.has(c.value)}
             >
-              {c.icon} {c.value}
+              {c.icon} {t(`enums.activityCategory.${c.value}`)}
             </button>
           ))}
           {filterActive && (
             <button type="button" className="itinerary-page__chip-clear" onClick={() => setCategoryFilter(new Set())}>
-              Clear
+              {t('itinerary.clear')}
             </button>
           )}
         </div>
       )}
       {filterActive && (
-        <p className="itinerary-page__filter-hint">Clear the filter to drag activities into a new order.</p>
+        <p className="itinerary-page__filter-hint">{t('itinerary.clearToReorder')}</p>
       )}
 
       <div className="itinerary-page__days">

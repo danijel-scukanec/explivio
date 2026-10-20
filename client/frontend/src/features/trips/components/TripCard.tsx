@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import type { Trip } from '@explivio/shared';
 import { formatTripDate, getTripDuration, tripStatusColor } from '@explivio/shared';
 import { tripCoverUrl } from '../services/tripsApi';
@@ -10,6 +11,7 @@ interface Props {
 
 export function TripCard({ trip }: Props) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="trip-card" onClick={() => navigate(`/trips/${trip.id}/itinerary`)}>
@@ -24,7 +26,7 @@ export function TripCard({ trip }: Props) {
               className="trip-card__status"
               style={{ backgroundColor: tripStatusColor(trip.status) }}
             >
-              {trip.status}
+              {t(`enums.tripStatus.${trip.status}`)}
             </span>
           )}
         </div>
@@ -32,7 +34,10 @@ export function TripCard({ trip }: Props) {
       </div>
       <div className="trip-card__meta">
         <span>{formatTripDate(trip.startDate)} – {formatTripDate(trip.endDate)}</span>
-        <span>{getTripDuration(trip.startDate, trip.endDate)} days · {trip.travelerCount} traveller{trip.travelerCount !== 1 ? 's' : ''}</span>
+        <span>{t('tripCard.summary', {
+          count: getTripDuration(trip.startDate, trip.endDate),
+          travelers: t('tripCard.travelers', { count: Number(trip.travelerCount) }),
+        })}</span>
       </div>
     </div>
   );

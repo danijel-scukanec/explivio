@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ActivityCategory, CreateActivityRequest } from '@explivio/shared';
 import { createActivity } from '../services/itineraryApi';
 import { PlaceSearchInput } from '../../../shared/components/PlaceSearchInput';
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function AddActivityModal({ tripId, initialDate, minDate, maxDate, onClose, onCreated }: Props) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: '',
     date: initialDate ?? minDate,
@@ -70,7 +72,7 @@ export function AddActivityModal({ tripId, initialDate, minDate, maxDate, onClos
       await createActivity(tripId, data);
       onCreated();
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(t('common.somethingWrong'));
     } finally {
       setSubmitting(false);
     }
@@ -80,16 +82,16 @@ export function AddActivityModal({ tripId, initialDate, minDate, maxDate, onClos
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>Add activity</h2>
-          <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+          <h2>{t('addActivity.title')}</h2>
+          <button className="modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal__form">
           <label>
-            Search for a place
+            {t('addActivity.searchPlace')}
             <PlaceSearchInput
               onPlaceSelect={handlePlaceSelect}
-              placeholder="Search restaurants, hotels, attractions…"
+              placeholder={t('addActivity.searchPlaceholder')}
             />
           </label>
           {form.location && (
@@ -97,45 +99,45 @@ export function AddActivityModal({ tripId, initialDate, minDate, maxDate, onClos
           )}
 
           <label>
-            Activity name
-            <input name="name" value={form.name} onChange={handleChange} required placeholder="e.g. Visit Senso-ji Temple" />
+            {t('addActivity.name')}
+            <input name="name" value={form.name} onChange={handleChange} required placeholder={t('addActivity.namePlaceholder')} />
           </label>
 
           <div className="modal__row">
             <label>
-              Date
+              {t('addActivity.date')}
               <input type="date" name="date" value={form.date} min={minDate} max={maxDate} onChange={handleChange} required />
             </label>
             <label>
-              Category
+              {t('addActivity.category')}
               <select name="category" value={form.category} onChange={handleChange}>
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                {CATEGORIES.map(c => <option key={c} value={c}>{t(`enums.activityCategory.${c}`)}</option>)}
               </select>
             </label>
           </div>
 
           <div className="modal__row">
             <label>
-              Start time
+              {t('addActivity.startTime')}
               <input type="time" name="startTime" value={form.startTime} onChange={handleChange} />
             </label>
             <label>
-              End time
+              {t('addActivity.endTime')}
               <input type="time" name="endTime" value={form.endTime} min={form.startTime} onChange={handleChange} />
             </label>
           </div>
 
           <label>
-            Notes
-            <input name="description" value={form.description} onChange={handleChange} placeholder="Optional notes" />
+            {t('addActivity.notes')}
+            <input name="description" value={form.description} onChange={handleChange} placeholder={t('common.optionalNotes')} />
           </label>
 
           {error && <p className="modal__error">{error}</p>}
 
           <div className="modal__actions">
-            <button type="button" className="btn btn--ghost" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn btn--ghost" onClick={onClose}>{t('common.cancel')}</button>
             <button type="submit" className="btn btn--primary" disabled={submitting}>
-              {submitting ? 'Adding…' : 'Add activity'}
+              {submitting ? t('addActivity.adding') : t('addActivity.add')}
             </button>
           </div>
         </form>
