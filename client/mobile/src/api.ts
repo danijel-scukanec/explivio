@@ -4,7 +4,11 @@ import type {
   BudgetSummary,
   CreateTripRequest,
   CreateActivityRequest,
+  UpdateActivityRequest,
   AddExpenseRequest,
+  Reservation,
+  CreateReservationRequest,
+  UpdateReservationRequest,
   TripStatus,
   TripStopInput,
 } from '@explivio/shared';
@@ -77,9 +81,24 @@ export const setTripStops = (tripId: string, stops: TripStopInput[]) =>
 export const getActivities = (tripId: string) => getJson<Activity[]>(`/trips/${tripId}/activities`);
 export const createActivity = (tripId: string, data: CreateActivityRequest) =>
   mutate<{ id: string }>('POST', `/trips/${tripId}/activities`, { ...data, tripId });
+// F23: edit an activity in place (name, category, times, …).
+export const updateActivity = (tripId: string, id: string, data: UpdateActivityRequest) =>
+  mutate('PUT', `/trips/${tripId}/activities/${id}`, { ...data, tripId, id });
+// F23: persist a day's new order (by id); the server rewrites each activity's SortOrder.
+export const reorderActivities = (tripId: string, orderedActivityIds: string[]) =>
+  mutate('PUT', `/trips/${tripId}/activities/reorder`, { tripId, orderedActivityIds });
 export const deleteActivity = (tripId: string, id: string) =>
   mutate('DELETE', `/trips/${tripId}/activities/${id}`);
 // AI generation streams over the itinerary-generation hub — see useItineraryGeneration.
+
+// F23: reservations (bookings). A booking's cost is mirrored into the budget server-side.
+export const getReservations = (tripId: string) => getJson<Reservation[]>(`/trips/${tripId}/reservations`);
+export const createReservation = (tripId: string, data: CreateReservationRequest) =>
+  mutate<{ id: string }>('POST', `/trips/${tripId}/reservations`, { ...data, tripId });
+export const updateReservation = (tripId: string, id: string, data: UpdateReservationRequest) =>
+  mutate('PUT', `/trips/${tripId}/reservations/${id}`, { ...data, tripId, id });
+export const deleteReservation = (tripId: string, id: string) =>
+  mutate('DELETE', `/trips/${tripId}/reservations/${id}`);
 
 // Budget
 export const getBudget = (tripId: string) => getJson<BudgetSummary>(`/trips/${tripId}/expenses`);

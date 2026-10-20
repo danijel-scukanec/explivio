@@ -95,19 +95,30 @@ export default function BudgetScreen() {
         {expenses.length === 0 ? (
           <Text style={styles.empty}>No expenses yet. Tap “+ Add”.</Text>
         ) : (
-          expenses.map(e => (
-            <View style={styles.expense} key={e.id}>
-              <Text style={styles.expenseIcon}>{CATEGORY_ICONS[e.category] ?? '📌'}</Text>
-              <View style={styles.expenseBody}>
-                <Text style={styles.expenseDesc}>{e.description}</Text>
-                <Text style={styles.expenseMeta}>{e.category} · {formatTripDate(e.date)}</Text>
+          expenses.map(e => {
+            // F23: expenses created from a booking's cost are managed from the booking, not here.
+            const fromBooking = e.reservationId != null;
+            return (
+              <View style={styles.expense} key={e.id}>
+                <Text style={styles.expenseIcon}>{CATEGORY_ICONS[e.category] ?? '📌'}</Text>
+                <View style={styles.expenseBody}>
+                  <View style={styles.expenseDescRow}>
+                    <Text style={styles.expenseDesc}>{e.description}</Text>
+                    {fromBooking ? <Text style={styles.bookingTag}>from booking</Text> : null}
+                  </View>
+                  <Text style={styles.expenseMeta}>{e.category} · {formatTripDate(e.date)}</Text>
+                </View>
+                <Text style={styles.expenseAmount}>{formatCurrency(Number(e.amount), e.currency)}</Text>
+                {fromBooking ? (
+                  <Text style={styles.locked}>🔒</Text>
+                ) : (
+                  <TouchableOpacity onPress={() => handleDelete(e.id)} hitSlop={10} style={styles.delete}>
+                    <Text style={styles.deleteText}>✕</Text>
+                  </TouchableOpacity>
+                )}
               </View>
-              <Text style={styles.expenseAmount}>{formatCurrency(Number(e.amount), e.currency)}</Text>
-              <TouchableOpacity onPress={() => handleDelete(e.id)} hitSlop={10} style={styles.delete}>
-                <Text style={styles.deleteText}>✕</Text>
-              </TouchableOpacity>
-            </View>
-          ))
+            );
+          })
         )}
       </ScrollView>
     </View>
@@ -136,7 +147,10 @@ const styles = StyleSheet.create({
   expense: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: theme.border },
   expenseIcon: { fontSize: 18 },
   expenseBody: { flex: 1 },
+  expenseDescRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   expenseDesc: { fontSize: 15, fontWeight: '600', color: theme.textStrong },
+  bookingTag: { fontSize: 11, color: theme.accent, backgroundColor: theme.accentBg, paddingHorizontal: 7, paddingVertical: 1, borderRadius: 999, overflow: 'hidden' },
+  locked: { fontSize: 13, paddingHorizontal: 2, opacity: 0.6 },
   expenseMeta: { fontSize: 12, color: theme.text, marginTop: 2 },
   expenseAmount: { fontSize: 15, fontWeight: '700', color: theme.textStrong },
   delete: { paddingHorizontal: 2 },
