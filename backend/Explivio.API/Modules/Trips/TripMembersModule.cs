@@ -15,10 +15,19 @@ public static class TripMembersModule
 
         group.MapGet("/", async (Guid tripId, AppDbContext db) =>
         {
-            var members = await db.TripMembers
-                .Where(m => m.TripId == tripId)
-                .OrderByDescending(m => m.Role)
-                .Select(m => new TripMemberResponse(m.UserId, m.Role))
+            // F25: include each member's display name (left-joined from Users) so the budget split UI
+            // and the collaboration list can show names, not GUIDs. A member without a Users row
+            // (e.g. the fake dev user) falls back to a short id.
+            var members = await (
+                from m in db.TripMembers
+                where m.TripId == tripId
+                join u in db.Users on m.UserId equals u.Id into users
+                from u in users.DefaultIfEmpty()
+                orderby m.Role descending
+                select new TripMemberResponse(
+                    m.UserId,
+                    m.Role,
+                    u != null ? u.DisplayName : null))
                 .ToListAsync();
             return Results.Ok(members);
         }).AddEndpointFilter(new RequireTripRole(TripRole.Viewer))
@@ -52,7 +61,11 @@ public static class TripMembersModule
             }
 
             await db.SaveChangesAsync();
-            return Results.Ok(new TripMemberResponse(request.UserId, request.Role));
+            var displayName = await db.Users
+                .Where(u => u.Id == request.UserId)
+                .Select(u => u.DisplayName)
+                .FirstOrDefaultAsync();
+            return Results.Ok(new TripMemberResponse(request.UserId, request.Role, displayName));
         }).AddEndpointFilter(new RequireTripRole(TripRole.Owner))
           .Produces<TripMemberResponse>()
           .ProducesProblem(StatusCodes.Status400BadRequest);
@@ -88,6 +101,6 @@ public static class TripMembersModule
         await db.TripMembers.CountAsync(m => m.TripId == tripId && m.Role == TripRole.Owner) <= 1;
 }
 
-public sealed record TripMemberResponse(Guid UserId, TripRole Role);
+public sealed record TripMemberResponse(Guid UserId, TripRole Role, string? DisplayName);
 
 public sealed record AddTripMemberRequest(Guid UserId, TripRole Role);

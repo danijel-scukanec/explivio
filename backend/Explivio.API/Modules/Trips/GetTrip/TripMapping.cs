@@ -13,6 +13,7 @@ public static class TripMapping
         trip.TravelerCount,
         trip.Status,
         trip.HasCoverPhoto,
+        trip.BaseCurrency,
         trip.CreatedAt,
         trip.Stops
             .OrderBy(s => s.Order)

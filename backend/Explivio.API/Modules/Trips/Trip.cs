@@ -11,6 +11,9 @@ public class Trip : Entity
     public int TravelerCount { get; set; }
     public TripStatus Status { get; set; }
     public bool HasCoverPhoto { get; set; }
+    // F25: the currency the trip's budget is reported in. Expenses keep their own currency; the budget
+    // summary converts them all into this one (live FX). 3-letter ISO 4217 code, defaults to EUR.
+    public string BaseCurrency { get; set; } = "EUR";
     public Guid UserId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
@@ -24,7 +27,7 @@ public class Trip : Entity
     // with at least one stop (validated before here).
     public static Trip Create(
         string name, DateOnly startDate, DateOnly endDate, int travelerCount, Guid userId,
-        IReadOnlyList<TripStopInput> stops)
+        IReadOnlyList<TripStopInput> stops, string baseCurrency = "EUR")
     {
         var trip = new Trip
         {
@@ -34,6 +37,7 @@ public class Trip : Entity
             EndDate = endDate,
             TravelerCount = travelerCount,
             Status = TripStatus.Planned,
+            BaseCurrency = baseCurrency.ToUpperInvariant(),
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
@@ -89,6 +93,14 @@ public class Trip : Entity
     public void SetStatus(TripStatus status)
     {
         Status = status;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    // F25: change the currency the budget is reported in. Only the reporting currency changes;
+    // expenses keep their own currencies and are re-converted on the next summary read.
+    public void SetBaseCurrency(string baseCurrency)
+    {
+        BaseCurrency = baseCurrency.ToUpperInvariant();
         UpdatedAt = DateTime.UtcNow;
     }
 

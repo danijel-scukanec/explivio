@@ -274,6 +274,63 @@ export interface paths {
         };
         trace?: never;
     };
+    "/v1/trips/{id}/base-currency": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SetTripBaseCurrencyRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/v1/trips/{id}/stops": {
         parameters: {
             query?: never;
@@ -960,6 +1017,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/trips/{tripId}/expenses/balances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tripId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BudgetBalancesResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/trips/{tripId}/expenses/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    format?: string;
+                };
+                header?: never;
+                path: {
+                    tripId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/trips/{tripId}/expenses/{id}": {
         parameters: {
             query?: never;
@@ -1198,17 +1329,29 @@ export interface components {
             category: components["schemas"]["ExpenseCategory"];
             /** Format: date */
             date: string;
+            /** Format: uuid */
+            paidByUserId?: null | string;
+            splits?: null | components["schemas"]["ExpenseShareInput"][];
         };
         AddTripMemberRequest: {
             /** Format: uuid */
             userId: string;
             role: components["schemas"]["TripRole"];
         };
+        BudgetBalancesResponse: {
+            baseCurrency: string;
+            conversionAvailable: boolean;
+            balances: components["schemas"]["MemberBalance"][];
+            settlements: components["schemas"]["Settlement"][];
+        };
         BudgetSummaryResponse: {
-            expenses: components["schemas"]["Expense"][];
+            baseCurrency: string;
+            conversionAvailable: boolean;
+            expenses: components["schemas"]["ExpenseResponse"][];
             /** Format: double */
             total: number | string;
             byCategory: components["schemas"]["CategoryTotal"][];
+            byCurrency: components["schemas"]["CurrencyTotal"][];
         };
         CategoryTotal: {
             category: string;
@@ -1266,27 +1409,48 @@ export interface components {
             stops: components["schemas"]["TripStopInput"][];
             /** Format: uuid */
             userId: string;
+            /** @default EUR */
+            baseCurrency: string;
         };
-        Expense: {
-            /** Format: uuid */
-            id?: string;
-            /** Format: uuid */
-            tripId?: string;
-            description?: string;
+        CurrencyTotal: {
+            currency: string;
             /** Format: double */
-            amount?: number | string;
-            currency?: string;
-            category?: components["schemas"]["ExpenseCategory"];
-            /** Format: date */
-            date?: string;
-            /** Format: uuid */
-            reservationId?: null | string;
-            /** Format: date-time */
-            createdAt?: string;
-            domainEvents?: null | components["schemas"]["IDomainEvent"][];
+            total: number | string;
         };
         /** @enum {unknown} */
         ExpenseCategory: "Transport" | "Accommodation" | "Food" | "Activities" | "Shopping" | "Other";
+        ExpenseResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            tripId: string;
+            description: string;
+            /** Format: double */
+            amount: number | string;
+            currency: string;
+            /** Format: double */
+            amountInBase: null | number | string;
+            category: components["schemas"]["ExpenseCategory"];
+            /** Format: date */
+            date: string;
+            /** Format: uuid */
+            reservationId: null | string;
+            /** Format: uuid */
+            paidByUserId: null | string;
+            shares: components["schemas"]["ExpenseShareResponse"][];
+        };
+        ExpenseShareInput: {
+            /** Format: uuid */
+            userId: string;
+            /** Format: double */
+            amount: number | string;
+        };
+        ExpenseShareResponse: {
+            /** Format: uuid */
+            userId: string;
+            /** Format: double */
+            amount: number | string;
+        };
         GeneratedActivity: {
             /** Format: int32 */
             day: number | string;
@@ -1322,6 +1486,17 @@ export interface components {
         IDomainEvent: Record<string, never>;
         /** Format: binary */
         IFormFile: string;
+        MemberBalance: {
+            /** Format: uuid */
+            userId: string;
+            displayName: string;
+            /** Format: double */
+            paid: number | string;
+            /** Format: double */
+            owed: number | string;
+            /** Format: double */
+            net: number | string;
+        };
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -1365,6 +1540,19 @@ export interface components {
         ReservationStatus: "Reserved" | "Confirmed" | "Cancelled";
         /** @enum {unknown} */
         ReservationType: "Flight" | "Accommodation" | "CarRental" | "Restaurant" | "Transport" | "Tour" | "Other";
+        Settlement: {
+            /** Format: uuid */
+            fromUserId: string;
+            fromName: string;
+            /** Format: uuid */
+            toUserId: string;
+            toName: string;
+            /** Format: double */
+            amount: number | string;
+        };
+        SetTripBaseCurrencyRequest: {
+            baseCurrency: string;
+        };
         SetTripStatusRequest: {
             status: components["schemas"]["TripStatus"];
         };
@@ -1375,6 +1563,7 @@ export interface components {
             /** Format: uuid */
             userId: string;
             role: components["schemas"]["TripRole"];
+            displayName: null | string;
         };
         TripResponse: {
             /** Format: uuid */
@@ -1389,6 +1578,7 @@ export interface components {
             travelerCount: number | string;
             status: components["schemas"]["TripStatus"];
             hasCoverPhoto: boolean;
+            baseCurrency: string;
             /** Format: date-time */
             createdAt: string;
             stops: components["schemas"]["TripStopResponse"][];

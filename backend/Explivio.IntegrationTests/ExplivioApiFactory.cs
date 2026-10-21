@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Infrastructure.Fx;
 using Explivio.API.Infrastructure.Storage;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testcontainers.Azurite;
 using Testcontainers.MsSql;
 using Xunit;
@@ -50,6 +52,11 @@ public sealed class ExplivioApiFactory : WebApplicationFactory<Program>, IAsyncL
         {
             services.AddSingleton(new BlobServiceClient(_azurite.GetConnectionString()));
             services.AddScoped<IPhotoStorage, BlobPhotoStorage>();
+
+            // F25: replace the live FX provider with a deterministic fake so budget-conversion tests
+            // are repeatable and CI stays offline. Fixed rates relative to EUR.
+            services.RemoveAll<IFxRateProvider>();
+            services.AddSingleton<IFxRateProvider, FakeFxRateProvider>();
         });
     }
 

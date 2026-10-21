@@ -10,5 +10,8 @@ public record CreateTripCommand(
     DateOnly EndDate,
     int TravelerCount,
     IReadOnlyList<TripStopInput> Stops,
-    Guid UserId
+    Guid UserId,
+    // F25: the currency the trip's budget is reported in (ISO 4217). Optional on the wire; defaults
+    // to EUR when the client doesn't send one.
+    string BaseCurrency = "EUR"
 ) : IRequest<Guid>;

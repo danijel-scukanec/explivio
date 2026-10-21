@@ -13,7 +13,8 @@ public class CreateTripHandler(AppDbContext db) : IRequestHandler<CreateTripComm
             command.EndDate,
             command.TravelerCount,
             command.UserId,
-            command.Stops);
+            command.Stops,
+            command.BaseCurrency);
 
         db.Trips.Add(trip);
 

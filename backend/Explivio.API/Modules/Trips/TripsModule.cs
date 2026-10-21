@@ -7,6 +7,7 @@ using Explivio.API.Modules.Trips.CreateTrip;
 using Explivio.API.Modules.Trips.DeleteTrip;
 using Explivio.API.Modules.Trips.GetTrip;
 using Explivio.API.Modules.Trips.GetTrips;
+using Explivio.API.Modules.Trips.SetTripBaseCurrency;
 using Explivio.API.Modules.Trips.SetTripStatus;
 using Explivio.API.Modules.Trips.SetTripStops;
 using MediatR;
@@ -76,6 +77,14 @@ public static class TripsModule
             return result.ToHttpResult();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Owner, "id"))
           .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound);
+
+        // F25: change the currency the budget is reported in. Editor+ (editing the trip).
+        group.MapPatch("/{id:guid}/base-currency", async (Guid id, SetTripBaseCurrencyRequest body, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new SetTripBaseCurrencyCommand(id, body.BaseCurrency));
+            return result.ToHttpResult();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Editor, "id"))
+          .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound).ProducesValidationProblem();
 
         // F22: replace a trip's ordered stops (multi-destination route). Editor+ (editing the trip).
         group.MapPut("/{id:guid}/stops", async (Guid id, SetTripStopsRequest body, IMediator mediator) =>

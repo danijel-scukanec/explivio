@@ -15,7 +15,9 @@ public class AddExpenseHandler(AppDbContext db, ITripCollaborationNotifier colla
             command.Amount,
             command.Currency,
             command.Category,
-            command.Date);
+            command.Date,
+            paidByUserId: command.PaidByUserId,
+            shares: command.Splits);
 
         db.Expenses.Add(expense);
         await db.SaveChangesAsync(cancellationToken);

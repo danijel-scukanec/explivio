@@ -17,6 +17,8 @@ public record TripResponse(
     int TravelerCount,
     TripStatus Status,
     bool HasCoverPhoto,
+    // F25: the currency the trip's budget is reported in (ISO 4217).
+    string BaseCurrency,
     DateTime CreatedAt,
     IReadOnlyList<TripStopResponse> Stops
 );

@@ -9,6 +9,7 @@ using Explivio.API.Infrastructure.Behaviors;
 using Explivio.API.Infrastructure.Idempotency;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Features;
+using Explivio.API.Infrastructure.Fx;
 using Explivio.API.Infrastructure.Outbox;
 using Explivio.API.Infrastructure.Rag;
 using Explivio.API.Infrastructure.ReadModel;
@@ -19,6 +20,7 @@ using Explivio.API.Modules.Users;
 using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Budget;
+using Explivio.API.Modules.Budget.Export;
 using Explivio.API.Modules.Reservations;
 using FluentValidation;
 using Microsoft.FeatureManagement;
@@ -147,6 +149,16 @@ builder.Services.AddSingleton<ITripCollaborationNotifier, TripCollaborationNotif
 
 // F23: keeps a booking's cost mirrored into the trip budget as a linked expense.
 builder.Services.AddScoped<ReservationBudgetSync>();
+
+// F25: live exchange rates (frankfurter.dev, cached) so the budget summary can convert every
+// expense into the trip's base currency. Public GET, so always registered; tests swap in a fake.
+builder.Services.AddExplivioFx(builder.Configuration);
+
+// F25: budget export writers (CSV hand-written; PDF via QuestPDF). Stateless, so singletons; the
+// export endpoint resolves them all and picks one by format.
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+builder.Services.AddSingleton<IBudgetExporter, CsvBudgetExporter>();
+builder.Services.AddSingleton<IBudgetExporter, PdfBudgetExporter>();
 
 // F09: API versioning via URL segment (/v1/...). C# stays the source of truth for the
 // version; the frontend regenerates types from the versioned OpenAPI spec.

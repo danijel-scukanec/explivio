@@ -13,6 +13,10 @@ public sealed class TripConfiguration : IEntityTypeConfiguration<Trip>
         // enum's numeric values ever change — same convention as TripMember.Role.
         builder.Property(t => t.Status).HasConversion<string>().HasMaxLength(20);
 
+        // F25: ISO 4217 code — fixed 3 chars. The DB default backfills existing trips (and any insert
+        // that somehow omits it) to EUR, matching the entity's default.
+        builder.Property(t => t.BaseCurrency).HasMaxLength(3).IsFixedLength().HasDefaultValue("EUR");
+
         // F22: a trip owns its ordered stops; deleting the trip removes them.
         builder.HasMany(t => t.Stops)
             .WithOne()

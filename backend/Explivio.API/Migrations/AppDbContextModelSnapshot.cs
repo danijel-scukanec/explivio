@@ -90,6 +90,7 @@ namespace Explivio.API.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Category")
@@ -109,6 +110,9 @@ namespace Explivio.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("PaidByUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("ReservationId")
                         .HasColumnType("uniqueidentifier");
 
@@ -117,7 +121,30 @@ namespace Explivio.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Expenses");
+                    b.ToTable("Expenses", (string)null);
+                });
+
+            modelBuilder.Entity("Explivio.API.Modules.Budget.ExpenseShare", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ExpenseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpenseId");
+
+                    b.ToTable("ExpenseShares", (string)null);
                 });
 
             modelBuilder.Entity("Explivio.API.Modules.Itinerary.Activity", b =>
@@ -226,6 +253,14 @@ namespace Explivio.API.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BaseCurrency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(3)
+                        .HasColumnType("nchar(3)")
+                        .HasDefaultValue("EUR")
+                        .IsFixedLength();
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -343,6 +378,15 @@ namespace Explivio.API.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Explivio.API.Modules.Budget.ExpenseShare", b =>
+                {
+                    b.HasOne("Explivio.API.Modules.Budget.Expense", null)
+                        .WithMany("Shares")
+                        .HasForeignKey("ExpenseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Explivio.API.Modules.Trips.TripStop", b =>
                 {
                     b.HasOne("Explivio.API.Modules.Trips.Trip", null)
@@ -350,6 +394,11 @@ namespace Explivio.API.Migrations
                         .HasForeignKey("TripId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Explivio.API.Modules.Budget.Expense", b =>
+                {
+                    b.Navigation("Shares");
                 });
 
             modelBuilder.Entity("Explivio.API.Modules.Trips.Trip", b =>
