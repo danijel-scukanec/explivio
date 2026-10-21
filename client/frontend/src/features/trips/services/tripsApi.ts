@@ -1,4 +1,4 @@
-import type { Trip, CreateTripRequest, TripStatus, TripStopInput } from '@explivio/shared';
+import type { Trip, TripMember, CreateTripRequest, TripStatus, TripStopInput } from '@explivio/shared';
 import { withDevUser, devUserQuery } from '../../../shared/devUser';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
@@ -44,6 +44,23 @@ export async function setTripStatus(id: string, status: TripStatus): Promise<voi
     body: JSON.stringify({ status }),
   });
   if (!res.ok) throw new Error('Failed to update trip status');
+}
+
+// F25: change the currency the trip's budget is reported in.
+export async function setTripBaseCurrency(id: string, baseCurrency: string): Promise<void> {
+  const res = await fetch(`${API_URL}/trips/${id}/base-currency`, {
+    method: 'PATCH',
+    headers: withDevUser({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ baseCurrency }),
+  });
+  if (!res.ok) throw new Error('Failed to update base currency');
+}
+
+// F15/F25: the trip's members (with display names), used for sharing and for splitting expenses.
+export async function getTripMembers(id: string): Promise<TripMember[]> {
+  const res = await fetch(`${API_URL}/trips/${id}/members`, { headers: withDevUser() });
+  if (!res.ok) throw new Error('Failed to fetch trip members');
+  return res.json();
 }
 
 // F22: upload (or replace) a trip's cover photo. No Content-Type header — the browser sets the

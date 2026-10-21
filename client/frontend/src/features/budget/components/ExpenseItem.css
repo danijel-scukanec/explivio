@@ -39,6 +39,22 @@
   font-size: 15px;
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* F25: the amount converted into the trip base currency, shown under the original. */
+.expense-item__converted {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text);
+}
+
+/* F25: split marker. */
+.expense-item__tag--split {
+  color: var(--text-h);
+  background: var(--border);
 }
 
 .expense-item__delete {

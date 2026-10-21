@@ -5,6 +5,9 @@ import { createTrip } from '../services/tripsApi';
 import { TripStopsEditor } from './TripStopsEditor';
 import './CreateTripModal.css';
 
+// F25: currencies a trip's budget can be reported in.
+const CURRENCIES = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'AUD', 'CAD'];
+
 interface Props {
   onClose: () => void;
   onCreated: () => void;
@@ -19,6 +22,7 @@ export function CreateTripModal({ onClose, onCreated }: Props) {
     startDate: '',
     endDate: '',
     travelerCount: 1,
+    baseCurrency: 'EUR',
   });
   // F22: a trip is an ordered route of stops; start with one empty stop.
   const [stops, setStops] = useState<TripStopInput[]>([
@@ -27,7 +31,7 @@ export function CreateTripModal({ onClose, onCreated }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: name === 'travelerCount' ? Number(value) : value }));
   }
@@ -82,10 +86,18 @@ export function CreateTripModal({ onClose, onCreated }: Props) {
             </label>
           </div>
 
-          <label>
-            {t('createTrip.travellers')}
-            <input type="number" name="travelerCount" value={form.travelerCount} onChange={handleChange} min={1} max={100} required />
-          </label>
+          <div className="modal__row">
+            <label>
+              {t('createTrip.travellers')}
+              <input type="number" name="travelerCount" value={form.travelerCount} onChange={handleChange} min={1} max={100} required />
+            </label>
+            <label>
+              {t('createTrip.baseCurrency')}
+              <select name="baseCurrency" value={form.baseCurrency} onChange={handleChange}>
+                {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </label>
+          </div>
 
           <div className="modal__stops">
             <span className="modal__stops-label">{t('createTrip.destinations')}</span>

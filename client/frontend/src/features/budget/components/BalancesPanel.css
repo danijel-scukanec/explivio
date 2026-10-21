@@ -1,0 +1,88 @@
+/* F25: settle-up balances panel. */
+.balances-panel {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.balances-panel__title {
+  font-size: 16px;
+  margin: 0 0 16px;
+}
+
+.balances-panel__members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.balances-panel__member {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 120px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.balances-panel__member-name {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.balances-panel__net {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.balances-panel__net--owed { color: #16a34a; }
+.balances-panel__net--owes { color: #e53e3e; }
+.balances-panel__net--even { color: var(--text); }
+
+.balances-panel__subtitle {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  margin: 0 0 10px;
+}
+
+.balances-panel__transfers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.balances-panel__transfer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-h);
+}
+
+.balances-panel__arrow {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.balances-panel__amount {
+  margin-left: auto;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.balances-panel__even {
+  font-size: 14px;
+  color: var(--text);
+  margin: 0;
+}

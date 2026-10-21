@@ -1,0 +1,84 @@
+/* F25: split-expense section inside the add-expense modal. */
+.split {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.split__toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-h);
+  cursor: pointer;
+
+  input {
+    width: auto;
+  }
+}
+
+.split__body {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.split__members {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.split__member {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  opacity: 0.6;
+}
+
+.split__member--on {
+  opacity: 1;
+  border-color: var(--accent);
+}
+
+.split__member-pick {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-h);
+  cursor: pointer;
+  margin: 0;
+
+  input {
+    width: auto;
+  }
+}
+
+.split__share {
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.split__share-input {
+  width: 90px;
+  text-align: right;
+}
+
+.split__summary {
+  font-size: 13px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.split__summary--off {
+  color: #e53e3e;
+}
