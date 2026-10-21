@@ -1,7 +1,9 @@
 import type {
   Trip,
+  TripMember,
   Activity,
   BudgetSummary,
+  BudgetBalances,
   CreateTripRequest,
   CreateActivityRequest,
   UpdateActivityRequest,
@@ -77,6 +79,13 @@ export const setTripStatus = (tripId: string, status: TripStatus) =>
 export const setTripStops = (tripId: string, stops: TripStopInput[]) =>
   mutate('PUT', `/trips/${tripId}/stops`, { stops });
 
+// F25: change the currency the trip's budget is reported in.
+export const setTripBaseCurrency = (tripId: string, baseCurrency: string) =>
+  mutate('PATCH', `/trips/${tripId}/base-currency`, { baseCurrency });
+
+// F15/F25: the trip's members (with display names), for sharing and splitting expenses.
+export const getTripMembers = (tripId: string) => getJson<TripMember[]>(`/trips/${tripId}/members`);
+
 // Itinerary
 export const getActivities = (tripId: string) => getJson<Activity[]>(`/trips/${tripId}/activities`);
 export const createActivity = (tripId: string, data: CreateActivityRequest) =>
@@ -102,7 +111,17 @@ export const deleteReservation = (tripId: string, id: string) =>
 
 // Budget
 export const getBudget = (tripId: string) => getJson<BudgetSummary>(`/trips/${tripId}/expenses`);
+// F25: settle-up balances across the trip's split expenses.
+export const getBudgetBalances = (tripId: string) => getJson<BudgetBalances>(`/trips/${tripId}/expenses/balances`);
 export const addExpense = (tripId: string, data: AddExpenseRequest) =>
   mutate<{ id: string }>('POST', `/trips/${tripId}/expenses`, { ...data, tripId });
 export const deleteExpense = (tripId: string, id: string) =>
   mutate('DELETE', `/trips/${tripId}/expenses/${id}`);
+
+// F25: fetch the budget export as text (CSV) — the mobile UI shares it via the OS share sheet. Not a
+// cached/queued call: it's an on-demand download that only makes sense online.
+export async function fetchBudgetCsv(tripId: string): Promise<string> {
+  const res = await rawSend('GET', `/trips/${tripId}/expenses/export?format=csv`);
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return res.text();
+}

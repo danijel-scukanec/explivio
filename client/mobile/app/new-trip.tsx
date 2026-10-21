@@ -11,10 +11,13 @@ import { theme } from '../src/theme';
 // The backend overrides this with the authenticated caller; it's just a placeholder for the body.
 const PLACEHOLDER_USER_ID = '00000000-0000-0000-0000-000000000001';
 
+// F25: currencies a trip's budget can be reported in.
+const CURRENCIES = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'AUD', 'CAD'];
+
 export default function NewTripScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [form, setForm] = useState({ name: '', startDate: '', endDate: '', travelerCount: '1' });
+  const [form, setForm] = useState({ name: '', startDate: '', endDate: '', travelerCount: '1', baseCurrency: 'EUR' });
   // F22: a trip is an ordered route of stops; start with one empty stop.
   const [stops, setStops] = useState<TripStopInput[]>([
     { place: '', arriveDate: null, departDate: null, latitude: null, longitude: null },
@@ -47,6 +50,7 @@ export default function NewTripScreen() {
       travelerCount: Number(form.travelerCount) || 1,
       stops: cleanedStops,
       userId: PLACEHOLDER_USER_ID,
+      baseCurrency: form.baseCurrency,
     };
     try {
       await createTrip(data);
@@ -78,6 +82,20 @@ export default function NewTripScreen() {
         <View>
           <Text style={s.label}>{t('createTrip.travellers')}</Text>
           <TextInput style={s.input} value={form.travelerCount} onChangeText={set('travelerCount')} keyboardType="number-pad" />
+        </View>
+
+        <View>
+          <Text style={s.label}>{t('createTrip.baseCurrency')}</Text>
+          <View style={s.chipRow}>
+            {CURRENCIES.map(c => {
+              const active = form.baseCurrency === c;
+              return (
+                <TouchableOpacity key={c} style={[s.chip, active && s.chipActive]} onPress={() => setForm(p => ({ ...p, baseCurrency: c }))}>
+                  <Text style={[s.chipText, active && s.chipTextActive]}>{c}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
 
         <View>

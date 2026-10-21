@@ -3,12 +3,12 @@
 Prioritized feature catalogue for the Explivio showcase. Each feature notes the **capability it demonstrates**, so the roadmap doubles as a map of "what this repo proves I can do."
 
 > ### ⭐ Committed target vs. roadmap
-> A half-finished portfolio repo reads worse than a smaller, polished one. The original **committed target** was **all of P0 + F12 + F13**; in practice the build went well beyond it. See the **Done** column for what has actually shipped — **all of P0; F12–F15 and F19 in P1; F22, F23, F30, F31, F32 in P2.** The unticked rows are **roadmap: genuinely planned, may not be built** — kept to show direction, not promised.
+> A half-finished portfolio repo reads worse than a smaller, polished one. The original **committed target** was **all of P0 + F12 + F13**; in practice the build went well beyond it. See the **Done** column for what has actually shipped — **all of P0; F12–F15 and F19 in P1; F22, F23, F25, F30, F31, F32 in P2.** The unticked rows are **roadmap: genuinely planned, may not be built** — kept to show direction, not promised.
 
 **Priority tiers**
 - **P0 — Foundation:** the distributed/AI spine + core product. Must exist for the showcase to land. **(shipped)**
 - **P1 — Showcase:** the features a reviewer stops scrolling for. **(F12–F15, F19 shipped; rest roadmap)**
-- **P2 — Stretch:** breadth once the spine is impressive. **(F22, F23, F30, F31, F32 shipped; rest roadmap)**
+- **P2 — Stretch:** breadth once the spine is impressive. **(F22, F23, F25, F30, F31, F32 shipped; rest roadmap)**
 
 Legend for _Proves_: 🧩 distributed-systems · 🤖 AI · 🎨 full-stack · 🛠️ engineering-discipline
 
@@ -65,7 +65,7 @@ Legend for _Proves_: 🧩 distributed-systems · 🤖 AI · 🎨 full-stack · �
 | F22 | Multi-destination trips (legs/stops), trip status, cover photos | 🎨 | ✅ |
 | F23 | Drag-to-reorder itinerary, activity categories, reservations (incl. budget-linked booking costs) | 🎨 | ✅ |
 | F24 | Packing lists / checklists, trip documents (Blob) | 🎨 | |
-| F25 | Budget deepening — multi-currency + live FX, split expenses, export | 🎨 | |
+| F25 | Budget deepening — multi-currency + live FX, split expenses, export | 🎨 | ✅ |
 | F26 | Public **trip gallery** + clone/templates, social (follow, share links, likes) | 🎨🧩 | |
 | F27 | Calendar sync (.ics / Google / Outlook), **PDF itinerary** export | 🎨 | |
 | F28 | Per-day weather, timezone/currency awareness | 🎨 | |
@@ -104,3 +104,5 @@ Entra External ID, feature flags, docs/README polish for the portfolio.
 ## Deferred / explicitly noted
 - **Real auth is deferred** — fake dev identity today; wire **Entra External ID** in Phase 6. (Azure AD B2C is on a deprecation path for new tenants.)
 - The existing hand-written **Bicep modules** will be superseded by the Aspire-generated deployment model (kept until F11 lands).
+- **F15 member-management UI is deferred to Phase 6 (with P-Auth).** F15 shipped shared-trip roles + real-time collaboration (presence, live-edit nudges) as backend + plumbing, but the "invite / manage members (with roles)" **UI** was not built — a people-picker needs real identities, so it waits on P-Auth. Adding members today is API-only (`POST /trips/{id}/members`).
+- **F25 split-expense UI depends on the F15 member UI above.** The budget split feature (split among trip members, settle-up balances) is backend-complete and tested, but its UI entry point only appears when a trip has 2+ members — so UI-reachable splitting lights up once the F15 member UI lands post-auth. F25's multi-currency + live FX and CSV/PDF export have no such dependency and are fully usable today.
