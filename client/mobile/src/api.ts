@@ -14,6 +14,8 @@ import type {
   TripStatus,
   TripStopInput,
   TripConditions,
+  Checklist,
+  TripDocument,
 } from '@explivio/shared';
 import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
 
@@ -130,4 +132,41 @@ export async function fetchBudgetCsv(tripId: string): Promise<string> {
   const res = await rawSend('GET', `/trips/${tripId}/expenses/export?format=csv`);
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
   return res.text();
+}
+
+// F24: checklists (packing lists / to-dos). Named lists, each with items. Mutations queue offline
+// like every other JSON mutation.
+export const getChecklists = (tripId: string) => getJson<Checklist[]>(`/trips/${tripId}/checklists`);
+export const createChecklist = (tripId: string, name: string) =>
+  mutate<{ id: string }>('POST', `/trips/${tripId}/checklists`, { tripId, name });
+export const deleteChecklist = (tripId: string, id: string) =>
+  mutate('DELETE', `/trips/${tripId}/checklists/${id}`);
+export const addChecklistItem = (tripId: string, checklistId: string, text: string) =>
+  mutate<{ id: string }>('POST', `/trips/${tripId}/checklists/${checklistId}/items`, { tripId, checklistId, text });
+export const updateChecklistItem = (
+  tripId: string, checklistId: string, id: string, text: string, isChecked: boolean) =>
+  mutate('PUT', `/trips/${tripId}/checklists/${checklistId}/items/${id}`, { tripId, checklistId, id, text, isChecked });
+export const deleteChecklistItem = (tripId: string, checklistId: string, id: string) =>
+  mutate('DELETE', `/trips/${tripId}/checklists/${checklistId}/items/${id}`);
+
+// F24: trip documents (Blob-backed). List/delete are ordinary JSON calls; upload is multipart and
+// online-only — binary bodies don't fit the offline replay queue, so it isn't routed through mutate().
+export const getDocuments = (tripId: string) => getJson<TripDocument[]>(`/trips/${tripId}/documents`);
+export const deleteDocument = (tripId: string, id: string) =>
+  mutate('DELETE', `/trips/${tripId}/documents/${id}`);
+export const documentContentUrl = (tripId: string, id: string) =>
+  `${API_URL}/trips/${tripId}/documents/${id}/content`;
+
+export async function uploadDocument(
+  tripId: string, file: { uri: string; name: string; mimeType?: string }): Promise<TripDocument> {
+  const form = new FormData();
+  // React Native's FormData takes a {uri, name, type} object for file parts.
+  form.append('file', {
+    uri: file.uri,
+    name: file.name,
+    type: file.mimeType ?? 'application/octet-stream',
+  } as unknown as Blob);
+  const res = await fetch(`${API_URL}/trips/${tripId}/documents`, { method: 'POST', body: form });
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return res.json() as Promise<TripDocument>;
 }

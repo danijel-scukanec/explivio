@@ -266,6 +266,23 @@
     "enterDescDate": "Introduce una descripción y una fecha.",
     "enterTitleStart": "Introduce un título y una fecha de inicio."
   },
+  "checklists": {
+    "title": "Listas",
+    "couldNotLoad": "No se pudieron cargar las listas.",
+    "addList": "Añadir",
+    "newListPlaceholder": "Nueva lista (p. ej. Equipaje)",
+    "empty": "Aún no hay listas. Añade una para empezar.",
+    "newItemPlaceholder": "Añadir un elemento…",
+    "addItem": "Añadir"
+  },
+  "documents": {
+    "title": "Documentos",
+    "couldNotLoad": "No se pudieron cargar los documentos.",
+    "couldNotUpload": "No se pudo subir el archivo.",
+    "upload": "+ Subir",
+    "uploading": "Subiendo…",
+    "empty": "Aún no hay documentos. Sube billetes, reservas y más."
+  },
   "conditions": {
     "title": "Tiempo e info local",
     "sameCurrency": "igual que tu moneda base",

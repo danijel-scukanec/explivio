@@ -266,6 +266,23 @@
     "enterDescDate": "Bitte Beschreibung und Datum eingeben.",
     "enterTitleStart": "Bitte Titel und Startdatum eingeben."
   },
+  "checklists": {
+    "title": "Checklisten",
+    "couldNotLoad": "Checklisten konnten nicht geladen werden.",
+    "addList": "Hinzufügen",
+    "newListPlaceholder": "Neue Liste (z. B. Packen)",
+    "empty": "Noch keine Listen. Füge eine hinzu, um zu beginnen.",
+    "newItemPlaceholder": "Eintrag hinzufügen…",
+    "addItem": "Hinzufügen"
+  },
+  "documents": {
+    "title": "Dokumente",
+    "couldNotLoad": "Dokumente konnten nicht geladen werden.",
+    "couldNotUpload": "Die Datei konnte nicht hochgeladen werden.",
+    "upload": "+ Hochladen",
+    "uploading": "Wird hochgeladen…",
+    "empty": "Noch keine Dokumente. Lade Tickets, Buchungen und mehr hoch."
+  },
   "conditions": {
     "title": "Wetter & Infos vor Ort",
     "sameCurrency": "wie deine Basiswährung",

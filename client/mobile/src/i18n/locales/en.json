@@ -266,6 +266,23 @@
     "enterDescDate": "Please enter a description and date.",
     "enterTitleStart": "Please enter a title and start date."
   },
+  "checklists": {
+    "title": "Checklists",
+    "couldNotLoad": "Could not load checklists.",
+    "addList": "Add",
+    "newListPlaceholder": "New list (e.g. Packing)",
+    "empty": "No lists yet. Add one to start packing.",
+    "newItemPlaceholder": "Add an item…",
+    "addItem": "Add"
+  },
+  "documents": {
+    "title": "Documents",
+    "couldNotLoad": "Could not load documents.",
+    "couldNotUpload": "Could not upload the file.",
+    "upload": "+ Upload",
+    "uploading": "Uploading…",
+    "empty": "No documents yet. Upload tickets, bookings and more."
+  },
   "conditions": {
     "title": "Weather & local info",
     "sameCurrency": "same as your base currency",
