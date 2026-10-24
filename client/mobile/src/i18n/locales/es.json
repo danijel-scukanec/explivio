@@ -266,6 +266,24 @@
     "enterDescDate": "Introduce una descripción y una fecha.",
     "enterTitleStart": "Introduce un título y una fecha de inicio."
   },
+  "gallery": {
+    "title": "Galería de viajes",
+    "couldNotLoad": "No se pudo cargar la galería.",
+    "couldNotClone": "No se pudo clonar el viaje.",
+    "empty": "Aún no hay viajes públicos.",
+    "clone": "Clonar",
+    "cloning": "Clonando…"
+  },
+  "share": {
+    "title": "Compartir viaje",
+    "listInGallery": "Publicar en la galería pública",
+    "listInGalleryHint": "Cualquiera puede encontrarlo, verlo y clonarlo.",
+    "linkTitle": "Enlace para compartir",
+    "linkHint": "Cualquiera con el enlace puede ver este viaje.",
+    "createLink": "Crear y compartir enlace",
+    "copy": "Compartir enlace",
+    "revoke": "Revocar enlace"
+  },
   "checklists": {
     "title": "Listas",
     "couldNotLoad": "No se pudieron cargar las listas.",

@@ -266,6 +266,24 @@
     "enterDescDate": "Bitte Beschreibung und Datum eingeben.",
     "enterTitleStart": "Bitte Titel und Startdatum eingeben."
   },
+  "gallery": {
+    "title": "Reisegalerie",
+    "couldNotLoad": "Galerie konnte nicht geladen werden.",
+    "couldNotClone": "Reise konnte nicht geklont werden.",
+    "empty": "Noch keine öffentlichen Reisen.",
+    "clone": "Klonen",
+    "cloning": "Wird geklont…"
+  },
+  "share": {
+    "title": "Reise teilen",
+    "listInGallery": "In der öffentlichen Galerie listen",
+    "listInGalleryHint": "Jeder kann sie finden, ansehen und klonen.",
+    "linkTitle": "Freigabelink",
+    "linkHint": "Jeder mit dem Link kann diese Reise ansehen.",
+    "createLink": "Link erstellen & teilen",
+    "copy": "Link teilen",
+    "revoke": "Link widerrufen"
+  },
   "checklists": {
     "title": "Checklisten",
     "couldNotLoad": "Checklisten konnten nicht geladen werden.",

@@ -16,6 +16,8 @@ import type {
   TripConditions,
   Checklist,
   TripDocument,
+  GalleryItem,
+  ShareLink,
 } from '@explivio/shared';
 import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
 
@@ -169,4 +171,24 @@ export async function uploadDocument(
   const res = await fetch(`${API_URL}/trips/${tripId}/documents`, { method: 'POST', body: form });
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
   return res.json() as Promise<TripDocument>;
+}
+
+// F26: the public gallery, likes, cloning and share links. The gallery list is read-through cached so
+// it survives going offline; likes/clone/visibility are queued mutations.
+export const getGallery = () => getJson<GalleryItem[]>('/gallery');
+export const getGalleryTrip = (tripId: string) => getJson<Trip>(`/gallery/${tripId}`);
+export const getSharedTrip = (token: string) => getJson<Trip>(`/trips/shared/${token}`);
+export const likeTrip = (tripId: string) => mutate('POST', `/trips/${tripId}/like`);
+export const unlikeTrip = (tripId: string) => mutate('DELETE', `/trips/${tripId}/like`);
+export const cloneTrip = (tripId: string) => mutate<{ id: string }>('POST', `/trips/${tripId}/clone`);
+export const setTripVisibility = (tripId: string, isPublic: boolean) =>
+  mutate('PATCH', `/trips/${tripId}/visibility`, { isPublic });
+export const revokeShareLink = (tripId: string) => mutate('DELETE', `/trips/${tripId}/share`);
+
+// Minting a share link must return the token, so it's online-only (not routed through the offline
+// queue, which discards responses).
+export async function createShareLink(tripId: string): Promise<ShareLink> {
+  const res = await rawSend('POST', `/trips/${tripId}/share`);
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return res.json() as Promise<ShareLink>;
 }

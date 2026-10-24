@@ -266,6 +266,24 @@
     "enterDescDate": "Please enter a description and date.",
     "enterTitleStart": "Please enter a title and start date."
   },
+  "gallery": {
+    "title": "Trip gallery",
+    "couldNotLoad": "Could not load the gallery.",
+    "couldNotClone": "Could not clone the trip.",
+    "empty": "No public trips yet.",
+    "clone": "Clone",
+    "cloning": "Cloning…"
+  },
+  "share": {
+    "title": "Share trip",
+    "listInGallery": "List in the public gallery",
+    "listInGalleryHint": "Anyone can find, view and clone it.",
+    "linkTitle": "Share link",
+    "linkHint": "Anyone with the link can view this trip.",
+    "createLink": "Create & share link",
+    "copy": "Share link",
+    "revoke": "Revoke link"
+  },
   "checklists": {
     "title": "Checklists",
     "couldNotLoad": "Could not load checklists.",

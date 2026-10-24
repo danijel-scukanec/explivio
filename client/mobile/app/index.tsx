@@ -39,9 +39,14 @@ export default function TripsScreen() {
         options={{
           title: t('mobile.tripsTitle'),
           headerRight: () => (
-            <TouchableOpacity onPress={() => router.push('/new-trip')} hitSlop={12}>
-              <Text style={styles.headerButton}>{t('mobile.newShort')}</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+              <TouchableOpacity onPress={() => router.push('/gallery')} hitSlop={12}>
+                <Text style={styles.headerButton}>🌍</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/new-trip')} hitSlop={12}>
+                <Text style={styles.headerButton}>{t('mobile.newShort')}</Text>
+              </TouchableOpacity>
+            </View>
           ),
         }}
       />
