@@ -147,6 +147,95 @@ namespace Explivio.API.Migrations
                     b.ToTable("ExpenseShares", (string)null);
                 });
 
+            modelBuilder.Entity("Explivio.API.Modules.Checklists.Checklist", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TripId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TripId");
+
+                    b.ToTable("Checklists");
+                });
+
+            modelBuilder.Entity("Explivio.API.Modules.Checklists.ChecklistItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChecklistId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsChecked")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChecklistId");
+
+                    b.ToTable("ChecklistItems");
+                });
+
+            modelBuilder.Entity("Explivio.API.Modules.Documents.TripDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("TripId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TripId");
+
+                    b.ToTable("TripDocuments");
+                });
+
             modelBuilder.Entity("Explivio.API.Modules.Itinerary.Activity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -387,6 +476,15 @@ namespace Explivio.API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Explivio.API.Modules.Checklists.ChecklistItem", b =>
+                {
+                    b.HasOne("Explivio.API.Modules.Checklists.Checklist", null)
+                        .WithMany("Items")
+                        .HasForeignKey("ChecklistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Explivio.API.Modules.Trips.TripStop", b =>
                 {
                     b.HasOne("Explivio.API.Modules.Trips.Trip", null)
@@ -399,6 +497,11 @@ namespace Explivio.API.Migrations
             modelBuilder.Entity("Explivio.API.Modules.Budget.Expense", b =>
                 {
                     b.Navigation("Shares");
+                });
+
+            modelBuilder.Entity("Explivio.API.Modules.Checklists.Checklist", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Explivio.API.Modules.Trips.Trip", b =>

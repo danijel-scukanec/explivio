@@ -53,6 +53,8 @@ public sealed class ExplivioApiFactory : WebApplicationFactory<Program>, IAsyncL
         {
             services.AddSingleton(new BlobServiceClient(_azurite.GetConnectionString()));
             services.AddScoped<IPhotoStorage, BlobPhotoStorage>();
+            // F24: trip documents run against the same Azurite emulator in tests.
+            services.AddScoped<IDocumentStorage, BlobDocumentStorage>();
 
             // F25: replace the live FX provider with a deterministic fake so budget-conversion tests
             // are repeatable and CI stays offline. Fixed rates relative to EUR.

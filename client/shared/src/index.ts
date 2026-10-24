@@ -3,6 +3,8 @@ export * from './types/itinerary';
 export * from './types/budget';
 export * from './types/reservation';
 export * from './types/conditions';
+export * from './types/checklist';
+export * from './types/document';
 export * from './utils/locale';
 export * from './utils/weather';
 export * from './utils/trip';

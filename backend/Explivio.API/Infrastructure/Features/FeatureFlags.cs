@@ -14,6 +14,9 @@ public static class FeatureFlags
     // Gates trip cover-photo upload/serve/delete.
     public const string TripCoverPhotos = "TripCoverPhotos";
 
+    // Gates trip document upload/list/download/delete (F24). Blob-backed, like cover photos.
+    public const string TripDocuments = "TripDocuments";
+
     // All flags, so GET /features can report each one's state without reflection.
-    public static readonly IReadOnlyList<string> All = [AiItineraryGeneration, TripCoverPhotos];
+    public static readonly IReadOnlyList<string> All = [AiItineraryGeneration, TripCoverPhotos, TripDocuments];
 }

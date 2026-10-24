@@ -22,6 +22,8 @@ using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Budget;
 using Explivio.API.Modules.Budget.Export;
+using Explivio.API.Modules.Checklists;
+using Explivio.API.Modules.Documents;
 using Explivio.API.Modules.Reservations;
 using FluentValidation;
 using Microsoft.FeatureManagement;
@@ -131,6 +133,8 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("blobs"
 {
     builder.AddAzureBlobServiceClient("blobs");
     builder.Services.AddScoped<IPhotoStorage, BlobPhotoStorage>();
+    // F24: trip documents share the same blob account (own container), gated the same way as covers.
+    builder.Services.AddScoped<IDocumentStorage, BlobDocumentStorage>();
 }
 
 // F32: feature flags evaluated from the "FeatureManagement" config section (appsettings / env /
@@ -259,6 +263,8 @@ api.MapUsersEndpoints();
 api.MapItineraryEndpoints();
 api.MapBudgetEndpoints();
 api.MapReservationEndpoints();
+api.MapChecklistEndpoints();
+api.MapDocumentEndpoints();
 
 // F13: the streaming itinerary-generation hub. Not versioned like the REST group — SignalR hubs are
 // addressed by a stable path; the default CORS policy and auth apply as for the rest of the app.
