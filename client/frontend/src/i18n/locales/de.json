@@ -233,5 +233,25 @@
     "addAll": "Alle {{count}} zum Reiseplan hinzufügen",
     "adding": "Wird hinzugefügt…",
     "couldNotAddAll": "Es konnten nicht alle Aktivitäten hinzugefügt werden. Bitte versuche es erneut."
+  },
+  "conditions": {
+    "title": "Wetter & Infos vor Ort",
+    "sameCurrency": "wie deine Basiswährung",
+    "weatherUnavailable": "Wetter für diese Daten nicht verfügbar.",
+    "seasonal": "typisch",
+    "wmo": {
+      "clear": "Klarer Himmel",
+      "mostlyClear": "Überwiegend klar",
+      "partlyCloudy": "Teilweise bewölkt",
+      "overcast": "Bedeckt",
+      "fog": "Nebel",
+      "drizzle": "Nieselregen",
+      "rain": "Regen",
+      "snow": "Schnee",
+      "showers": "Regenschauer",
+      "snowShowers": "Schneeschauer",
+      "thunderstorm": "Gewitter",
+      "unknown": "—"
+    }
   }
 }

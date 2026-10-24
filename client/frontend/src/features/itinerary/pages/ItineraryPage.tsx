@@ -14,6 +14,7 @@ import { EditActivityModal } from '../components/EditActivityModal';
 import { EditStopsModal } from '../../trips/components/EditStopsModal';
 import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
 import { ItineraryMap } from '../components/ItineraryMap';
+import { TripConditions } from '../components/TripConditions';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
 import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
@@ -240,6 +241,8 @@ export function ItineraryPage() {
           ))}
         </ol>
       )}
+
+      <TripConditions tripId={tripId!} />
 
       <ItineraryMap activities={activities} days={days} />
 

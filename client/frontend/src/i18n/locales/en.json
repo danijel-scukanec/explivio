@@ -233,5 +233,25 @@
     "addAll": "Add all {{count}} to itinerary",
     "adding": "Adding…",
     "couldNotAddAll": "Could not add all activities. Please try again."
+  },
+  "conditions": {
+    "title": "Weather & local info",
+    "sameCurrency": "same as your base currency",
+    "weatherUnavailable": "Weather unavailable for these dates.",
+    "seasonal": "typical",
+    "wmo": {
+      "clear": "Clear sky",
+      "mostlyClear": "Mainly clear",
+      "partlyCloudy": "Partly cloudy",
+      "overcast": "Overcast",
+      "fog": "Fog",
+      "drizzle": "Drizzle",
+      "rain": "Rain",
+      "snow": "Snow",
+      "showers": "Rain showers",
+      "snowShowers": "Snow showers",
+      "thunderstorm": "Thunderstorm",
+      "unknown": "—"
+    }
   }
 }

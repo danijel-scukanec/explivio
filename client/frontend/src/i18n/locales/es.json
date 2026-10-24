@@ -233,5 +233,25 @@
     "addAll": "Añadir las {{count}} al itinerario",
     "adding": "Añadiendo…",
     "couldNotAddAll": "No se pudieron añadir todas las actividades. Inténtalo de nuevo."
+  },
+  "conditions": {
+    "title": "Tiempo e info local",
+    "sameCurrency": "igual que tu moneda base",
+    "weatherUnavailable": "Tiempo no disponible para estas fechas.",
+    "seasonal": "típico",
+    "wmo": {
+      "clear": "Cielo despejado",
+      "mostlyClear": "Mayormente despejado",
+      "partlyCloudy": "Parcialmente nublado",
+      "overcast": "Cubierto",
+      "fog": "Niebla",
+      "drizzle": "Llovizna",
+      "rain": "Lluvia",
+      "snow": "Nieve",
+      "showers": "Chubascos",
+      "snowShowers": "Chubascos de nieve",
+      "thunderstorm": "Tormenta",
+      "unknown": "—"
+    }
   }
 }
