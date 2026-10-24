@@ -100,6 +100,8 @@
     "addCover": "Add cover",
     "editRoute": "Edit route",
     "bookings": "Bookings",
+    "checklists": "Checklists",
+    "documents": "Documents",
     "budget": "Budget",
     "generate": "Generate with AI",
     "addActivity": "+ Add activity",
@@ -233,6 +235,30 @@
     "addAll": "Add all {{count}} to itinerary",
     "adding": "Adding…",
     "couldNotAddAll": "Could not add all activities. Please try again."
+  },
+  "checklists": {
+    "itinerary": "Itinerary",
+    "documents": "Documents",
+    "couldNotLoad": "Could not load checklists.",
+    "notFound": "Trip not found.",
+    "addList": "Add list",
+    "newListPlaceholder": "New list name (e.g. Packing)",
+    "empty": "No lists yet. Add one to start packing.",
+    "deleteList": "Delete list",
+    "addItem": "Add",
+    "newItemPlaceholder": "Add an item…",
+    "deleteItem": "Delete item"
+  },
+  "documents": {
+    "itinerary": "Itinerary",
+    "checklists": "Checklists",
+    "couldNotLoad": "Could not load documents.",
+    "couldNotUpload": "Could not upload the file.",
+    "notFound": "Trip not found.",
+    "upload": "+ Upload",
+    "uploading": "Uploading…",
+    "empty": "No documents yet. Upload tickets, bookings and more.",
+    "delete": "Delete document"
   },
   "conditions": {
     "title": "Weather & local info",

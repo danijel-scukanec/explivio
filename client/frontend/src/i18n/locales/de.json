@@ -100,6 +100,8 @@
     "addCover": "Titelbild hinzufügen",
     "editRoute": "Route bearbeiten",
     "bookings": "Buchungen",
+    "checklists": "Checklisten",
+    "documents": "Dokumente",
     "budget": "Budget",
     "generate": "Mit KI erstellen",
     "addActivity": "+ Aktivität hinzufügen",
@@ -233,6 +235,30 @@
     "addAll": "Alle {{count}} zum Reiseplan hinzufügen",
     "adding": "Wird hinzugefügt…",
     "couldNotAddAll": "Es konnten nicht alle Aktivitäten hinzugefügt werden. Bitte versuche es erneut."
+  },
+  "checklists": {
+    "itinerary": "Reiseplan",
+    "documents": "Dokumente",
+    "couldNotLoad": "Checklisten konnten nicht geladen werden.",
+    "notFound": "Reise nicht gefunden.",
+    "addList": "Liste hinzufügen",
+    "newListPlaceholder": "Name der Liste (z. B. Packen)",
+    "empty": "Noch keine Listen. Füge eine hinzu, um mit dem Packen zu beginnen.",
+    "deleteList": "Liste löschen",
+    "addItem": "Hinzufügen",
+    "newItemPlaceholder": "Eintrag hinzufügen…",
+    "deleteItem": "Eintrag löschen"
+  },
+  "documents": {
+    "itinerary": "Reiseplan",
+    "checklists": "Checklisten",
+    "couldNotLoad": "Dokumente konnten nicht geladen werden.",
+    "couldNotUpload": "Die Datei konnte nicht hochgeladen werden.",
+    "notFound": "Reise nicht gefunden.",
+    "upload": "+ Hochladen",
+    "uploading": "Wird hochgeladen…",
+    "empty": "Noch keine Dokumente. Lade Tickets, Buchungen und mehr hoch.",
+    "delete": "Dokument löschen"
   },
   "conditions": {
     "title": "Wetter & Infos vor Ort",

@@ -213,6 +213,8 @@ export function ItineraryPage() {
           )}
           <button className="btn btn--ghost" onClick={() => setShowEditStops(true)}>🧭 {t('itinerary.editRoute')}</button>
           <Link className="btn btn--ghost" to={`/trips/${tripId}/bookings`}>🎫 {t('itinerary.bookings')}</Link>
+          <Link className="btn btn--ghost" to={`/trips/${tripId}/checklists`}>✅ {t('itinerary.checklists')}</Link>
+          <Link className="btn btn--ghost" to={`/trips/${tripId}/documents`}>📎 {t('itinerary.documents')}</Link>
           <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 {t('itinerary.budget')}</Link>
           {isFeatureOn(features, 'AiItineraryGeneration') && (
             <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ {t('itinerary.generate')}</button>

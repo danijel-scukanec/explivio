@@ -100,6 +100,8 @@
     "addCover": "Añadir portada",
     "editRoute": "Editar ruta",
     "bookings": "Reservas",
+    "checklists": "Listas",
+    "documents": "Documentos",
     "budget": "Presupuesto",
     "generate": "Generar con IA",
     "addActivity": "+ Añadir actividad",
@@ -233,6 +235,30 @@
     "addAll": "Añadir las {{count}} al itinerario",
     "adding": "Añadiendo…",
     "couldNotAddAll": "No se pudieron añadir todas las actividades. Inténtalo de nuevo."
+  },
+  "checklists": {
+    "itinerary": "Itinerario",
+    "documents": "Documentos",
+    "couldNotLoad": "No se pudieron cargar las listas.",
+    "notFound": "Viaje no encontrado.",
+    "addList": "Añadir lista",
+    "newListPlaceholder": "Nombre de la lista (p. ej. Equipaje)",
+    "empty": "Aún no hay listas. Añade una para empezar a preparar el equipaje.",
+    "deleteList": "Eliminar lista",
+    "addItem": "Añadir",
+    "newItemPlaceholder": "Añadir un elemento…",
+    "deleteItem": "Eliminar elemento"
+  },
+  "documents": {
+    "itinerary": "Itinerario",
+    "checklists": "Listas",
+    "couldNotLoad": "No se pudieron cargar los documentos.",
+    "couldNotUpload": "No se pudo subir el archivo.",
+    "notFound": "Viaje no encontrado.",
+    "upload": "+ Subir",
+    "uploading": "Subiendo…",
+    "empty": "Aún no hay documentos. Sube billetes, reservas y más.",
+    "delete": "Eliminar documento"
   },
   "conditions": {
     "title": "Tiempo e info local",
