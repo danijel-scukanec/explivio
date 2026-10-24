@@ -388,6 +388,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/trips/{id}/conditions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TripConditionsResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/trips/{id}/cover": {
         parameters: {
             query?: never;
@@ -1417,6 +1454,19 @@ export interface components {
             /** Format: double */
             total: number | string;
         };
+        DailyConditions: {
+            /** Format: date */
+            date: string;
+            /** Format: double */
+            temperatureMaxC: number | string;
+            /** Format: double */
+            temperatureMinC: number | string;
+            /** Format: int32 */
+            precipitationProbability: null | number | string;
+            /** Format: int32 */
+            weatherCode: number | string;
+            source: components["schemas"]["WeatherSource"];
+        };
         /** @enum {unknown} */
         ExpenseCategory: "Transport" | "Accommodation" | "Food" | "Activities" | "Shopping" | "Other";
         ExpenseResponse: {
@@ -1559,6 +1609,31 @@ export interface components {
         SetTripStopsRequest: {
             stops: components["schemas"]["TripStopInput"][];
         };
+        StopConditions: {
+            /** Format: uuid */
+            stopId: string;
+            /** Format: int32 */
+            order: number | string;
+            place: string;
+            /** Format: double */
+            latitude: null | number | string;
+            /** Format: double */
+            longitude: null | number | string;
+            hasLocation: boolean;
+            timeZoneId: null | string;
+            timeZoneAbbreviation: null | string;
+            /** Format: int32 */
+            utcOffsetSeconds: null | number | string;
+            localCurrency: null | string;
+            /** Format: double */
+            localPerBaseUnit: null | number | string;
+            weatherAvailable: boolean;
+            days: components["schemas"]["DailyConditions"][];
+        };
+        TripConditionsResponse: {
+            baseCurrency: string;
+            stops: components["schemas"]["StopConditions"][];
+        };
         TripMemberResponse: {
             /** Format: uuid */
             userId: string;
@@ -1669,6 +1744,8 @@ export interface components {
             cost: null | number | string;
             currency: string;
         };
+        /** @enum {unknown} */
+        WeatherSource: "Forecast" | "Seasonal";
     };
     responses: never;
     parameters: never;

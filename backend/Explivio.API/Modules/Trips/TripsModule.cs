@@ -5,6 +5,7 @@ using Explivio.API.Infrastructure.ReadModel;
 using Explivio.API.Modules.Trips.Cover;
 using Explivio.API.Modules.Trips.CreateTrip;
 using Explivio.API.Modules.Trips.DeleteTrip;
+using Explivio.API.Modules.Trips.GetConditions;
 using Explivio.API.Modules.Trips.GetTrip;
 using Explivio.API.Modules.Trips.GetTrips;
 using Explivio.API.Modules.Trips.SetTripBaseCurrency;
@@ -93,6 +94,15 @@ public static class TripsModule
             return result.ToHttpResult();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor, "id"))
           .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound).ProducesValidationProblem();
+
+        // F28: destination conditions — per-stop time zone, local currency + live rate, per-day
+        // weather. Read-only, so Viewer+ (same gate as the trip read).
+        group.MapGet("/{id:guid}/conditions", async (Guid id, IMediator mediator) =>
+        {
+            var conditions = await mediator.Send(new GetTripConditionsQuery(id));
+            return Results.Ok(conditions);
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Viewer, "id"))
+          .Produces<TripConditionsResponse>();
 
         // F22: trip cover photo upload/serve/delete.
         group.MapTripCoverEndpoints();

@@ -2,6 +2,7 @@ using Azure.Storage.Blobs;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Fx;
 using Explivio.API.Infrastructure.Storage;
+using Explivio.API.Infrastructure.Weather;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -57,6 +58,11 @@ public sealed class ExplivioApiFactory : WebApplicationFactory<Program>, IAsyncL
             // are repeatable and CI stays offline. Fixed rates relative to EUR.
             services.RemoveAll<IFxRateProvider>();
             services.AddSingleton<IFxRateProvider, FakeFxRateProvider>();
+
+            // F28: likewise replace the live weather provider (Open-Meteo) with a deterministic fake
+            // so the conditions tests are repeatable and need no network.
+            services.RemoveAll<IWeatherProvider>();
+            services.AddSingleton<IWeatherProvider, FakeWeatherProvider>();
         });
     }
 

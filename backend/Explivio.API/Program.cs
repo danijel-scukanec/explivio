@@ -14,6 +14,7 @@ using Explivio.API.Infrastructure.Outbox;
 using Explivio.API.Infrastructure.Rag;
 using Explivio.API.Infrastructure.ReadModel;
 using Explivio.API.Infrastructure.Storage;
+using Explivio.API.Infrastructure.Weather;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Trips.Collaboration;
 using Explivio.API.Modules.Users;
@@ -153,6 +154,10 @@ builder.Services.AddScoped<ReservationBudgetSync>();
 // F25: live exchange rates (frankfurter.dev, cached) so the budget summary can convert every
 // expense into the trip's base currency. Public GET, so always registered; tests swap in a fake.
 builder.Services.AddExplivioFx(builder.Configuration);
+
+// F28: per-day weather + destination time zone (Open-Meteo, cached). Public GET, so always
+// registered; tests swap in a fake. Feeds the trip "conditions" view alongside the FX rates above.
+builder.Services.AddExplivioWeather();
 
 // F25: budget export writers (CSV hand-written; PDF via QuestPDF). Stateless, so singletons; the
 // export endpoint resolves them all and picks one by format.
