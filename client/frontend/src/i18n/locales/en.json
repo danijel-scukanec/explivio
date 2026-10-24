@@ -52,6 +52,7 @@
   "trips": {
     "title": "My trips",
     "newTrip": "+ New trip",
+    "gallery": "Gallery",
     "couldNotLoad": "Could not load trips.",
     "empty": "No trips yet. Create your first one!",
     "filterAll": "All",
@@ -103,6 +104,7 @@
     "checklists": "Checklists",
     "documents": "Documents",
     "budget": "Budget",
+    "share": "Share",
     "generate": "Generate with AI",
     "addActivity": "+ Add activity",
     "othersViewing_one": "{{count}} other viewing",
@@ -235,6 +237,31 @@
     "addAll": "Add all {{count}} to itinerary",
     "adding": "Adding…",
     "couldNotAddAll": "Could not add all activities. Please try again."
+  },
+  "gallery": {
+    "title": "Trip gallery",
+    "subtitle": "Discover public trips — like them, or clone one as your own.",
+    "myTrips": "My trips",
+    "couldNotLoad": "Could not load the gallery.",
+    "couldNotClone": "Could not clone the trip.",
+    "empty": "No public trips yet. Publish one from its itinerary to get started.",
+    "clone": "Clone",
+    "cloning": "Cloning…",
+    "cloneToMyTrips": "Clone to my trips",
+    "tripNotFound": "Trip not found.",
+    "travelers_one": "{{count}} traveller",
+    "travelers_other": "{{count}} travellers"
+  },
+  "share": {
+    "title": "Share this trip",
+    "listInGallery": "List in the public gallery",
+    "listInGalleryHint": "Anyone can find, view and clone it.",
+    "linkTitle": "Share link",
+    "linkHint": "Anyone with the link can view this trip, even if it's private.",
+    "createLink": "Create share link",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "revoke": "Revoke link"
   },
   "checklists": {
     "itinerary": "Itinerary",

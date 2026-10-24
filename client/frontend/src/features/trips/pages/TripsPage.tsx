@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Trip, TripStatus } from '@explivio/shared';
 import { TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
@@ -42,6 +43,7 @@ export function TripsPage() {
       <div className="trips-page__header">
         <h1>{t('trips.title')}</h1>
         <div className="trips-page__header-actions">
+          <Link className="btn btn--ghost" to="/gallery">🌍 {t('trips.gallery')}</Link>
           <LanguageSwitcher />
           <button className="btn btn--primary" onClick={() => setShowModal(true)}>
             {t('trips.newTrip')}

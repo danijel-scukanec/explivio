@@ -1,0 +1,104 @@
+.gallery-page {
+  padding: 40px 32px;
+  text-align: left;
+
+  @media (max-width: 1024px) {
+    padding: 24px 20px;
+  }
+}
+
+.gallery-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.gallery-page__back {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  a {
+    font-size: 14px;
+    color: var(--text);
+    text-decoration: none;
+
+    &:hover { color: var(--accent); }
+  }
+
+  h1 { margin: 0; }
+}
+
+.gallery-page__subtitle { font-size: 15px; color: var(--accent); }
+
+.gallery-page__status { font-size: 15px; color: var(--text); }
+.gallery-page__status--error { color: #e53e3e; }
+.gallery-page__empty { font-size: 14px; color: var(--text); }
+
+.gallery-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.gallery-card {
+  border: 1px solid var(--border, #e4e4ec);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface, #fff);
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-card__banner {
+  height: 110px;
+  display: flex;
+  align-items: flex-end;
+  padding: 12px 14px;
+  text-decoration: none;
+}
+
+.gallery-card__banner-name {
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  line-height: 1.2;
+}
+
+.gallery-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px 14px;
+}
+
+.gallery-card__route { font-size: 14px; color: var(--text-h); font-weight: 600; }
+.gallery-card__dates { font-size: 13px; color: var(--text); }
+
+.gallery-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.gallery-card__like {
+  border: 1px solid var(--border, #d8d8e0);
+  background: var(--surface, #fff);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-h);
+
+  &:hover { border-color: var(--accent); }
+}
+
+.gallery-card__like--on { border-color: #e5567a; }
+
+.gallery-card__clone { padding: 5px 12px; font-size: 13px; }

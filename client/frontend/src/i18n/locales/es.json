@@ -52,6 +52,7 @@
   "trips": {
     "title": "Mis viajes",
     "newTrip": "+ Nuevo viaje",
+    "gallery": "Galería",
     "couldNotLoad": "No se pudieron cargar los viajes.",
     "empty": "Aún no hay viajes. ¡Crea el primero!",
     "filterAll": "Todos",
@@ -103,6 +104,7 @@
     "checklists": "Listas",
     "documents": "Documentos",
     "budget": "Presupuesto",
+    "share": "Compartir",
     "generate": "Generar con IA",
     "addActivity": "+ Añadir actividad",
     "othersViewing_one": "{{count}} persona más viendo",
@@ -235,6 +237,31 @@
     "addAll": "Añadir las {{count}} al itinerario",
     "adding": "Añadiendo…",
     "couldNotAddAll": "No se pudieron añadir todas las actividades. Inténtalo de nuevo."
+  },
+  "gallery": {
+    "title": "Galería de viajes",
+    "subtitle": "Descubre viajes públicos: dales me gusta o clónalos como propios.",
+    "myTrips": "Mis viajes",
+    "couldNotLoad": "No se pudo cargar la galería.",
+    "couldNotClone": "No se pudo clonar el viaje.",
+    "empty": "Aún no hay viajes públicos. Publica uno desde su itinerario para empezar.",
+    "clone": "Clonar",
+    "cloning": "Clonando…",
+    "cloneToMyTrips": "Clonar a mis viajes",
+    "tripNotFound": "Viaje no encontrado.",
+    "travelers_one": "{{count}} viajero",
+    "travelers_other": "{{count}} viajeros"
+  },
+  "share": {
+    "title": "Compartir este viaje",
+    "listInGallery": "Publicar en la galería pública",
+    "listInGalleryHint": "Cualquiera puede encontrarlo, verlo y clonarlo.",
+    "linkTitle": "Enlace para compartir",
+    "linkHint": "Cualquiera con el enlace puede ver este viaje, aunque sea privado.",
+    "createLink": "Crear enlace",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "revoke": "Revocar enlace"
   },
   "checklists": {
     "itinerary": "Itinerario",

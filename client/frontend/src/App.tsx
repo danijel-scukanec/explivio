@@ -5,6 +5,8 @@ import { BudgetPage } from './features/budget/pages/BudgetPage';
 import { BookingsPage } from './features/reservations/pages/BookingsPage';
 import { ChecklistsPage } from './features/checklists/pages/ChecklistsPage';
 import { DocumentsPage } from './features/documents/pages/DocumentsPage';
+import { GalleryPage } from './features/gallery/pages/GalleryPage';
+import { PublicTripPage } from './features/gallery/pages/PublicTripPage';
 
 function App() {
   return (
@@ -17,6 +19,9 @@ function App() {
         <Route path="/trips/:tripId/bookings" element={<BookingsPage />} />
         <Route path="/trips/:tripId/checklists" element={<ChecklistsPage />} />
         <Route path="/trips/:tripId/documents" element={<DocumentsPage />} />
+        <Route path="/gallery" element={<GalleryPage />} />
+        <Route path="/gallery/:tripId" element={<PublicTripPage mode="gallery" />} />
+        <Route path="/shared/:token" element={<PublicTripPage mode="shared" />} />
       </Routes>
     </BrowserRouter>
   );

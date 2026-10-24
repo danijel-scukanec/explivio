@@ -52,6 +52,7 @@
   "trips": {
     "title": "Meine Reisen",
     "newTrip": "+ Neue Reise",
+    "gallery": "Galerie",
     "couldNotLoad": "Reisen konnten nicht geladen werden.",
     "empty": "Noch keine Reisen. Erstelle deine erste!",
     "filterAll": "Alle",
@@ -103,6 +104,7 @@
     "checklists": "Checklisten",
     "documents": "Dokumente",
     "budget": "Budget",
+    "share": "Teilen",
     "generate": "Mit KI erstellen",
     "addActivity": "+ Aktivität hinzufügen",
     "othersViewing_one": "{{count}} weitere Person sieht zu",
@@ -235,6 +237,31 @@
     "addAll": "Alle {{count}} zum Reiseplan hinzufügen",
     "adding": "Wird hinzugefügt…",
     "couldNotAddAll": "Es konnten nicht alle Aktivitäten hinzugefügt werden. Bitte versuche es erneut."
+  },
+  "gallery": {
+    "title": "Reisegalerie",
+    "subtitle": "Entdecke öffentliche Reisen – gib ein Like oder klone eine als deine eigene.",
+    "myTrips": "Meine Reisen",
+    "couldNotLoad": "Galerie konnte nicht geladen werden.",
+    "couldNotClone": "Reise konnte nicht geklont werden.",
+    "empty": "Noch keine öffentlichen Reisen. Veröffentliche eine über ihren Reiseplan.",
+    "clone": "Klonen",
+    "cloning": "Wird geklont…",
+    "cloneToMyTrips": "Zu meinen Reisen klonen",
+    "tripNotFound": "Reise nicht gefunden.",
+    "travelers_one": "{{count}} Reisende/r",
+    "travelers_other": "{{count}} Reisende"
+  },
+  "share": {
+    "title": "Diese Reise teilen",
+    "listInGallery": "In der öffentlichen Galerie listen",
+    "listInGalleryHint": "Jeder kann sie finden, ansehen und klonen.",
+    "linkTitle": "Freigabelink",
+    "linkHint": "Jeder mit dem Link kann diese Reise ansehen, auch wenn sie privat ist.",
+    "createLink": "Link erstellen",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "revoke": "Link widerrufen"
   },
   "checklists": {
     "itinerary": "Reiseplan",
