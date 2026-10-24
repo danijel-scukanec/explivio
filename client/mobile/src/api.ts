@@ -13,6 +13,7 @@ import type {
   UpdateReservationRequest,
   TripStatus,
   TripStopInput,
+  TripConditions,
 } from '@explivio/shared';
 import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
 
@@ -117,6 +118,11 @@ export const addExpense = (tripId: string, data: AddExpenseRequest) =>
   mutate<{ id: string }>('POST', `/trips/${tripId}/expenses`, { ...data, tripId });
 export const deleteExpense = (tripId: string, id: string) =>
   mutate('DELETE', `/trips/${tripId}/expenses/${id}`);
+
+// F28: destination conditions — per-stop time zone, local currency + live rate, per-day weather.
+// Read-through cached like the other GETs so it survives going offline.
+export const getTripConditions = (tripId: string) =>
+  getJson<TripConditions>(`/trips/${tripId}/conditions`);
 
 // F25: fetch the budget export as text (CSV) — the mobile UI shares it via the OS share sheet. Not a
 // cached/queued call: it's an on-demand download that only makes sense online.

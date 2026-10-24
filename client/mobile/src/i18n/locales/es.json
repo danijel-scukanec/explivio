@@ -265,5 +265,25 @@
     "couldNotLoadBooking": "No se pudo cargar la reserva.",
     "enterDescDate": "Introduce una descripción y una fecha.",
     "enterTitleStart": "Introduce un título y una fecha de inicio."
+  },
+  "conditions": {
+    "title": "Tiempo e info local",
+    "sameCurrency": "igual que tu moneda base",
+    "weatherUnavailable": "Tiempo no disponible para estas fechas.",
+    "seasonal": "típico",
+    "wmo": {
+      "clear": "Cielo despejado",
+      "mostlyClear": "Mayormente despejado",
+      "partlyCloudy": "Parcialmente nublado",
+      "overcast": "Cubierto",
+      "fog": "Niebla",
+      "drizzle": "Llovizna",
+      "rain": "Lluvia",
+      "snow": "Nieve",
+      "showers": "Chubascos",
+      "snowShowers": "Chubascos de nieve",
+      "thunderstorm": "Tormenta",
+      "unknown": "—"
+    }
   }
 }

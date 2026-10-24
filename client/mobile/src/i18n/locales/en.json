@@ -265,5 +265,25 @@
     "couldNotLoadBooking": "Could not load the booking.",
     "enterDescDate": "Please enter a description and date.",
     "enterTitleStart": "Please enter a title and start date."
+  },
+  "conditions": {
+    "title": "Weather & local info",
+    "sameCurrency": "same as your base currency",
+    "weatherUnavailable": "Weather unavailable for these dates.",
+    "seasonal": "typical",
+    "wmo": {
+      "clear": "Clear sky",
+      "mostlyClear": "Mainly clear",
+      "partlyCloudy": "Partly cloudy",
+      "overcast": "Overcast",
+      "fog": "Fog",
+      "drizzle": "Drizzle",
+      "rain": "Rain",
+      "snow": "Snow",
+      "showers": "Rain showers",
+      "snowShowers": "Snow showers",
+      "thunderstorm": "Thunderstorm",
+      "unknown": "—"
+    }
   }
 }
