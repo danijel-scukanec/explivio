@@ -42,6 +42,53 @@ namespace Explivio.API.Infrastructure.ReadModel.Migrations
                     b.ToTable("InboxMessages", "read");
                 });
 
+            modelBuilder.Entity("Explivio.API.Infrastructure.ReadModel.TripPopularity", b =>
+                {
+                    b.Property<Guid>("TripId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("HasCoverPhoto")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("OwnerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("TravelerCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("TripId");
+
+                    b.HasIndex("IsPublic", "LikeCount");
+
+                    b.ToTable("TripPopularity", "read");
+                });
+
             modelBuilder.Entity("Explivio.API.Infrastructure.ReadModel.TripSummary", b =>
                 {
                     b.Property<Guid>("TripId")

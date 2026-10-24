@@ -14,6 +14,8 @@ public static class TripMapping
         trip.Status,
         trip.HasCoverPhoto,
         trip.BaseCurrency,
+        trip.IsPublic,
+        trip.ShareToken,
         trip.CreatedAt,
         trip.Stops
             .OrderBy(s => s.Order)

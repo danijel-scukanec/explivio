@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Explivio.API.Infrastructure.Domain;
 
 namespace Explivio.API.Modules.Trips;
@@ -11,6 +12,11 @@ public class Trip : Entity
     public int TravelerCount { get; set; }
     public TripStatus Status { get; set; }
     public bool HasCoverPhoto { get; set; }
+
+    // F26: whether the trip appears in the public gallery. A share token is a separate, unguessable
+    // handle for link-sharing a single trip (public or not) without adding the viewer as a member.
+    public bool IsPublic { get; set; }
+    public string? ShareToken { get; set; }
     // F25: the currency the trip's budget is reported in. Expenses keep their own currency; the budget
     // summary converts them all into this one (live FX). 3-letter ISO 4217 code, defaults to EUR.
     public string BaseCurrency { get; set; } = "EUR";
@@ -123,5 +129,45 @@ public class Trip : Entity
     public void Delete()
     {
         AddDomainEvent(new TripDeletedDomainEvent(Id));
+    }
+
+    // F26: list the trip in the public gallery. Idempotent; the event carries the denormalized state
+    // the gallery read model needs (event-carried state), so re-publishing a trip whose details
+    // changed refreshes the gallery row too.
+    public void Publish()
+    {
+        IsPublic = true;
+        UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new TripPublishedDomainEvent(
+            Id, UserId, Name, DestinationSummary(), StartDate, EndDate, TravelerCount, HasCoverPhoto));
+    }
+
+    // F26: remove the trip from the gallery. The read model keeps the like count so re-publishing
+    // restores it.
+    public void Unpublish()
+    {
+        IsPublic = false;
+        UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new TripUnpublishedDomainEvent(Id));
+    }
+
+    // F26: make sure the trip has a share token, minting one on first use. Returns the token so the
+    // endpoint can hand back a link. Unguessable 128-bit, URL-safe base64.
+    public string EnsureShareToken()
+    {
+        if (string.IsNullOrEmpty(ShareToken))
+        {
+            ShareToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16))
+                .Replace('+', '-').Replace('/', '_').TrimEnd('=');
+            UpdatedAt = DateTime.UtcNow;
+        }
+        return ShareToken;
+    }
+
+    // F26: invalidate the share link.
+    public void RevokeShareToken()
+    {
+        ShareToken = null;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

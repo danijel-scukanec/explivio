@@ -360,9 +360,16 @@ namespace Explivio.API.Migrations
                     b.Property<bool>("HasCoverPhoto")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShareToken")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
@@ -383,7 +390,36 @@ namespace Explivio.API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IsPublic");
+
+                    b.HasIndex("ShareToken")
+                        .IsUnique()
+                        .HasFilter("[ShareToken] IS NOT NULL");
+
                     b.ToTable("Trips", (string)null);
+                });
+
+            modelBuilder.Entity("Explivio.API.Modules.Trips.TripLike", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TripId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TripId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("TripLikes", (string)null);
                 });
 
             modelBuilder.Entity("Explivio.API.Modules.Trips.TripMember", b =>

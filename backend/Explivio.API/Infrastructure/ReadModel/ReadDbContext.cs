@@ -11,6 +11,7 @@ public sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : DbC
     public const string Schema = "read";
 
     public DbSet<TripSummary> TripSummaries => Set<TripSummary>();
+    public DbSet<TripPopularity> TripPopularity => Set<TripPopularity>();
     public DbSet<ProjectionInboxMessage> InboxMessages => Set<ProjectionInboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -24,6 +25,15 @@ public sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : DbC
         summary.Property(s => s.Destination).HasMaxLength(200);
         summary.Property(s => s.TotalSpend).HasColumnType("decimal(18,2)");
         summary.HasIndex(s => s.UserId);
+
+        // F26: the gallery / like-count read model.
+        var popularity = modelBuilder.Entity<TripPopularity>();
+        popularity.ToTable("TripPopularity");
+        popularity.HasKey(p => p.TripId);
+        popularity.Property(p => p.Name).HasMaxLength(200);
+        popularity.Property(p => p.Destination).HasMaxLength(200);
+        // The gallery lists public trips ordered by likes/recency.
+        popularity.HasIndex(p => new { p.IsPublic, p.LikeCount });
 
         modelBuilder.ConfigureInbox<ProjectionInboxMessage>();
     }

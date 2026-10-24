@@ -38,6 +38,12 @@ public sealed class TripSummaryProjector(
             case nameof(TripStopsChangedDomainEvent):
                 var stopsChanged = Deserialize<TripStopsChangedDomainEvent>(body);
                 await MutateAsync(db, stopsChanged.TripId, s => TripSummaryProjection.ApplyStopsChanged(s, stopsChanged.Destination), subject, cancellationToken);
+                // F26: keep the gallery row's destination in step too (if the trip is in the gallery).
+                var pop = await db.TripPopularity.FirstOrDefaultAsync(p => p.TripId == stopsChanged.TripId, cancellationToken);
+                if (pop is not null)
+                {
+                    TripPopularityProjection.ApplyStopsChanged(pop, stopsChanged.Destination);
+                }
                 break;
 
             case nameof(ActivityAddedDomainEvent):
@@ -62,6 +68,38 @@ public sealed class TripSummaryProjector(
                 {
                     db.TripSummaries.Remove(toRemove);
                 }
+                var popToRemove = await db.TripPopularity.FirstOrDefaultAsync(p => p.TripId == deleted.TripId, cancellationToken);
+                if (popToRemove is not null)
+                {
+                    db.TripPopularity.Remove(popToRemove);
+                }
+                break;
+
+            // F26: the gallery / like read model. Published carries the trip's denormalized state, so
+            // the gallery row is built (or refreshed) from the event; the rest mutate an existing row.
+            case nameof(TripPublishedDomainEvent):
+                var published = Deserialize<TripPublishedDomainEvent>(body);
+                var existing = await db.TripPopularity.FirstOrDefaultAsync(p => p.TripId == published.TripId, cancellationToken);
+                var row = TripPopularityProjection.Publish(existing, published);
+                if (existing is null)
+                {
+                    db.TripPopularity.Add(row);
+                }
+                break;
+
+            case nameof(TripUnpublishedDomainEvent):
+                var unpublished = Deserialize<TripUnpublishedDomainEvent>(body);
+                await MutatePopularityAsync(db, unpublished.TripId, TripPopularityProjection.Unpublish, subject, cancellationToken);
+                break;
+
+            case nameof(TripLikedDomainEvent):
+                var liked = Deserialize<TripLikedDomainEvent>(body);
+                await MutatePopularityAsync(db, liked.TripId, TripPopularityProjection.ApplyLiked, subject, cancellationToken);
+                break;
+
+            case nameof(TripUnlikedDomainEvent):
+                var unliked = Deserialize<TripUnlikedDomainEvent>(body);
+                await MutatePopularityAsync(db, unliked.TripId, TripPopularityProjection.ApplyUnliked, subject, cancellationToken);
                 break;
 
             default:
@@ -83,6 +121,20 @@ public sealed class TripSummaryProjector(
         }
 
         mutate(summary);
+    }
+
+    // F26: same skip-if-missing posture as MutateAsync, for the gallery read model.
+    private async Task MutatePopularityAsync(
+        ReadDbContext db, Guid tripId, Action<TripPopularity> mutate, string? subject, CancellationToken ct)
+    {
+        var row = await db.TripPopularity.FirstOrDefaultAsync(p => p.TripId == tripId, ct);
+        if (row is null)
+        {
+            logger.LogWarning("No TripPopularity for trip {TripId} when projecting {Subject}; skipping.", tripId, subject);
+            return;
+        }
+
+        mutate(row);
     }
 
     private static T Deserialize<T>(BinaryData body) => body.ToObjectFromJson<T>(SerializerOptions)!;

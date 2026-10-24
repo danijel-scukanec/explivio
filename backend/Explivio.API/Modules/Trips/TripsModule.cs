@@ -2,10 +2,12 @@ using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Outcomes;
 using Explivio.API.Infrastructure.ReadModel;
+using Explivio.API.Modules.Trips.CloneTrip;
 using Explivio.API.Modules.Trips.Cover;
 using Explivio.API.Modules.Trips.CreateTrip;
 using Explivio.API.Modules.Trips.DeleteTrip;
 using Explivio.API.Modules.Trips.GetConditions;
+using Explivio.API.Modules.Trips.Sharing;
 using Explivio.API.Modules.Trips.GetTrip;
 using Explivio.API.Modules.Trips.GetTrips;
 using Explivio.API.Modules.Trips.SetTripBaseCurrency;
@@ -104,8 +106,21 @@ public static class TripsModule
         }).AddEndpointFilter(new RequireTripRole(TripRole.Viewer, "id"))
           .Produces<TripConditionsResponse>();
 
+        // F26: clone a trip as a template. Not RequireTripRole — you can clone any public trip, not
+        // just ones you're a member of; the handler does its own "public or member" check.
+        group.MapPost("/{id:guid}/clone", async (Guid id, IMediator mediator, HttpContext ctx) =>
+        {
+            var newId = await mediator.Send(new CloneTripCommand(id, ctx.GetUserId()));
+            return newId is null
+                ? Results.NotFound()
+                : Results.Created($"/trips/{newId}", new CreatedResponse(newId.Value));
+        }).Produces<CreatedResponse>(StatusCodes.Status201Created).Produces(StatusCodes.Status404NotFound);
+
         // F22: trip cover photo upload/serve/delete.
         group.MapTripCoverEndpoints();
+
+        // F26: gallery visibility, share links, and likes.
+        group.MapTripSharingEndpoints();
 
         return app;
     }

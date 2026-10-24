@@ -19,6 +19,10 @@ public record TripResponse(
     bool HasCoverPhoto,
     // F25: the currency the trip's budget is reported in (ISO 4217).
     string BaseCurrency,
+    // F26: whether the trip is listed in the public gallery, and its share-link token (null until one
+    // is minted). Visible to members, who can publish or share the trip.
+    bool IsPublic,
+    string? ShareToken,
     DateTime CreatedAt,
     IReadOnlyList<TripStopResponse> Stops
 );
