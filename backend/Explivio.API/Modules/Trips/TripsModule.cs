@@ -67,9 +67,9 @@ public static class TripsModule
         }).Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
         // F22: change a trip's lifecycle status. Editor+ (changing status is an edit, not ownership).
-        group.MapPatch("/{id:guid}/status", async (Guid id, SetTripStatusRequest body, IMediator mediator) =>
+        group.MapPatch("/{id:guid}/status", async (Guid id, SetTripStatusRequest body, HttpContext ctx, IMediator mediator) =>
         {
-            var result = await mediator.Send(new SetTripStatusCommand(id, body.Status));
+            var result = await mediator.Send(new SetTripStatusCommand(id, body.Status, ctx.GetUserId()));
             return result.ToHttpResult();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor, "id"))
           .Produces(StatusCodes.Status204NoContent).ProducesProblem(StatusCodes.Status404NotFound).ProducesValidationProblem();

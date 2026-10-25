@@ -1,5 +1,6 @@
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Features;
+using Explivio.API.Modules.Notifications;
 using Explivio.API.Modules.Itinerary.CreateActivity;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Itinerary.ReorderActivities;
@@ -30,9 +31,9 @@ public static class ItineraryModule
         }).AddEndpointFilter(new RequireTripRole(TripRole.Viewer))
           .Produces<IEnumerable<Activity>>();
 
-        group.MapPost("/", async (Guid tripId, CreateActivityCommand command, IMediator mediator) =>
+        group.MapPost("/", async (Guid tripId, CreateActivityCommand command, HttpContext ctx, IMediator mediator) =>
         {
-            var id = await mediator.Send(command with { TripId = tripId });
+            var id = await mediator.Send(command with { TripId = tripId, ActorUserId = ctx.GetUserId() });
             return Results.Created($"/trips/{tripId}/activities/{id}", new CreatedResponse(id));
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
@@ -66,26 +67,35 @@ public static class ItineraryModule
           .AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces<GeneratedItinerary>().ProducesValidationProblem().ProducesProblem(StatusCodes.Status404NotFound);
 
-        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db, ITripCollaborationNotifier collaboration) =>
+        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, HttpContext ctx, AppDbContext db, ITripCollaborationNotifier collaboration, CancellationToken token) =>
         {
             // F08: load then remove so the aggregate raises ActivityRemovedDomainEvent for the
             // read-model projector (the outbox interceptor captures it in the same transaction).
-            var activity = await db.Activities.FirstOrDefaultAsync(a => a.Id == id && a.TripId == tripId);
+            var activity = await db.Activities.FirstOrDefaultAsync(a => a.Id == id && a.TripId == tripId, token);
             if (activity is null)
             {
                 return Results.NotFound();
             }
 
             activity.Remove();
+
+            // F20: notify the trip's other members (same transaction via the outbox).
+            var notification = await TripNotifications.BuildAsync(
+                db, tripId, ctx.GetUserId(), NotificationKind.ActivityRemoved, activity.Name, token);
+            if (notification is not null) db.OutboxMessages.Add(notification);
+
             db.Activities.Remove(activity);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(token);
 
             // F15 Phase B: nudge anyone viewing the trip to refetch — immediate, after the commit.
-            await collaboration.TripChangedAsync(tripId, "activity.deleted");
+            await collaboration.TripChangedAsync(tripId, "activity.deleted", token);
             return Results.NoContent();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
 
         return app;
     }
+
+    private static Guid GetUserId(this HttpContext ctx) =>
+        Guid.Parse(ctx.User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
 }

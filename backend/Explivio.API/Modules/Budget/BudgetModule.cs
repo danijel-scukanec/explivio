@@ -1,5 +1,7 @@
+using System.Globalization;
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Modules.Notifications;
 using Explivio.API.Modules.Budget.AddExpense;
 using Explivio.API.Modules.Budget.Export;
 using Explivio.API.Modules.Budget.GetBudgetBalances;
@@ -55,29 +57,40 @@ public static class BudgetModule
         }).AddEndpointFilter(new RequireTripRole(TripRole.Viewer))
           .Produces(StatusCodes.Status200OK);
 
-        group.MapPost("/", async (Guid tripId, AddExpenseCommand command, IMediator mediator) =>
+        group.MapPost("/", async (Guid tripId, AddExpenseCommand command, HttpContext ctx, IMediator mediator) =>
         {
-            var id = await mediator.Send(command with { TripId = tripId });
+            var id = await mediator.Send(command with { TripId = tripId, ActorUserId = ctx.GetUserId() });
             return Results.Created($"/trips/{tripId}/expenses/{id}", new CreatedResponse(id));
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
-        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, AppDbContext db, ITripCollaborationNotifier collaboration) =>
+        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, HttpContext ctx, AppDbContext db, ITripCollaborationNotifier collaboration, CancellationToken token) =>
         {
-            var deleted = await db.Expenses
-                .Where(e => e.Id == id && e.TripId == tripId)
-                .ExecuteDeleteAsync();
-            if (deleted == 0)
+            // F20: load then remove (instead of a bulk ExecuteDelete) so the outbox interceptor can
+            // capture the member notification raised on the tracked entity in the same transaction.
+            var expense = await db.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.TripId == tripId, token);
+            if (expense is null)
             {
                 return Results.NotFound();
             }
 
+            var detail = $"{expense.Amount.ToString("0.##", CultureInfo.InvariantCulture)} {expense.Currency}";
+            var notification = await TripNotifications.BuildAsync(
+                db, tripId, ctx.GetUserId(), NotificationKind.ExpenseRemoved, detail, token);
+            if (notification is not null) db.OutboxMessages.Add(notification);
+
+            db.Expenses.Remove(expense);
+            await db.SaveChangesAsync(token);
+
             // F15 Phase B: nudge anyone viewing the trip to refetch — immediate, after the commit.
-            await collaboration.TripChangedAsync(tripId, "expense.deleted");
+            await collaboration.TripChangedAsync(tripId, "expense.deleted", token);
             return Results.NoContent();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
 
         return app;
     }
+
+    private static Guid GetUserId(this HttpContext ctx) =>
+        Guid.Parse(ctx.User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
 }

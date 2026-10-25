@@ -1,4 +1,5 @@
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Modules.Notifications;
 using Explivio.API.Modules.Trips.Collaboration;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,12 @@ public class CreateActivityHandler(AppDbContext db, ITripCollaborationNotifier c
             (lastOrder ?? -1) + 1);
 
         db.Activities.Add(activity);
+
+        // F20: notify the trip's other members (published via the outbox in the same transaction).
+        var notification = await TripNotifications.BuildAsync(
+            db, command.TripId, command.ActorUserId, NotificationKind.ActivityAdded, command.Name, cancellationToken);
+        if (notification is not null) db.OutboxMessages.Add(notification);
+
         await db.SaveChangesAsync(cancellationToken);
 
         // F15 Phase B: nudge anyone viewing the trip to refetch — immediate, after the commit.

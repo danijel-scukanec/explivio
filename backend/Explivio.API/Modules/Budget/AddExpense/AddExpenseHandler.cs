@@ -1,4 +1,6 @@
+using System.Globalization;
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Modules.Notifications;
 using Explivio.API.Modules.Trips.Collaboration;
 using MediatR;
 
@@ -20,6 +22,13 @@ public class AddExpenseHandler(AppDbContext db, ITripCollaborationNotifier colla
             shares: command.Splits);
 
         db.Expenses.Add(expense);
+
+        // F20: notify the trip's other members (published via the outbox in the same transaction).
+        var detail = $"{command.Amount.ToString("0.##", CultureInfo.InvariantCulture)} {command.Currency}";
+        var notification = await TripNotifications.BuildAsync(
+            db, command.TripId, command.ActorUserId, NotificationKind.ExpenseAdded, detail, cancellationToken);
+        if (notification is not null) db.OutboxMessages.Add(notification);
+
         await db.SaveChangesAsync(cancellationToken);
 
         // F15 Phase B: nudge anyone viewing the trip to refetch — immediate, after the commit.

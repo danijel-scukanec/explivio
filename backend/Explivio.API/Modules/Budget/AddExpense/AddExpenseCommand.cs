@@ -13,5 +13,7 @@ public record AddExpenseCommand(
     // balances. Splits are in the expense's Currency and must sum to Amount. Omit both for an
     // unsplit expense (the original behaviour).
     Guid? PaidByUserId = null,
-    IReadOnlyList<ExpenseShareInput>? Splits = null
+    IReadOnlyList<ExpenseShareInput>? Splits = null,
+    // F20: the authenticated caller, set by the endpoint — used to notify the trip's other members.
+    Guid ActorUserId = default
 ) : IRequest<Guid>;
