@@ -20,6 +20,7 @@ import { ExportItineraryModal } from '../components/ExportItineraryModal';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
 import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
+import { NotificationBell } from '../../../shared/components/NotificationBell';
 import './ItineraryPage.css';
 
 // F23: categories available for the itinerary view filter (mirrors the ActivityCategory enum).
@@ -225,6 +226,7 @@ export function ItineraryPage() {
           {isFeatureOn(features, 'AiItineraryGeneration') && (
             <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ {t('itinerary.generate')}</button>
           )}
+          <NotificationBell />
           <LanguageSwitcher />
           <button className="btn btn--primary" onClick={() => setShowModal(true)}>{t('itinerary.addActivity')}</button>
         </div>

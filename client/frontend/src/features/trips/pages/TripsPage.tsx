@@ -7,6 +7,7 @@ import { getTrips } from '../services/tripsApi';
 import { TripCard } from '../components/TripCard';
 import { CreateTripModal } from '../components/CreateTripModal';
 import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
+import { NotificationBell } from '../../../shared/components/NotificationBell';
 import './TripsPage.css';
 
 export function TripsPage() {
@@ -44,6 +45,7 @@ export function TripsPage() {
         <h1>{t('trips.title')}</h1>
         <div className="trips-page__header-actions">
           <Link className="btn btn--ghost" to="/gallery">🌍 {t('trips.gallery')}</Link>
+          <NotificationBell />
           <LanguageSwitcher />
           <button className="btn btn--primary" onClick={() => setShowModal(true)}>
             {t('trips.newTrip')}

@@ -320,5 +320,17 @@
     "syncHint": "Suscríbete en Google, Outlook o Apple Calendar: los cambios que hagas aquí mantienen el calendario actualizado.",
     "createSyncLink": "Crear enlace de sincronización",
     "openInCalendar": "Abrir en la app de calendario"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Aún no hay notificaciones",
+    "markAllRead": "Marcar todo como leído",
+    "kind": {
+      "ActivityAdded": "añadió una actividad",
+      "ActivityRemoved": "eliminó una actividad",
+      "ExpenseAdded": "añadió un gasto",
+      "ExpenseRemoved": "eliminó un gasto",
+      "StatusChanged": "cambió el estado del viaje"
+    }
   }
 }

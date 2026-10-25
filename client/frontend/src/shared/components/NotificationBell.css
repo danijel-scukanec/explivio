@@ -1,0 +1,123 @@
+/* F20: in-app notification bell + dropdown panel. */
+.notif {
+  position: relative;
+  display: inline-block;
+}
+
+.notif__bell {
+  position: relative;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.notif__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--danger, #e53935);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.notif__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  max-height: 420px;
+  overflow-y: auto;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  z-index: 50;
+}
+
+.notif__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border, #e0e0e0);
+  position: sticky;
+  top: 0;
+  background: var(--surface, #fff);
+}
+
+.notif__markall {
+  background: none;
+  border: none;
+  color: var(--accent, #6c5ce7);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notif__empty {
+  padding: 24px 14px;
+  text-align: center;
+  color: var(--text-muted, #888);
+  font-size: 13px;
+}
+
+.notif__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notif__item {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border, #f0f0f0);
+  text-align: left;
+  cursor: pointer;
+}
+
+.notif__item:hover {
+  background: var(--surface-hover, #f6f5ff);
+}
+
+.notif__item--unread {
+  background: var(--unread, #f3f1ff);
+}
+
+.notif__icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.notif__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.notif__title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-strong, #222);
+}
+
+.notif__detail {
+  font-size: 12px;
+  color: var(--text, #555);
+}
+
+.notif__time {
+  font-size: 11px;
+  color: var(--text-muted, #999);
+}
