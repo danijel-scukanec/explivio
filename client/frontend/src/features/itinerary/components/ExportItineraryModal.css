@@ -1,0 +1,13 @@
+/* F27: export / calendar-sync modal — extends the shared share-modal styles. */
+.export-modal__buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.export-modal__webcal {
+  display: inline-block;
+  margin-top: 8px;
+  text-decoration: underline;
+}

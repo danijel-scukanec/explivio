@@ -114,7 +114,8 @@
     "clearToReorder": "Setze den Filter zurück, um Aktivitäten neu zu ordnen.",
     "day": "Tag {{number}}",
     "noActivities": "Keine Aktivitäten geplant",
-    "noTime": "Keine Zeit"
+    "noTime": "Keine Zeit",
+    "export": "Exportieren"
   },
   "activity": {
     "edit": "Aktivität bearbeiten",
@@ -306,5 +307,18 @@
       "thunderstorm": "Gewitter",
       "unknown": "—"
     }
+  },
+  "export": {
+    "title": "Exportieren & synchronisieren",
+    "downloadTitle": "Herunterladen",
+    "downloadHint": "Speichere deine Reiseroute als Kalenderdatei oder druckbares PDF.",
+    "downloadIcs": "Kalender (.ics)",
+    "downloadPdf": "PDF",
+    "preparing": "Wird vorbereitet…",
+    "failed": "Export fehlgeschlagen. Bitte erneut versuchen.",
+    "syncTitle": "Mit deinem Kalender synchronisieren",
+    "syncHint": "Abonniere in Google, Outlook oder Apple Kalender – deine Änderungen hier halten den Kalender aktuell.",
+    "createSyncLink": "Sync-Link erstellen",
+    "openInCalendar": "In Kalender-App öffnen"
   }
 }
