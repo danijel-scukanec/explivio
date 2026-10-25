@@ -113,7 +113,8 @@
     "clearToReorder": "Quita el filtro para reordenar las actividades.",
     "day": "Día {{number}}",
     "noActivities": "Sin actividades planeadas",
-    "noTime": "Sin hora"
+    "noTime": "Sin hora",
+    "export": "Exportar"
   },
   "activity": {
     "edit": "Editar actividad",
@@ -320,5 +321,18 @@
       "thunderstorm": "Tormenta",
       "unknown": "—"
     }
+  },
+  "export": {
+    "title": "Exportar y sincronizar",
+    "downloadTitle": "Descargar",
+    "downloadHint": "Guarda tu itinerario como archivo de calendario (.ics) para abrirlo en cualquier app de calendario.",
+    "downloadIcs": "Calendario (.ics)",
+    "downloadPdf": "PDF",
+    "preparing": "Preparando…",
+    "failed": "Error al exportar. Inténtalo de nuevo.",
+    "syncTitle": "Sincroniza con tu calendario",
+    "syncHint": "Suscríbete en Google, Outlook o Apple Calendar: los cambios que hagas aquí mantienen el calendario actualizado.",
+    "createSyncLink": "Crear enlace de sincronización",
+    "openInCalendar": "Abrir en la app de calendario"
   }
 }

@@ -113,7 +113,8 @@
     "clearToReorder": "Clear the filter to drag activities into a new order.",
     "day": "Day {{number}}",
     "noActivities": "No activities planned",
-    "noTime": "No time"
+    "noTime": "No time",
+    "export": "Export"
   },
   "activity": {
     "edit": "Edit activity",
@@ -320,5 +321,18 @@
       "thunderstorm": "Thunderstorm",
       "unknown": "—"
     }
+  },
+  "export": {
+    "title": "Export & sync",
+    "downloadTitle": "Download",
+    "downloadHint": "Save your itinerary as a calendar file (.ics) to open in any calendar app.",
+    "downloadIcs": "Calendar (.ics)",
+    "downloadPdf": "PDF",
+    "preparing": "Preparing…",
+    "failed": "Export failed. Please try again.",
+    "syncTitle": "Sync to your calendar",
+    "syncHint": "Subscribe in Google, Outlook or Apple Calendar — the changes you make here keep the calendar up to date.",
+    "createSyncLink": "Create sync link",
+    "openInCalendar": "Open in calendar app"
   }
 }

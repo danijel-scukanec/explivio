@@ -136,6 +136,21 @@ export async function fetchBudgetCsv(tripId: string): Promise<string> {
   return res.text();
 }
 
+// F27: fetch the itinerary as an iCalendar (.ics) document — shared as text via the OS share sheet,
+// mirroring the budget CSV. (PDF export is web-only: a binary file needs expo-file-system/-sharing,
+// deliberately not added for a secondary feature.) Online-only, like the CSV.
+export async function fetchItineraryIcs(tripId: string): Promise<string> {
+  const res = await rawSend('GET', `/trips/${tripId}/calendar/export?format=ics`);
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return res.text();
+}
+
+// F27: the anonymous subscription-feed URL for a share token — the live link Google/Outlook/Apple
+// Calendar poll. The token is the credential, so no auth is attached. webcal:// opens the device's
+// calendar app directly.
+export const calendarFeedUrl = (token: string) => `${API_URL}/calendar/${token}.ics`;
+export const calendarWebcalUrl = (token: string) => calendarFeedUrl(token).replace(/^https?:/, 'webcal:');
+
 // F24: checklists (packing lists / to-dos). Named lists, each with items. Mutations queue offline
 // like every other JSON mutation.
 export const getChecklists = (tripId: string) => getJson<Checklist[]>(`/trips/${tripId}/checklists`);
