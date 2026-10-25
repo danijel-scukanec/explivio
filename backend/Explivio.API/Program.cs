@@ -22,6 +22,8 @@ using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Budget;
 using Explivio.API.Modules.Budget.Export;
+using Explivio.API.Modules.Calendar;
+using Explivio.API.Modules.Calendar.Export;
 using Explivio.API.Modules.Checklists;
 using Explivio.API.Modules.Documents;
 using Explivio.API.Modules.Gallery;
@@ -170,6 +172,11 @@ QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 builder.Services.AddSingleton<IBudgetExporter, CsvBudgetExporter>();
 builder.Services.AddSingleton<IBudgetExporter, PdfBudgetExporter>();
 
+// F27: itinerary export writers (iCalendar hand-written; PDF via QuestPDF). Stateless singletons,
+// same shape as the budget exporters above; the calendar endpoints pick one by format.
+builder.Services.AddSingleton<IItineraryExporter, IcsItineraryExporter>();
+builder.Services.AddSingleton<IItineraryExporter, PdfItineraryExporter>();
+
 // F09: API versioning via URL segment (/v1/...). C# stays the source of truth for the
 // version; the frontend regenerates types from the versioned OpenAPI spec.
 builder.Services.AddApiVersioning(options =>
@@ -268,6 +275,8 @@ api.MapChecklistEndpoints();
 api.MapDocumentEndpoints();
 api.MapGalleryEndpoints();
 api.MapSharedTripEndpoint();
+api.MapCalendarEndpoints();
+api.MapCalendarFeedEndpoint();
 
 // F13: the streaming itinerary-generation hub. Not versioned like the REST group — SignalR hubs are
 // addressed by a stable path; the default CORS policy and auth apply as for the rest of the app.
