@@ -98,6 +98,7 @@ This is an evolving portfolio project. The **committed target** — the foundati
 | Storage | Trip **cover photos** in **Azure Blob Storage** (Azurite emulator locally), streamed through the API behind trip authorization |
 | Web | Trips (with **status lifecycle** badge + filter + **cover photos**), Itinerary (day-by-day + AI generate + **map**), Budget, Google Places search; map via **Leaflet + OpenStreetMap** (keyless) |
 | Export | Itinerary to **iCalendar (.ics)** + **PDF** (QuestPDF), plus a share-token **calendar subscription feed** for Google/Outlook/Apple sync |
+| Notifications | **In-app** notifications of trip changes to other members, delivered through the Notifications Worker (outbox → Service Bus → read model); 🔔 bell + unread badge on web + mobile (mobile **push** is a follow-up) |
 | Quality | Testcontainers integration tests + GitHub Actions CI |
 
 **Roadmap (planned, not yet built)**

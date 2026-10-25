@@ -3,11 +3,11 @@
 Prioritized feature catalogue for the Explivio showcase. Each feature notes the **capability it demonstrates**, so the roadmap doubles as a map of "what this repo proves I can do."
 
 > ### ⭐ Committed target vs. roadmap
-> A half-finished portfolio repo reads worse than a smaller, polished one. The original **committed target** was **all of P0 + F12 + F13**; in practice the build went well beyond it. See the **Done** column for what has actually shipped — **all of P0; F12–F15 and F19 in P1; F22, F23, F24, F25, F26, F27, F28, F30, F31, F32 in P2.** The unticked rows are **roadmap: genuinely planned, may not be built** — kept to show direction, not promised.
+> A half-finished portfolio repo reads worse than a smaller, polished one. The original **committed target** was **all of P0 + F12 + F13**; in practice the build went well beyond it. See the **Done** column for what has actually shipped — **all of P0; F12–F15, F19 and F20 in P1; F22, F23, F24, F25, F26, F27, F28, F30, F31, F32 in P2.** The unticked rows are **roadmap: genuinely planned, may not be built** — kept to show direction, not promised.
 
 **Priority tiers**
 - **P0 — Foundation:** the distributed/AI spine + core product. Must exist for the showcase to land. **(shipped)**
-- **P1 — Showcase:** the features a reviewer stops scrolling for. **(F12–F15, F19 shipped; rest roadmap)**
+- **P1 — Showcase:** the features a reviewer stops scrolling for. **(F12–F15, F19, F20 shipped; rest roadmap)**
 - **P2 — Stretch:** breadth once the spine is impressive. **(F22, F23, F24, F25, F26, F27, F28, F30, F31, F32 shipped; rest roadmap)**
 
 Legend for _Proves_: 🧩 distributed-systems · 🤖 AI · 🎨 full-stack · 🛠️ engineering-discipline
@@ -55,7 +55,7 @@ Legend for _Proves_: 🧩 distributed-systems · 🤖 AI · 🎨 full-stack · �
 | F17 | **Receipt scanning** (vision) → auto expenses | 🤖 | |
 | F18 | **Booking-email parsing** → auto activities | 🤖 | |
 | F19 | **Map view** of activities (coordinates already stored) | 🎨 | ✅ |
-| F20 | **Notifications** — in-app + mobile push | 🧩🎨 | |
+| F20 | **Notifications** — in-app + mobile push | 🧩🎨 | ✅ |
 | F21 | **AI ops** — GenAI telemetry (token/cost), semantic cache, Content Safety, eval harness | 🤖🛠️ | |
 
 ## P2 — Stretch (breadth)
@@ -106,4 +106,5 @@ Entra External ID, feature flags, docs/README polish for the portfolio.
 - The existing hand-written **Bicep modules** will be superseded by the Aspire-generated deployment model (kept until F11 lands).
 - **F15 member-management UI is deferred to Phase 6 (with P-Auth).** F15 shipped shared-trip roles + real-time collaboration (presence, live-edit nudges) as backend + plumbing, but the "invite / manage members (with roles)" **UI** was not built — a people-picker needs real identities, so it waits on P-Auth. Adding members today is API-only (`POST /trips/{id}/members`).
 - **F26 shipped gallery + share links + clone/templates + likes; "follow" is deferred to P-Auth.** Likes, share links, cloning and the public gallery (an event-driven `TripPopularity` read model) all work on the dev identity. A follow/social graph needs a real user directory, so it waits on Entra External ID — the same reason the F15 member UI does.
+- **F20 shipped in-app notifications; mobile push is deferred to a follow-up.** Trip changes (activity/expense add + remove, status change) notify the trip's other members through the Notifications Worker (outbox → Service Bus → `read.Notifications`), surfaced as a 🔔 bell with an unread badge on web + mobile. **Push notifications** — an OS-level alert when the app is closed — are **not built yet**; the pipeline already produces the message and recipients, so a follow-up adds Expo push-token registration + a sender in the worker (and, separately, web push). Tracked as the remaining half of F20.
 - **F25 split-expense UI depends on the F15 member UI above.** The budget split feature (split among trip members, settle-up balances) is backend-complete and tested, but its UI entry point only appears when a trip has 2+ members — so UI-reachable splitting lights up once the F15 member UI lands post-auth. F25's multi-currency + live FX and CSV/PDF export have no such dependency and are fully usable today.
