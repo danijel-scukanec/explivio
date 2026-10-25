@@ -6,6 +6,7 @@ import type { Trip } from '@explivio/shared';
 import { formatTripDate, getTripDuration, tripStatusColor } from '@explivio/shared';
 import { getTrips, deleteTrip } from '../src/api';
 import { LanguageSwitcher } from '../src/LanguageSwitcher';
+import { NotificationBell } from '../src/NotificationBell';
 import { theme } from '../src/theme';
 
 export default function TripsScreen() {
@@ -40,6 +41,7 @@ export default function TripsScreen() {
           title: t('mobile.tripsTitle'),
           headerRight: () => (
             <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+              <NotificationBell />
               <TouchableOpacity onPress={() => router.push('/gallery')} hitSlop={12}>
                 <Text style={styles.headerButton}>🌍</Text>
               </TouchableOpacity>

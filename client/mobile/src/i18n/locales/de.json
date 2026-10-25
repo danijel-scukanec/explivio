@@ -334,5 +334,17 @@
     "syncHint": "Abonniere in Google, Outlook oder Apple Kalender – deine Änderungen hier halten den Kalender aktuell.",
     "createSyncLink": "Sync-Link erstellen",
     "openInCalendar": "In Kalender-App öffnen"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty": "Noch keine Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "kind": {
+      "ActivityAdded": "hat eine Aktivität hinzugefügt",
+      "ActivityRemoved": "hat eine Aktivität entfernt",
+      "ExpenseAdded": "hat eine Ausgabe hinzugefügt",
+      "ExpenseRemoved": "hat eine Ausgabe entfernt",
+      "StatusChanged": "hat den Reisestatus geändert"
+    }
   }
 }

@@ -151,6 +151,26 @@ export async function fetchItineraryIcs(tripId: string): Promise<string> {
 export const calendarFeedUrl = (token: string) => `${API_URL}/calendar/${token}.ics`;
 export const calendarWebcalUrl = (token: string) => calendarFeedUrl(token).replace(/^https?:/, 'webcal:');
 
+// F20: in-app notifications for the current user (written by the Notifications Worker). The feed is
+// read-through cached so the bell survives going offline; mark-read is a queued mutation.
+export interface AppNotification {
+  id: string;
+  tripId: string;
+  tripName: string;
+  kind: string;
+  detail: string | null;
+  actorUserId: string;
+  createdAt: string;
+  isRead: boolean;
+}
+export interface NotificationsFeed {
+  unreadCount: number;
+  items: AppNotification[];
+}
+export const getNotifications = () => getJson<NotificationsFeed>('/notifications');
+export const markNotificationRead = (id: string) => mutate('POST', `/notifications/${id}/read`);
+export const markAllNotificationsRead = () => mutate('POST', '/notifications/read-all');
+
 // F24: checklists (packing lists / to-dos). Named lists, each with items. Mutations queue offline
 // like every other JSON mutation.
 export const getChecklists = (tripId: string) => getJson<Checklist[]>(`/trips/${tripId}/checklists`);

@@ -8,6 +8,7 @@ import { getTrip, getActivities, getReservations, deleteActivity, deleteReservat
 import { TYPE_ICONS, reservationStatusColor, formatReservationTime, reservationDateKey } from '../../../src/reservationMeta';
 import { useTripCollaboration } from '../../../src/useTripCollaboration';
 import { ItineraryMap } from '../../../src/ItineraryMap';
+import { NotificationBell } from '../../../src/NotificationBell';
 import { theme } from '../../../src/theme';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -149,6 +150,7 @@ export default function ItineraryScreen() {
               <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/export`)} hitSlop={10}>
                 <Text style={styles.headerButton}>📅</Text>
               </TouchableOpacity>
+              <NotificationBell />
               <TouchableOpacity
                 onPress={() => router.push(`/trips/${tripId}/generate?startDate=${trip?.startDate ?? ''}&days=${days.length}`)}
                 hitSlop={10}
