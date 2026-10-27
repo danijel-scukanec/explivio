@@ -501,6 +501,57 @@ namespace Explivio.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DisplayName = "Dev User",
+                            Email = "dev@explivio.local"
+                        });
+                });
+
+            modelBuilder.Entity("Explivio.API.Modules.Users.UserExternalLogin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Provider", "Subject")
+                        .IsUnique();
+
+                    b.ToTable("UserExternalLogins");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-0000000d0001"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Provider = "dev",
+                            Subject = "00000000-0000-0000-0000-000000000001",
+                            UserId = new Guid("00000000-0000-0000-0000-000000000001")
+                        });
                 });
 
             modelBuilder.Entity("Explivio.API.Modules.Budget.ExpenseShare", b =>
@@ -530,6 +581,15 @@ namespace Explivio.API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Explivio.API.Modules.Users.UserExternalLogin", b =>
+                {
+                    b.HasOne("Explivio.API.Modules.Users.User", null)
+                        .WithMany("ExternalLogins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Explivio.API.Modules.Budget.Expense", b =>
                 {
                     b.Navigation("Shares");
@@ -543,6 +603,11 @@ namespace Explivio.API.Migrations
             modelBuilder.Entity("Explivio.API.Modules.Trips.Trip", b =>
                 {
                     b.Navigation("Stops");
+                });
+
+            modelBuilder.Entity("Explivio.API.Modules.Users.User", b =>
+                {
+                    b.Navigation("ExternalLogins");
                 });
 #pragma warning restore 612, 618
         }

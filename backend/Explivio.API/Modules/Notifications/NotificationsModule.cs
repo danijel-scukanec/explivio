@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.ReadModel;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,9 +51,6 @@ public static class NotificationsModule
 
         return app;
     }
-
-    private static Guid GetUserId(this HttpContext ctx) =>
-        Guid.Parse(ctx.User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
 }
 
 public record NotificationResponse(

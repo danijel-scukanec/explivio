@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +15,7 @@ public sealed class RequireTripRole(TripRole minimum, string routeKey = "tripId"
     {
         var http = context.HttpContext;
 
-        if (!Guid.TryParse(http.User.FindFirst("sub")?.Value, out var userId))
+        if (!http.TryGetUserId(out var userId))
         {
             return Results.Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Not authenticated.");
         }

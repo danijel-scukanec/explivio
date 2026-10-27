@@ -1,5 +1,6 @@
 using System.Globalization;
 using Explivio.API.Infrastructure.Api;
+using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Modules.Notifications;
 using Explivio.API.Modules.Budget.AddExpense;
@@ -90,7 +91,4 @@ public static class BudgetModule
 
         return app;
     }
-
-    private static Guid GetUserId(this HttpContext ctx) =>
-        Guid.Parse(ctx.User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
 }

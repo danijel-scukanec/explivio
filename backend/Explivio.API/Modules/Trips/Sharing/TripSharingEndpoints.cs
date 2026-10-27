@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -95,9 +96,6 @@ public static class TripSharingEndpoints
         if (trip.IsPublic) return true;
         return await db.TripMembers.AnyAsync(m => m.TripId == tripId && m.UserId == userId, ct);
     }
-
-    private static Guid GetUserId(this HttpContext ctx) =>
-        Guid.Parse(ctx.User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
 }
 
 public record SetVisibilityRequest(bool IsPublic);

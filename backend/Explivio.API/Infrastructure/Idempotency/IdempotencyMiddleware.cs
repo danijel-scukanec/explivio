@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -163,7 +164,7 @@ public sealed class IdempotencyMiddleware(RequestDelegate next, ILogger<Idempote
         || HttpMethods.IsDelete(method);
 
     private static Guid? GetUserId(HttpContext context) =>
-        Guid.TryParse(context.User.FindFirst("sub")?.Value, out var id) ? id : null;
+        context.TryGetUserId(out var id) ? id : null;
 }
 
 public static class IdempotencyMiddlewareExtensions

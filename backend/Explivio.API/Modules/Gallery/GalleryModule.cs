@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.ReadModel;
 using Explivio.API.Modules.Trips;
@@ -20,7 +21,7 @@ public static class GalleryModule
         group.MapGet("/", async (AppDbContext db, ReadDbContext read, HttpContext ctx,
             int? skip, int? take, CancellationToken ct) =>
         {
-            var userId = GetUserId(ctx);
+            var userId = ctx.GetUserId();
             var page = Math.Clamp(take ?? 24, 1, 100);
             var offset = Math.Max(0, skip ?? 0);
 
@@ -70,7 +71,4 @@ public static class GalleryModule
           .Produces<TripResponse>().Produces(StatusCodes.Status404NotFound);
         return app;
     }
-
-    private static Guid GetUserId(HttpContext ctx) =>
-        Guid.Parse(ctx.User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
 }

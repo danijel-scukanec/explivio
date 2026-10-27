@@ -1,3 +1,4 @@
+using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Database;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -58,7 +59,7 @@ public sealed class TripCollaborationHub(AppDbContext db, TripPresence presence)
         });
 
     private Guid GetUserId() =>
-        Guid.TryParse(Context.User?.FindFirst("sub")?.Value, out var id)
+        Context.User.TryGetUserId(out var id)
             ? id
             : throw new HubException("Not authenticated.");
 }

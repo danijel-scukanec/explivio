@@ -1,4 +1,5 @@
 using Explivio.API.Infrastructure.Api;
+using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Features;
 using Explivio.API.Modules.Notifications;
 using Explivio.API.Modules.Itinerary.CreateActivity;
@@ -95,7 +96,4 @@ public static class ItineraryModule
 
         return app;
     }
-
-    private static Guid GetUserId(this HttpContext ctx) =>
-        Guid.Parse(ctx.User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
 }

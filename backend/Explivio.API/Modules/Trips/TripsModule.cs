@@ -1,4 +1,5 @@
 using Explivio.API.Infrastructure.Api;
+using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.Outcomes;
 using Explivio.API.Infrastructure.ReadModel;
@@ -124,7 +125,4 @@ public static class TripsModule
 
         return app;
     }
-
-    private static Guid GetUserId(this HttpContext ctx) =>
-        Guid.Parse(ctx.User.FindFirst("sub")?.Value ?? throw new UnauthorizedAccessException());
 }

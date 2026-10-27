@@ -5,6 +5,7 @@ using Asp.Versioning;
 using Asp.Versioning.Builder;
 using Explivio.API.Infrastructure.Ai;
 using Explivio.API.Infrastructure.Api;
+using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Behaviors;
 using Explivio.API.Infrastructure.Idempotency;
 using Explivio.API.Infrastructure.Database;
@@ -191,7 +192,31 @@ builder.Services.AddApiVersioning(options =>
 // F09: per-user sliding-window rate limiting (429 + Retry-After as ProblemDetails).
 builder.Services.AddExplivioRateLimiter(builder.Configuration);
 
-builder.Services.AddAuthentication().AddJwtBearer();
+// P-Auth: validate Microsoft Entra External ID bearer tokens. Config lives in the "Entra" section and
+// is empty until the tenant/app registrations exist — so this stays dormant: with no Authority set the
+// handler validates nothing, and locally the Development fake-identity middleware supplies the user
+// instead. Once Authority is filled, real tokens are validated and the resolved identity flows through
+// the same (provider, subject) -> internal User.Id seam the dev identity already uses.
+var entra = builder.Configuration.GetSection("Entra");
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    var authority = entra["Authority"];
+    var audience = entra["Audience"];
+
+    if (!string.IsNullOrWhiteSpace(authority))
+    {
+        options.Authority = authority;
+        options.TokenValidationParameters.ValidateAudience = !string.IsNullOrWhiteSpace(audience);
+        if (!string.IsNullOrWhiteSpace(audience))
+        {
+            options.Audience = audience;
+        }
+
+        // Stamp resolved identities with the "entra" provider so CurrentUserResolutionMiddleware looks
+        // them up under that provider in UserExternalLogins (the dev identity uses "dev").
+        options.TokenValidationParameters.AuthenticationType = ExternalLoginProviders.Entra;
+    }
+});
 builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
@@ -254,6 +279,13 @@ app.UseAuthorization();
 
 // Rate limiter runs after authentication so it can partition by the 'sub' claim.
 app.UseRateLimiter();
+
+// P-Auth: resolve the authenticated principal's external (provider, subject) login to the internal
+// User.Id and stamp it onto the principal, so every endpoint, the trip-role filter and the hubs read a
+// single internal id via CurrentUser.GetUserId() — never a provider claim. After the rate limiter so a
+// flood is throttled before it reaches the identity lookup; before idempotency and the feature
+// endpoints/hubs, which all consume the internal id.
+app.UseMiddleware<CurrentUserResolutionMiddleware>();
 
 // F04: boundary idempotency for mutating requests carrying an Idempotency-Key. After auth so it can
 // scope keys by user, and after the rate limiter so throttled requests never reserve a key.
