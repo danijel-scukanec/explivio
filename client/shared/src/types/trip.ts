@@ -7,5 +7,8 @@ export type TripStatus = components['schemas']['TripStatus'];
 // shape sent when creating a trip or replacing its route.
 export type TripStop = components['schemas']['TripStopResponse'];
 export type TripStopInput = components['schemas']['TripStopInput'];
-// F15/F25: a member of a trip (with display name), used by the sharing UI and the budget split UI.
+// F15/F25: a member of a trip (with display name + email), used by the member-management UI and the
+// budget split UI. TripRole is the Owner/Editor/Viewer level; InviteTripMemberRequest is the invite body.
 export type TripMember = components['schemas']['TripMemberResponse'];
+export type TripRole = components['schemas']['TripRole'];
+export type InviteTripMemberRequest = components['schemas']['InviteTripMemberRequest'];

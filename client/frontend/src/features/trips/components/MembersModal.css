@@ -1,0 +1,138 @@
+.members-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.members-modal {
+  width: 100%;
+  max-width: 460px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  background: var(--surface, #fff);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.members-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.members-modal__head h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.members-modal__close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-muted, #888);
+}
+
+.members-modal__error {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(229, 62, 62, 0.1);
+  color: var(--danger, #e53e3e);
+  font-size: 0.9rem;
+}
+
+.members-modal__muted {
+  color: var(--text-muted, #888);
+}
+
+.members-modal__list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.members-modal__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border, #eee);
+}
+
+.members-modal__person {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.members-modal__name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.members-modal__email {
+  font-size: 0.8rem;
+  color: var(--text-muted, #888);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.members-modal__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.members-modal__role {
+  font-size: 0.85rem;
+  color: var(--text-muted, #888);
+  flex-shrink: 0;
+}
+
+.members-modal__remove {
+  border: 1px solid var(--border, #ddd);
+  background: transparent;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--danger, #e53e3e);
+}
+
+.members-modal__remove:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.members-modal__invite {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.members-modal__invite input[type='email'] {
+  flex: 1;
+  min-width: 140px;
+  padding: 8px 10px;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}

@@ -1,4 +1,4 @@
-import type { Trip, TripMember, CreateTripRequest, TripStatus, TripStopInput } from '@explivio/shared';
+import type { Trip, TripMember, TripRole, CreateTripRequest, TripStatus, TripStopInput } from '@explivio/shared';
 import { authHeaders } from '../../../shared/auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
@@ -56,11 +56,56 @@ export async function setTripBaseCurrency(id: string, baseCurrency: string): Pro
   if (!res.ok) throw new Error('Failed to update base currency');
 }
 
-// F15/F25: the trip's members (with display names), used for sharing and for splitting expenses.
+// F15/F25: the trip's members (with display names + emails), used by the member-management UI and the
+// budget split UI.
 export async function getTripMembers(id: string): Promise<TripMember[]> {
   const res = await fetch(`${API_URL}/trips/${id}/members`, { headers: await authHeaders() });
   if (!res.ok) throw new Error('Failed to fetch trip members');
   return res.json();
+}
+
+// F15: the caller's own role on this trip, so the UI can show Owner-only controls.
+export async function getMemberRole(id: string): Promise<TripRole> {
+  const res = await fetch(`${API_URL}/trips/${id}/members/me`, { headers: await authHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch your role');
+  const body = await res.json();
+  return body.role as TripRole;
+}
+
+// Surfaces the API's ProblemDetails `title` (e.g. the last-owner guard) so the UI can show it.
+async function problemTitle(res: Response, fallback: string): Promise<string> {
+  const body = await res.json().catch(() => null);
+  return (body && typeof body.title === 'string') ? body.title : fallback;
+}
+
+// F15: invite someone by email (they must already have an Explivio account).
+export async function inviteMember(id: string, email: string, role: TripRole): Promise<TripMember> {
+  const res = await fetch(`${API_URL}/trips/${id}/members/invite`, {
+    method: 'POST',
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ email, role }),
+  });
+  if (!res.ok) throw new Error(await problemTitle(res, 'Failed to invite member'));
+  return res.json();
+}
+
+// F15: change a member's role (Owner only; can't demote the last owner).
+export async function setMemberRole(id: string, userId: string, role: TripRole): Promise<void> {
+  const res = await fetch(`${API_URL}/trips/${id}/members`, {
+    method: 'POST',
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ userId, role }),
+  });
+  if (!res.ok) throw new Error(await problemTitle(res, 'Failed to change role'));
+}
+
+// F15: remove a member (Owner only; can't remove the last owner).
+export async function removeMember(id: string, userId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/trips/${id}/members/${userId}`, {
+    method: 'DELETE',
+    headers: await authHeaders(),
+  });
+  if (!res.ok) throw new Error(await problemTitle(res, 'Failed to remove member'));
 }
 
 // F22: upload (or replace) a trip's cover photo. No Content-Type header — the browser sets the

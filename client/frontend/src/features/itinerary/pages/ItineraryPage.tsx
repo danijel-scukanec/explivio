@@ -16,6 +16,7 @@ import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
 import { ItineraryMap } from '../components/ItineraryMap';
 import { TripConditions } from '../components/TripConditions';
 import { ShareTripModal } from '../../gallery/components/ShareTripModal';
+import { MembersModal } from '../../trips/components/MembersModal';
 import { ExportItineraryModal } from '../components/ExportItineraryModal';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
@@ -47,6 +48,7 @@ export function ItineraryPage() {
   const [showEditStops, setShowEditStops] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
   // F23: the activity being edited, and the set of categories to show (empty = show all).
   const [editing, setEditing] = useState<Activity | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<Set<ActivityCategory>>(new Set());
@@ -225,6 +227,7 @@ export function ItineraryPage() {
           <Link className="btn btn--ghost" to={`/trips/${tripId}/checklists`}>✅ {t('itinerary.checklists')}</Link>
           <Link className="btn btn--ghost" to={`/trips/${tripId}/documents`}>📎 {t('itinerary.documents')}</Link>
           <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 {t('itinerary.budget')}</Link>
+          <button className="btn btn--ghost" onClick={() => setShowMembers(true)}>👥 {t('members.title')}</button>
           <button className="btn btn--ghost" onClick={() => setShowShare(true)}>🔗 {t('itinerary.share')}</button>
           <button className="btn btn--ghost" onClick={() => setShowExport(true)}>📅 {t('itinerary.export')}</button>
           {isFeatureOn(features, 'AiItineraryGeneration') && (
@@ -352,6 +355,10 @@ export function ItineraryPage() {
           onClose={() => setShowEditStops(false)}
           onSaved={() => { setShowEditStops(false); load(); }}
         />
+      )}
+
+      {showMembers && (
+        <MembersModal tripId={tripId!} onClose={() => setShowMembers(false)} />
       )}
 
       {showShare && (

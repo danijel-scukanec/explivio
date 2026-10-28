@@ -338,5 +338,20 @@
     "hint": "Sign in to plan and share your trips.",
     "signOut": "Sign out",
     "loading": "Loading…"
+  },
+  "members": {
+    "title": "Members",
+    "loading": "Loading…",
+    "close": "Close",
+    "loadError": "Couldn't load members.",
+    "inviteError": "Couldn't invite that person.",
+    "roleError": "Couldn't change the role.",
+    "removeError": "Couldn't remove the member.",
+    "emailPlaceholder": "Email address",
+    "invite": "Invite",
+    "remove": "Remove",
+    "roleOwner": "Owner",
+    "roleEditor": "Editor",
+    "roleViewer": "Viewer"
   }
 }
