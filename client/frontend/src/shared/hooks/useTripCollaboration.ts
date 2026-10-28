@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
-import { devUserQuery } from '../devUser';
+import { authEnabled, hubAccessToken, devUserQuery } from '../auth';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5298';
 
@@ -27,7 +27,12 @@ export function useTripCollaboration(
     if (!tripId) return;
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${API_URL}/hubs/trip-collaboration${devUserQuery()}`, { withCredentials: false })
+      .withUrl(
+        `${API_URL}/hubs/trip-collaboration${authEnabled ? '' : devUserQuery()}`,
+        authEnabled
+          ? { withCredentials: false, accessTokenFactory: () => hubAccessToken() }
+          : { withCredentials: false },
+      )
       .withAutomaticReconnect()
       .build();
 

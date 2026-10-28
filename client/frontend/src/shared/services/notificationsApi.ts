@@ -1,4 +1,4 @@
-import { withDevUser } from '../devUser';
+import { authHeaders } from '../auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 
@@ -20,7 +20,7 @@ export interface NotificationsFeed {
 }
 
 export async function getNotifications(): Promise<NotificationsFeed> {
-  const res = await fetch(`${API_URL}/notifications`, { headers: withDevUser() });
+  const res = await fetch(`${API_URL}/notifications`, { headers: await authHeaders() });
   if (!res.ok) throw new Error('Failed to fetch notifications');
   return res.json();
 }
@@ -28,7 +28,7 @@ export async function getNotifications(): Promise<NotificationsFeed> {
 export async function markNotificationRead(id: string): Promise<void> {
   const res = await fetch(`${API_URL}/notifications/${id}/read`, {
     method: 'POST',
-    headers: withDevUser(),
+    headers: await authHeaders(),
   });
   if (!res.ok && res.status !== 404) throw new Error('Failed to mark notification read');
 }
@@ -36,7 +36,7 @@ export async function markNotificationRead(id: string): Promise<void> {
 export async function markAllNotificationsRead(): Promise<void> {
   const res = await fetch(`${API_URL}/notifications/read-all`, {
     method: 'POST',
-    headers: withDevUser(),
+    headers: await authHeaders(),
   });
   if (!res.ok) throw new Error('Failed to mark notifications read');
 }

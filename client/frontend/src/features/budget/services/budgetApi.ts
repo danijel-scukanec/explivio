@@ -1,17 +1,17 @@
 import type { BudgetSummary, BudgetBalances, AddExpenseRequest } from '@explivio/shared';
-import { withDevUser } from '../../../shared/devUser';
+import { authHeaders } from '../../../shared/auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 
 export async function getBudgetSummary(tripId: string): Promise<BudgetSummary> {
-  const res = await fetch(`${API_URL}/trips/${tripId}/expenses`, { headers: withDevUser() });
+  const res = await fetch(`${API_URL}/trips/${tripId}/expenses`, { headers: await authHeaders() });
   if (!res.ok) throw new Error('Failed to fetch budget');
   return res.json();
 }
 
 // F25: settle-up balances across the trip's split expenses.
 export async function getBudgetBalances(tripId: string): Promise<BudgetBalances> {
-  const res = await fetch(`${API_URL}/trips/${tripId}/expenses/balances`, { headers: withDevUser() });
+  const res = await fetch(`${API_URL}/trips/${tripId}/expenses/balances`, { headers: await authHeaders() });
   if (!res.ok) throw new Error('Failed to fetch balances');
   return res.json();
 }
@@ -19,7 +19,7 @@ export async function getBudgetBalances(tripId: string): Promise<BudgetBalances>
 export async function addExpense(tripId: string, data: AddExpenseRequest): Promise<string> {
   const res = await fetch(`${API_URL}/trips/${tripId}/expenses`, {
     method: 'POST',
-    headers: withDevUser({ 'Content-Type': 'application/json' }),
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ ...data, tripId }),
   });
   if (!res.ok) throw new Error('Failed to add expense');
@@ -30,7 +30,7 @@ export async function addExpense(tripId: string, data: AddExpenseRequest): Promi
 export async function deleteExpense(tripId: string, id: string): Promise<void> {
   const res = await fetch(`${API_URL}/trips/${tripId}/expenses/${id}`, {
     method: 'DELETE',
-    headers: withDevUser(),
+    headers: await authHeaders(),
   });
   if (!res.ok) throw new Error('Failed to delete expense');
 }
@@ -39,7 +39,7 @@ export async function deleteExpense(tripId: string, id: string): Promise<void> {
 // authorization; we fetch it (with the dev-user header) and hand the browser a blob to save.
 export async function exportBudget(tripId: string, format: 'csv' | 'pdf', fallbackName: string): Promise<void> {
   const res = await fetch(`${API_URL}/trips/${tripId}/expenses/export?format=${format}`, {
-    headers: withDevUser(),
+    headers: await authHeaders(),
   });
   if (!res.ok) throw new Error('Failed to export budget');
 

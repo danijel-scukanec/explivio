@@ -1,4 +1,4 @@
-import { withDevUser } from '../../../shared/devUser';
+import { authHeaders } from '../../../shared/auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 
@@ -9,7 +9,7 @@ const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 // the caller passes the trip name and we build the same "<slug>-itinerary.<ext>" name client-side.
 export async function downloadItinerary(tripId: string, format: 'ics' | 'pdf', tripName?: string): Promise<void> {
   const res = await fetch(`${API_URL}/trips/${tripId}/calendar/export?format=${format}`, {
-    headers: withDevUser(),
+    headers: await authHeaders(),
   });
   if (!res.ok) throw new Error('Failed to export itinerary');
 

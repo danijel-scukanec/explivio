@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
 import type { GeneratedActivity, GenerateItineraryRequest } from '@explivio/shared';
 import { parsePartialItinerary } from '@explivio/shared';
+import { authEnabled, hubAccessToken } from '../../../shared/auth';
 
 const HUB_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/hubs/itinerary-generation`;
 
@@ -41,7 +42,12 @@ export function useItineraryGeneration(tripId: string): ItineraryGeneration {
       setError(null);
 
       const connection = new signalR.HubConnectionBuilder()
-        .withUrl(HUB_URL, { withCredentials: false })
+        .withUrl(
+          HUB_URL,
+          authEnabled
+            ? { withCredentials: false, accessTokenFactory: () => hubAccessToken() }
+            : { withCredentials: false },
+        )
         .build();
       connectionRef.current = connection;
 

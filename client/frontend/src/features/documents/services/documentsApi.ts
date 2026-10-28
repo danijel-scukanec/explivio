@@ -1,5 +1,5 @@
 import type { TripDocument } from '@explivio/shared';
-import { withDevUser, devUserQuery } from '../../../shared/devUser';
+import { authHeaders, devUserQuery } from '../../../shared/auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 
@@ -7,7 +7,7 @@ const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 // link to the content endpoint (the ?devUser suffix carries the dev identity, since an <a> download
 // can't set the X-Dev-User header — same trick as the cover image).
 export async function getDocuments(tripId: string): Promise<TripDocument[]> {
-  const res = await fetch(`${API_URL}/trips/${tripId}/documents`, { headers: withDevUser() });
+  const res = await fetch(`${API_URL}/trips/${tripId}/documents`, { headers: await authHeaders() });
   if (!res.ok) throw new Error('Failed to fetch documents');
   return res.json();
 }
@@ -17,7 +17,7 @@ export async function uploadDocument(tripId: string, file: File): Promise<TripDo
   form.append('file', file);
   const res = await fetch(`${API_URL}/trips/${tripId}/documents`, {
     method: 'POST',
-    headers: withDevUser(), // no Content-Type — the browser sets the multipart boundary
+    headers: await authHeaders(), // no Content-Type — the browser sets the multipart boundary
     body: form,
   });
   if (!res.ok) throw new Error('Failed to upload document');
@@ -27,7 +27,7 @@ export async function uploadDocument(tripId: string, file: File): Promise<TripDo
 export async function deleteDocument(tripId: string, id: string): Promise<void> {
   const res = await fetch(`${API_URL}/trips/${tripId}/documents/${id}`, {
     method: 'DELETE',
-    headers: withDevUser(),
+    headers: await authHeaders(),
   });
   if (!res.ok) throw new Error('Failed to delete document');
 }

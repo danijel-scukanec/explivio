@@ -1,16 +1,16 @@
 import type { Trip, TripMember, CreateTripRequest, TripStatus, TripStopInput } from '@explivio/shared';
-import { withDevUser, devUserQuery } from '../../../shared/devUser';
+import { authHeaders, devUserQuery } from '../../../shared/auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 
 export async function getTrips(): Promise<Trip[]> {
-  const res = await fetch(`${API_URL}/trips`, { headers: withDevUser() });
+  const res = await fetch(`${API_URL}/trips`, { headers: await authHeaders() });
   if (!res.ok) throw new Error('Failed to fetch trips');
   return res.json();
 }
 
 export async function getTrip(id: string): Promise<Trip> {
-  const res = await fetch(`${API_URL}/trips/${id}`, { headers: withDevUser() });
+  const res = await fetch(`${API_URL}/trips/${id}`, { headers: await authHeaders() });
   if (!res.ok) throw new Error('Failed to fetch trip');
   return res.json();
 }
@@ -18,7 +18,7 @@ export async function getTrip(id: string): Promise<Trip> {
 export async function createTrip(data: CreateTripRequest): Promise<string> {
   const res = await fetch(`${API_URL}/trips`, {
     method: 'POST',
-    headers: withDevUser({ 'Content-Type': 'application/json' }),
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error('Failed to create trip');
@@ -30,7 +30,7 @@ export async function createTrip(data: CreateTripRequest): Promise<string> {
 export async function setTripStops(id: string, stops: TripStopInput[]): Promise<void> {
   const res = await fetch(`${API_URL}/trips/${id}/stops`, {
     method: 'PUT',
-    headers: withDevUser({ 'Content-Type': 'application/json' }),
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ stops }),
   });
   if (!res.ok) throw new Error('Failed to update trip route');
@@ -40,7 +40,7 @@ export async function setTripStops(id: string, stops: TripStopInput[]): Promise<
 export async function setTripStatus(id: string, status: TripStatus): Promise<void> {
   const res = await fetch(`${API_URL}/trips/${id}/status`, {
     method: 'PATCH',
-    headers: withDevUser({ 'Content-Type': 'application/json' }),
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ status }),
   });
   if (!res.ok) throw new Error('Failed to update trip status');
@@ -50,7 +50,7 @@ export async function setTripStatus(id: string, status: TripStatus): Promise<voi
 export async function setTripBaseCurrency(id: string, baseCurrency: string): Promise<void> {
   const res = await fetch(`${API_URL}/trips/${id}/base-currency`, {
     method: 'PATCH',
-    headers: withDevUser({ 'Content-Type': 'application/json' }),
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ baseCurrency }),
   });
   if (!res.ok) throw new Error('Failed to update base currency');
@@ -58,7 +58,7 @@ export async function setTripBaseCurrency(id: string, baseCurrency: string): Pro
 
 // F15/F25: the trip's members (with display names), used for sharing and for splitting expenses.
 export async function getTripMembers(id: string): Promise<TripMember[]> {
-  const res = await fetch(`${API_URL}/trips/${id}/members`, { headers: withDevUser() });
+  const res = await fetch(`${API_URL}/trips/${id}/members`, { headers: await authHeaders() });
   if (!res.ok) throw new Error('Failed to fetch trip members');
   return res.json();
 }
@@ -70,7 +70,7 @@ export async function setTripCover(id: string, file: File): Promise<void> {
   body.append('file', file);
   const res = await fetch(`${API_URL}/trips/${id}/cover`, {
     method: 'POST',
-    headers: withDevUser(),
+    headers: await authHeaders(),
     body,
   });
   if (!res.ok) throw new Error('Failed to upload cover photo');
