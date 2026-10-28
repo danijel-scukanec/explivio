@@ -1,5 +1,5 @@
 import type { TripDocument } from '@explivio/shared';
-import { authHeaders, devUserQuery } from '../../../shared/auth';
+import { authHeaders } from '../../../shared/auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 
@@ -32,6 +32,22 @@ export async function deleteDocument(tripId: string, id: string): Promise<void> 
   if (!res.ok) throw new Error('Failed to delete document');
 }
 
-export function documentContentUrl(tripId: string, id: string): string {
-  return `${API_URL}/trips/${tripId}/documents/${id}/content${devUserQuery()}`;
+function documentContentUrl(tripId: string, id: string): string {
+  return `${API_URL}/trips/${tripId}/documents/${id}/content`;
+}
+
+// P-Auth: download a document through fetch (with the auth header) and save it client-side — an <a>
+// can't send a bearer token. Works in dev-identity and real-auth modes alike.
+export async function downloadDocument(tripId: string, id: string, fileName: string): Promise<void> {
+  const res = await fetch(documentContentUrl(tripId, id), { headers: await authHeaders() });
+  if (!res.ok) throw new Error('Failed to download document');
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }

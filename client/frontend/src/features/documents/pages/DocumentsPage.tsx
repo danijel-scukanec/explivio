@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { Trip, TripDocument } from '@explivio/shared';
 import { formatTripDate } from '@explivio/shared';
 import { getTrip } from '../../trips/services/tripsApi';
-import { getDocuments, uploadDocument, deleteDocument, documentContentUrl } from '../services/documentsApi';
+import { getDocuments, uploadDocument, deleteDocument, downloadDocument } from '../services/documentsApi';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
 import './DocumentsPage.css';
@@ -125,14 +125,13 @@ export function DocumentsPage() {
             {documents.map(doc => (
               <li key={doc.id} className="document">
                 <span className="document__icon" aria-hidden="true">{fileIcon(doc.contentType)}</span>
-                <a
-                  className="document__name"
-                  href={documentContentUrl(tripId!, doc.id)}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
+                  className="document__name document__name--btn"
+                  onClick={() => downloadDocument(tripId!, doc.id, doc.fileName)}
                 >
                   {doc.fileName}
-                </a>
+                </button>
                 <span className="document__meta">{formatSize(Number(doc.sizeBytes))} · {formatTripDate(doc.uploadedAt)}</span>
                 <button
                   type="button"

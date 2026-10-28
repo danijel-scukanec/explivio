@@ -103,6 +103,16 @@
   &:hover { color: var(--accent); text-decoration: underline; }
 }
 
+/* The download trigger is a <button> (needs the auth header), styled to read like the old link. */
+.document__name--btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .document__meta {
   font-size: 13px;
   color: var(--text);

@@ -1,5 +1,5 @@
 import type { Trip, TripMember, CreateTripRequest, TripStatus, TripStopInput } from '@explivio/shared';
-import { authHeaders, devUserQuery } from '../../../shared/auth';
+import { authHeaders } from '../../../shared/auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 
@@ -76,11 +76,8 @@ export async function setTripCover(id: string, file: File): Promise<void> {
   if (!res.ok) throw new Error('Failed to upload cover photo');
 }
 
-// F22: the URL an <img> loads a cover from. The image is streamed by the API behind the trip's
-// authorization, so the dev-user is passed as a query param (an <img> can't send headers); `version`
-// busts the browser cache after a re-upload.
-export function tripCoverUrl(id: string, version?: number): string {
-  const dev = devUserQuery(); // '' or '?devUser=...'
-  const v = version ? `${dev ? '&' : '?'}v=${version}` : '';
-  return `${API_URL}/trips/${id}/cover${dev}${v}`;
+// F22 / P-Auth: the API path a cover is streamed from (behind trip authorization). Loaded via
+// useAuthedBlobUrl (fetch + auth header → object URL), since an <img> can't send the auth header.
+export function tripCoverUrl(id: string): string {
+  return `${API_URL}/trips/${id}/cover`;
 }

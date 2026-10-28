@@ -21,6 +21,7 @@ import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
 import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
 import { NotificationBell } from '../../../shared/components/NotificationBell';
+import { useAuthedBlobUrl } from '../../../shared/hooks/useAuthedBlobUrl';
 import './ItineraryPage.css';
 
 // F23: categories available for the itinerary view filter (mirrors the ActivityCategory enum).
@@ -54,6 +55,9 @@ export function ItineraryPage() {
   // F22: bumps on each cover upload so the <img> reloads past the browser cache (the blob URL is stable).
   const [coverVersion, setCoverVersion] = useState(() => Date.now());
   const coverInputRef = useRef<HTMLInputElement>(null);
+  // P-Auth: load the cover via fetch (with the auth header) as an object URL — an <img> can't send a
+  // bearer token. Re-fetches when coverVersion bumps after an upload.
+  const coverSrc = useAuthedBlobUrl(trip && trip.hasCoverPhoto ? tripCoverUrl(trip.id) : null, coverVersion);
 
   async function load() {
     if (!tripId) return;
@@ -232,8 +236,8 @@ export function ItineraryPage() {
         </div>
       </div>
 
-      {trip.hasCoverPhoto && (
-        <img className="itinerary-page__cover" src={tripCoverUrl(trip.id, coverVersion)} alt="" />
+      {coverSrc && (
+        <img className="itinerary-page__cover" src={coverSrc} alt="" />
       )}
 
       {trip.stops.length > 0 && (
