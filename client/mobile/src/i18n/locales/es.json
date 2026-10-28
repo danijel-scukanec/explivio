@@ -346,5 +346,11 @@
       "ExpenseRemoved": "eliminó un gasto",
       "StatusChanged": "cambió el estado del viaje"
     }
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "hint": "Inicia sesión para planificar y compartir tus viajes.",
+    "signOut": "Cerrar sesión",
+    "loading": "Cargando…"
   }
 }

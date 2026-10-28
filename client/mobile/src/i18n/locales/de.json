@@ -346,5 +346,11 @@
       "ExpenseRemoved": "hat eine Ausgabe entfernt",
       "StatusChanged": "hat den Reisestatus geändert"
     }
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "hint": "Melde dich an, um deine Reisen zu planen und zu teilen.",
+    "signOut": "Abmelden",
+    "loading": "Wird geladen…"
   }
 }

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { authEnabled, useAuth } from './AuthProvider';
 import { theme } from './theme';
@@ -7,6 +8,7 @@ import { theme } from './theme';
 // screen. Rendered as an overlay (not a replacement) so expo-router's navigator stays mounted
 // underneath. No-op when auth is disabled — the dev-identity flow is untouched.
 export function AuthGate({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const { isAuthenticated, ready, signIn } = useAuth();
 
   return (
@@ -15,13 +17,13 @@ export function AuthGate({ children }: { children: ReactNode }) {
       {authEnabled && !isAuthenticated && (
         <View style={styles.overlay}>
           <Text style={styles.brand}>Explivio</Text>
-          <Text style={styles.hint}>Sign in to plan and share your trips.</Text>
+          <Text style={styles.hint}>{t('auth.hint')}</Text>
           <Pressable
             style={[styles.btn, !ready && styles.btnDisabled]}
             onPress={signIn}
             disabled={!ready}
           >
-            <Text style={styles.btnText}>{ready ? 'Sign in' : 'Loading…'}</Text>
+            <Text style={styles.btnText}>{ready ? t('auth.signIn') : t('auth.loading')}</Text>
           </Pressable>
         </View>
       )}

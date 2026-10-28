@@ -8,10 +8,12 @@ import { getTrips, deleteTrip } from '../src/api';
 import { LanguageSwitcher } from '../src/LanguageSwitcher';
 import { NotificationBell } from '../src/NotificationBell';
 import { theme } from '../src/theme';
+import { useAuth, authEnabled } from '../src/AuthProvider';
 
 export default function TripsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { isAuthenticated, signOut } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +64,16 @@ export default function TripsScreen() {
           data={trips}
           keyExtractor={trip => trip.id}
           contentContainerStyle={styles.list}
-          ListHeaderComponent={<View style={styles.langRow}><LanguageSwitcher /></View>}
+          ListHeaderComponent={
+            <View style={styles.langRow}>
+              <LanguageSwitcher />
+              {authEnabled && isAuthenticated && (
+                <TouchableOpacity onPress={signOut} hitSlop={8}>
+                  <Text style={styles.signOut}>{t('auth.signOut')}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          }
           ListEmptyComponent={<Text style={styles.center}>{t('mobile.tripsEmpty')}</Text>}
           renderItem={({ item }) => {
             const nights = getTripDuration(item.startDate, item.endDate);
@@ -99,6 +110,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   list: { padding: 16, gap: 12 },
   langRow: { alignItems: 'flex-end', marginBottom: 4 },
+  signOut: { color: theme.text, fontSize: 13, marginTop: 6 },
   center: { textAlign: 'center', marginTop: 40, color: theme.text },
   error: { color: theme.danger },
   headerButton: { color: '#fff', fontSize: 16, fontWeight: '600' },

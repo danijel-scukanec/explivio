@@ -346,5 +346,11 @@
       "ExpenseRemoved": "removed an expense",
       "StatusChanged": "changed the trip status"
     }
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "hint": "Sign in to plan and share your trips.",
+    "signOut": "Sign out",
+    "loading": "Loading…"
   }
 }
