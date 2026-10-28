@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MediatR;
 
 namespace Explivio.API.Modules.Budget.AddExpense;
@@ -15,5 +16,7 @@ public record AddExpenseCommand(
     Guid? PaidByUserId = null,
     IReadOnlyList<ExpenseShareInput>? Splits = null,
     // F20: the authenticated caller, set by the endpoint — used to notify the trip's other members.
-    Guid ActorUserId = default
+    // [JsonIgnore]: server-set from the auth context, so it's never part of the request body (clients
+    // can't spoof it) and stays out of the OpenAPI schema.
+    [property: JsonIgnore] Guid ActorUserId = default
 ) : IRequest<Guid>;
