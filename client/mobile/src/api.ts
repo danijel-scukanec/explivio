@@ -20,6 +20,7 @@ import type {
   ShareLink,
 } from '@explivio/shared';
 import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
+import { authEnabled, getAccessToken } from './auth';
 
 // On web (expo start --web) the device is the host, so localhost works. For a real device/emulator,
 // set EXPO_PUBLIC_API_URL to the host's LAN IP (emulators also have their own aliases). The dev API
@@ -27,10 +28,18 @@ import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline
 export const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:5298';
 const API_URL = `${API_BASE}/v1`;
 
-function rawSend(method: string, path: string, body?: unknown): Promise<Response> {
+async function rawSend(method: string, path: string, body?: unknown): Promise<Response> {
+  const headers: Record<string, string> = {};
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  // P-Auth: attach the bearer token when Entra auth is enabled; otherwise send no identity header and
+  // let the dev API use the default dev user (unchanged behaviour).
+  if (authEnabled) {
+    const token = await getAccessToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
   return fetch(`${API_URL}${path}`, {
     method,
-    headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+    headers: Object.keys(headers).length > 0 ? headers : undefined,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 }

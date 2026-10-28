@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
 import { API_BASE } from './api';
+import { authEnabled, hubAccessToken } from './auth';
 
 // F15 / F31: mobile twin of the web's useTripCollaboration. Joins the trip's live group, tracks who
 // else is viewing (presence), and calls onChange when a member edits the trip so the screen refetches.
@@ -15,7 +16,12 @@ export function useTripCollaboration(tripId: string | undefined, onChange: () =>
     if (!tripId) return;
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${API_BASE}/hubs/trip-collaboration`, { withCredentials: false })
+      .withUrl(
+        `${API_BASE}/hubs/trip-collaboration`,
+        authEnabled
+          ? { withCredentials: false, accessTokenFactory: () => hubAccessToken() }
+          : { withCredentials: false },
+      )
       .withAutomaticReconnect()
       .build();
 

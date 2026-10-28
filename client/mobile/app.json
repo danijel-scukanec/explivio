@@ -26,7 +26,8 @@
     "plugins": [
       "expo-router",
       "expo-status-bar",
-      "expo-localization"
+      "expo-localization",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": false

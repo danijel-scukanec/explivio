@@ -6,6 +6,7 @@ import {
   type GenerateItineraryRequest,
 } from '@explivio/shared';
 import { API_BASE } from './api';
+import { authEnabled, hubAccessToken } from './auth';
 
 export type GenerationStatus = 'idle' | 'streaming' | 'done' | 'error';
 
@@ -45,7 +46,12 @@ export function useItineraryGeneration(tripId: string): ItineraryGeneration {
       setError(null);
 
       const connection = new signalR.HubConnectionBuilder()
-        .withUrl(`${API_BASE}/hubs/itinerary-generation`, { withCredentials: false })
+        .withUrl(
+          `${API_BASE}/hubs/itinerary-generation`,
+          authEnabled
+            ? { withCredentials: false, accessTokenFactory: () => hubAccessToken() }
+            : { withCredentials: false },
+        )
         .build();
       connectionRef.current = connection;
 
