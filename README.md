@@ -41,7 +41,7 @@ Every trip carries an explicit lifecycle status — **Draft, Planned, Active, Co
 - **Event-driven core with a transactional outbox** — domain events are persisted in the same transaction as the business change, then relayed to **Azure Service Bus**; consumers dedupe on message id for exactly-once *effect* over at-least-once delivery.
 - **Independently-deployed workers** — an **AI Worker** and a **Notifications Worker** consume domain events off their own subscriptions, each with its own inbox-dedupe store.
 - **CQRS read model** — a denormalized per-trip dashboard summary in its own SQL `read` schema, kept current by an event-driven projector (projection + inbox committed in one transaction).
-- **AI as a product capability** — itinerary generation via `Microsoft.Extensions.AI` with **structured outputs** (typed JSON, no brittle text parsing) and **streaming to the UI over SignalR**. Provider-neutral: Azure OpenAI, GitHub Models, or a local stub, chosen by config.
+- **AI as a product capability** — itinerary generation via `Microsoft.Extensions.AI` with **structured outputs** (typed JSON, no brittle text parsing) and **streaming to the UI over SignalR**. Provider-neutral: Azure OpenAI, OpenAI, Groq, or a local stub, chosen by config.
 - **Real-time collaboration** — shareable trips with role-based membership (Owner/Editor/Viewer) enforced at a single authorization seam; live presence and edit-nudges over **SignalR**, pushed immediately via `IHubContext` rather than through the outbox, so "live" doesn't inherit the poll latency.
 - **Operable by default** — OpenTelemetry traces/metrics/logs, health/liveness endpoints, and resilience pipelines wired through a shared `ServiceDefaults`, orchestrated locally by **.NET Aspire**.
 - **Consistent HTTP contract** — `Result`-based error flow and a global exception handler, all rendered as **ProblemDetails (RFC 9457)**; validation, logging, API versioning, and per-user rate limiting as cross-cutting concerns.
@@ -64,7 +64,7 @@ flowchart LR
 
   sb["Azure Service Bus"]
   sql[("Azure SQL<br/>write model + read model")]
-  openai[["AI model<br/>(Azure OpenAI / GitHub Models / stub)"]]
+  openai[["AI model<br/>(Azure OpenAI / OpenAI-compatible / stub)"]]
 
   web -- "REST + SignalR stream" --> api
   api -- "outbox" --> sb
@@ -93,6 +93,7 @@ This is an evolving portfolio project. The **committed target** — the foundati
 | Workers | AI Worker + Notifications Worker (event consumption + inbox dedupe) |
 | CQRS | Trip-dashboard read model, event-driven projector |
 | AI | Itinerary generation (structured output) + **live streaming over SignalR**, with accept-to-itinerary flow in the web UI |
+| AI assistant | **Conversational trip assistant** (F16) — grounded Q&A + **agentic edits** (add/update/delete activities, expenses, status) via tool-calling, streamed over SignalR; role-gated (Viewer = Q&A only) |
 | RAG | Itinerary grounding by **vector search** — embeddings + place retrieval over **Azure Cosmos DB** when deployed, in-memory over a seeded corpus locally |
 | Collaboration | Shareable trips with role-based membership (Owner/Editor/Viewer) + **real-time presence and live updates over SignalR** |
 | Storage | Trip **cover photos** in **Azure Blob Storage** (Azurite emulator locally), streamed through the API behind trip authorization |
@@ -104,7 +105,7 @@ This is an evolving portfolio project. The **committed target** — the foundati
 
 **Roadmap (planned, not yet built)**
 
-AI chat assistant · receipt/email parsing (vision) · push notifications · AI ops (token/cost telemetry, semantic cache, evals) · mobile parity.
+Receipt/email parsing (vision) · push notifications · AI ops (token/cost telemetry, semantic cache, evals) · AI trip recap.
 
 ---
 
@@ -146,15 +147,15 @@ Then open <http://localhost:5173>, create a trip, open its itinerary, and try **
 
 ### Using a real AI model
 
-By default the app uses a deterministic **stub** — great for building and CI, zero cost. To generate real itineraries, set three config keys (e.g. via `dotnet user-secrets` in `backend/Explivio.API`) and restart — no code change:
+By default the app uses a deterministic **stub** — great for building and CI, zero cost. To use a real model, set config keys (e.g. via `dotnet user-secrets` in `backend/Explivio.API`) and restart — **no code change**. Any **OpenAI-compatible** endpoint works (Azure OpenAI, OpenAI, Groq, local Ollama…):
 
-| Key | Example (GitHub Models — free tier) |
+| Key | Example (Azure OpenAI) |
 |---|---|
-| `AI:Endpoint` | `https://models.github.ai/inference` |
-| `AI:ApiKey`   | a GitHub token with the Models permission |
-| `AI:Model`    | `openai/gpt-4o-mini` |
+| `AI:Endpoint` | `https://<resource>.openai.azure.com/openai/v1` |
+| `AI:ApiKey`   | the resource key |
+| `AI:Model`    | the deployment name (e.g. `gpt-5-mini`) |
 
-Any OpenAI-compatible endpoint works, including Azure OpenAI (endpoint + key + deployment name).
+**Embeddings** (for RAG) are a separate capability — not every chat provider offers them. Set `AI:EmbeddingEndpoint` (+ `AI:EmbeddingModel`; key falls back to `AI:ApiKey`) to use a real embedder; otherwise a deterministic in-memory embedder is used, so chat-only providers (e.g. Groq) still work.
 
 ### Tests
 
