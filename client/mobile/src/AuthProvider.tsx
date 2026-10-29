@@ -28,11 +28,21 @@ export const useAuth = () => useContext(AuthContext);
 // to the app registration) — see mobile AGENTS.md / the P-Auth notes.
 const redirectUri = makeRedirectUri({ scheme: 'explivio', path: 'auth' });
 
+// Public entry point. Only mount the Entra machinery when auth is actually configured; otherwise
+// fall through to the default context (dev-identity mode — no identity header, API treats the
+// request as the dev user). `authEnabled` is a module constant, so this branch is stable across
+// renders — no rules-of-hooks concern — and it keeps expo-auth-session's hooks from ever running
+// with an empty issuer: useAutoDiscovery('') rejects with "Expected a valid discovery object or
+// issuer URL" and would otherwise crash the app on a clone without the EXPO_PUBLIC_ENTRA_* vars.
 export function AuthProvider({ children }: { children: ReactNode }) {
+  if (!authEnabled) return <>{children}</>;
+  return <EntraAuthProvider>{children}</EntraAuthProvider>;
+}
+
+function EntraAuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // When auth is disabled these hooks still run but with empty config; nothing is triggered unless
-  // signIn() is called, which the gate never does when auth is off.
+  // Safe here: EntraAuthProvider only mounts when authEnabled, so authority/clientId are present.
   const discovery = useAutoDiscovery(entraConfig.authority ?? '');
   const [request, response, promptAsync] = useAuthRequest(
     { clientId: entraConfig.clientId ?? '', scopes: authScopes, redirectUri, usePKCE: true },
