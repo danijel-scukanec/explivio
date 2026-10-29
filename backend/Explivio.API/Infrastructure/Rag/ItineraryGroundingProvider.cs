@@ -36,7 +36,18 @@ public sealed class ItineraryGroundingProvider(
             return string.Empty;
         }
 
-        var matches = await retriever.RetrieveAsync(destination, command.Prompt, TopK, cancellationToken);
+        IReadOnlyList<PlaceMatch> matches;
+        try
+        {
+            matches = await retriever.RetrieveAsync(destination, command.Prompt, TopK, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // RAG only ever adds context; a retrieval/embedding failure must never block generation.
+            logger.LogWarning(ex, "Place retrieval failed for '{Destination}'; generating ungrounded.", destination);
+            return string.Empty;
+        }
+
         if (matches.Count == 0)
         {
             logger.LogInformation("No grounding places found for destination '{Destination}'.", destination);
