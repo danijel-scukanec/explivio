@@ -352,5 +352,12 @@
     "hint": "Inicia sesión para planificar y compartir tus viajes.",
     "signOut": "Cerrar sesión",
     "loading": "Cargando…"
+  },
+  "assistant": {
+    "title": "Asistente de viaje",
+    "empty": "Pregúntame sobre tu viaje o pídeme que añada o cambie algo.",
+    "placeholder": "Pregunta o pídeme un cambio…",
+    "send": "Enviar",
+    "thinking": "Pensando…"
   }
 }

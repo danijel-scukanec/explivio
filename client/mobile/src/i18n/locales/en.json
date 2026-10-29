@@ -352,5 +352,12 @@
     "hint": "Sign in to plan and share your trips.",
     "signOut": "Sign out",
     "loading": "Loading…"
+  },
+  "assistant": {
+    "title": "Trip assistant",
+    "empty": "Ask about your trip, or tell me to add or change something.",
+    "placeholder": "Ask or tell me to change something…",
+    "send": "Send",
+    "thinking": "Thinking…"
   }
 }

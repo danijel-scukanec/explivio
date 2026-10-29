@@ -352,5 +352,12 @@
     "hint": "Melde dich an, um deine Reisen zu planen und zu teilen.",
     "signOut": "Abmelden",
     "loading": "Wird geladen…"
+  },
+  "assistant": {
+    "title": "Reise-Assistent",
+    "empty": "Frag mich etwas zu deiner Reise oder bitte mich, etwas hinzuzufügen oder zu ändern.",
+    "placeholder": "Frag mich oder bitte um eine Änderung…",
+    "send": "Senden",
+    "thinking": "Denkt nach…"
   }
 }
