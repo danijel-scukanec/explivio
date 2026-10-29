@@ -107,6 +107,11 @@ builder.Services.AddExplivioAi(builder.Configuration);
 // connection is configured (added below).
 builder.Services.AddExplivioRag(builder.Configuration);
 
+// F16: builds the per-trip grounding block (facts + activities + budget + RAG places) for the AI
+// chat assistant hub.
+builder.Services.AddScoped<Explivio.API.Modules.Itinerary.Assistant.ITripAssistantContext,
+    Explivio.API.Modules.Itinerary.Assistant.TripAssistantContext>();
+
 // F14: when Cosmos is configured (the Aspire AppHost injects "cosmos"; Azure provides it when
 // deployed), swap the in-memory retriever for real Cosmos vector search and seed the corpus on
 // startup. Without it the API still grounds generation via the in-memory retriever, so tests and a
@@ -215,6 +220,23 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
         // Stamp resolved identities with the "entra" provider so CurrentUserResolutionMiddleware looks
         // them up under that provider in UserExternalLogins (the dev identity uses "dev").
         options.TokenValidationParameters.AuthenticationType = ExternalLoginProviders.Entra;
+
+        // SignalR WebSockets can't send an Authorization header, so the JS client passes the access
+        // token as the `access_token` query string instead. Read it from there for hub paths — without
+        // this, authenticated hub connections carry no identity and (in Development) fall back to the
+        // fake dev user, which then fails trip-membership checks ("Trip not found").
+        options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(accessToken) && context.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            },
+        };
     }
 });
 builder.Services.AddAuthorization();
@@ -318,6 +340,9 @@ app.MapHub<ItineraryGenerationHub>("/hubs/itinerary-generation");
 
 // F15 Phase B: the real-time trip collaboration hub (presence + live-edit nudges).
 app.MapHub<TripCollaborationHub>("/hubs/trip-collaboration");
+
+// F16: the AI trip assistant hub (NL Q&A + agentic edits over the trip).
+app.MapHub<Explivio.API.Modules.Itinerary.Assistant.TripAssistantHub>("/hubs/trip-assistant");
 
 app.Run();
 

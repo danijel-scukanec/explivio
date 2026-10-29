@@ -17,6 +17,10 @@ public static class FeatureFlags
     // Gates trip document upload/list/download/delete (F24). Blob-backed, like cover photos.
     public const string TripDocuments = "TripDocuments";
 
+    // F16: gates the AI chat assistant (the /hubs/trip-assistant SignalR hub). Like
+    // AiItineraryGeneration, it's the model-backed feature you'd most want to switch off.
+    public const string AiAssistant = "AiAssistant";
+
     // All flags, so GET /features can report each one's state without reflection.
-    public static readonly IReadOnlyList<string> All = [AiItineraryGeneration, TripCoverPhotos, TripDocuments];
+    public static readonly IReadOnlyList<string> All = [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant];
 }

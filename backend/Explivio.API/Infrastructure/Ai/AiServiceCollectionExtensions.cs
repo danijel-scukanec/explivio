@@ -18,7 +18,9 @@ public static class AiServiceCollectionExtensions
         if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(apiKey))
         {
             // No provider configured — use the stub. Real generation is opt-in via config.
-            services.AddChatClient(new FakeItineraryChatClient());
+            // F16: UseFunctionInvocation lets the chat assistant's tool-calls run automatically; it's a
+            // no-op for the tool-less generation path (F12/F13 pass no tools), and harmless on the stub.
+            services.AddChatClient(new FakeItineraryChatClient()).UseFunctionInvocation();
             return services;
         }
 
@@ -30,7 +32,7 @@ public static class AiServiceCollectionExtensions
             var options = new OpenAIClientOptions { Endpoint = new Uri(endpoint) };
             var client = new OpenAIClient(new ApiKeyCredential(apiKey), options);
             return client.GetChatClient(model).AsIChatClient();
-        });
+        }).UseFunctionInvocation();
 
         return services;
     }

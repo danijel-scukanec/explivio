@@ -1,13 +1,12 @@
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Features;
-using Explivio.API.Modules.Notifications;
 using Explivio.API.Modules.Itinerary.CreateActivity;
+using Explivio.API.Modules.Itinerary.DeleteActivity;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
 using Explivio.API.Modules.Itinerary.ReorderActivities;
 using Explivio.API.Modules.Itinerary.UpdateActivity;
 using Explivio.API.Modules.Trips;
-using Explivio.API.Modules.Trips.Collaboration;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Explivio.API.Infrastructure.Database;
@@ -68,29 +67,12 @@ public static class ItineraryModule
           .AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces<GeneratedItinerary>().ProducesValidationProblem().ProducesProblem(StatusCodes.Status404NotFound);
 
-        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, HttpContext ctx, AppDbContext db, ITripCollaborationNotifier collaboration, CancellationToken token) =>
+        // F16: the delete logic moved to DeleteActivityCommand so the AI assistant's delete tool and
+        // this endpoint share one path (load → removal event → notify → commit → live-refresh).
+        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, HttpContext ctx, IMediator mediator) =>
         {
-            // F08: load then remove so the aggregate raises ActivityRemovedDomainEvent for the
-            // read-model projector (the outbox interceptor captures it in the same transaction).
-            var activity = await db.Activities.FirstOrDefaultAsync(a => a.Id == id && a.TripId == tripId, token);
-            if (activity is null)
-            {
-                return Results.NotFound();
-            }
-
-            activity.Remove();
-
-            // F20: notify the trip's other members (same transaction via the outbox).
-            var notification = await TripNotifications.BuildAsync(
-                db, tripId, ctx.GetUserId(), NotificationKind.ActivityRemoved, activity.Name, token);
-            if (notification is not null) db.OutboxMessages.Add(notification);
-
-            db.Activities.Remove(activity);
-            await db.SaveChangesAsync(token);
-
-            // F15 Phase B: nudge anyone viewing the trip to refetch — immediate, after the commit.
-            await collaboration.TripChangedAsync(tripId, "activity.deleted", token);
-            return Results.NoContent();
+            var deleted = await mediator.Send(new DeleteActivityCommand(tripId, id, ctx.GetUserId()));
+            return deleted ? Results.NoContent() : Results.NotFound();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
 
