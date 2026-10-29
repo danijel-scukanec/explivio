@@ -18,6 +18,7 @@ import { TripConditions } from '../components/TripConditions';
 import { ShareTripModal } from '../../gallery/components/ShareTripModal';
 import { MembersModal } from '../../trips/components/MembersModal';
 import { ExportItineraryModal } from '../components/ExportItineraryModal';
+import { TripAssistantPanel } from '../components/TripAssistantPanel';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
 import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
@@ -380,6 +381,10 @@ export function ItineraryPage() {
           onChanged={load}
         />
       )}
+
+      {/* F16: AI trip assistant — gated by the AiAssistant feature flag. Edits it makes refresh the
+          page via the collaboration broadcast above (useTripCollaboration(tripId, load)). */}
+      {isFeatureOn(features, 'AiAssistant') && <TripAssistantPanel tripId={tripId!} />}
     </div>
   );
 }

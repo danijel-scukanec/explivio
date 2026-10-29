@@ -353,5 +353,12 @@
     "roleOwner": "Propietario",
     "roleEditor": "Editor",
     "roleViewer": "Lector"
+  },
+  "assistant": {
+    "title": "Asistente de viaje",
+    "empty": "Pregúntame sobre tu viaje o pídeme que añada o cambie algo.",
+    "placeholder": "Pregunta o pídeme un cambio…",
+    "send": "Enviar",
+    "thinking": "Pensando…"
   }
 }

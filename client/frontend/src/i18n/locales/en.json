@@ -353,5 +353,12 @@
     "roleOwner": "Owner",
     "roleEditor": "Editor",
     "roleViewer": "Viewer"
+  },
+  "assistant": {
+    "title": "Trip assistant",
+    "empty": "Ask about your trip, or tell me to add or change something.",
+    "placeholder": "Ask or tell me to change something…",
+    "send": "Send",
+    "thinking": "Thinking…"
   }
 }
