@@ -94,6 +94,7 @@ This is an evolving portfolio project. The **committed target** — the foundati
 | CQRS | Trip-dashboard read model, event-driven projector |
 | AI | Itinerary generation (structured output) + **live streaming over SignalR**, with accept-to-itinerary flow in the web UI |
 | AI assistant | **Conversational trip assistant** (F16) — grounded Q&A + **agentic edits** (add/update/delete activities, expenses, status) via tool-calling, streamed over SignalR; role-gated (Viewer = Q&A only) |
+| Receipts | **Receipt scanning** (F17) — a photographed receipt read by a **vision model** into a draft expense (merchant, total, currency, category, date) for review; the image is stored in **Blob Storage** and streamed back through the API behind trip authorization |
 | RAG | Itinerary grounding by **vector search** — embeddings + place retrieval over **Azure Cosmos DB** when deployed, in-memory over a seeded corpus locally |
 | Collaboration | Shareable trips with role-based membership (Owner/Editor/Viewer) + **real-time presence and live updates over SignalR** |
 | Storage | Trip **cover photos** in **Azure Blob Storage** (Azurite emulator locally), streamed through the API behind trip authorization |
@@ -105,7 +106,7 @@ This is an evolving portfolio project. The **committed target** — the foundati
 
 **Roadmap (planned, not yet built)**
 
-Receipt/email parsing (vision) · push notifications · AI ops (token/cost telemetry, semantic cache, evals) · AI trip recap.
+Booking-email parsing → auto activities · push notifications · AI ops (token/cost telemetry, semantic cache, evals) · AI trip recap.
 
 ---
 
