@@ -115,7 +115,8 @@
     "day": "Tag {{number}}",
     "noActivities": "Keine Aktivitäten geplant",
     "noTime": "Keine Zeit",
-    "export": "Exportieren"
+    "export": "Exportieren",
+    "recap": "Rückblick"
   },
   "activity": {
     "edit": "Aktivität bearbeiten",
@@ -365,5 +366,17 @@
     "placeholder": "Frag mich oder bitte um eine Änderung…",
     "send": "Senden",
     "thinking": "Denkt nach…"
+  },
+  "recap": {
+    "title": "Reiserückblick",
+    "trips": "Reisen",
+    "itinerary": "Reiseplan",
+    "generate": "Rückblick erstellen",
+    "regenerate": "Neu erstellen",
+    "generating": "Wird geschrieben…",
+    "loading": "Wird geladen…",
+    "loadFailed": "Rückblick konnte nicht geladen werden.",
+    "empty": "Noch kein Rückblick. Erstelle einen, um auf diese Reise zurückzublicken.",
+    "generatedOn": "Erstellt am {{date}}"
   }
 }

@@ -228,6 +228,9 @@ export function ItineraryPage() {
           <Link className="btn btn--ghost" to={`/trips/${tripId}/checklists`}>✅ {t('itinerary.checklists')}</Link>
           <Link className="btn btn--ghost" to={`/trips/${tripId}/documents`}>📎 {t('itinerary.documents')}</Link>
           <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 {t('itinerary.budget')}</Link>
+          {isFeatureOn(features, 'AiTripRecap') && (
+            <Link className="btn btn--ghost" to={`/trips/${tripId}/recap`}>📖 {t('itinerary.recap')}</Link>
+          )}
           <button className="btn btn--ghost" onClick={() => setShowMembers(true)}>👥 {t('members.title')}</button>
           <button className="btn btn--ghost" onClick={() => setShowShare(true)}>🔗 {t('itinerary.share')}</button>
           <button className="btn btn--ghost" onClick={() => setShowExport(true)}>📅 {t('itinerary.export')}</button>

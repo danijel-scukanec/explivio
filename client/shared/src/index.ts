@@ -6,6 +6,7 @@ export * from './types/conditions';
 export * from './types/checklist';
 export * from './types/document';
 export * from './types/gallery';
+export * from './types/recap';
 export * from './utils/locale';
 export * from './utils/weather';
 export * from './utils/trip';

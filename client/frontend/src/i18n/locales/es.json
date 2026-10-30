@@ -115,7 +115,8 @@
     "day": "Día {{number}}",
     "noActivities": "Sin actividades planeadas",
     "noTime": "Sin hora",
-    "export": "Exportar"
+    "export": "Exportar",
+    "recap": "Resumen"
   },
   "activity": {
     "edit": "Editar actividad",
@@ -365,5 +366,17 @@
     "placeholder": "Pregunta o pídeme un cambio…",
     "send": "Enviar",
     "thinking": "Pensando…"
+  },
+  "recap": {
+    "title": "Resumen del viaje",
+    "trips": "Viajes",
+    "itinerary": "Itinerario",
+    "generate": "Generar resumen",
+    "regenerate": "Regenerar",
+    "generating": "Escribiendo…",
+    "loading": "Cargando…",
+    "loadFailed": "No se pudo cargar el resumen.",
+    "empty": "Aún no hay resumen. Genera uno para recordar este viaje.",
+    "generatedOn": "Generado el {{date}}"
   }
 }

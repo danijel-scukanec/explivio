@@ -340,6 +340,28 @@ namespace Explivio.API.Migrations
                     b.ToTable("Reservations");
                 });
 
+            modelBuilder.Entity("Explivio.API.Modules.Trips.Recap.TripRecap", b =>
+                {
+                    b.Property<Guid>("TripId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("GeneratedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Model")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("TripId");
+
+                    b.ToTable("TripRecaps");
+                });
+
             modelBuilder.Entity("Explivio.API.Modules.Trips.Trip", b =>
                 {
                     b.Property<Guid>("Id")

@@ -18,6 +18,7 @@ using Explivio.API.Infrastructure.Storage;
 using Explivio.API.Infrastructure.Weather;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Trips.Collaboration;
+using Explivio.API.Modules.Trips.Recap;
 using Explivio.API.Modules.Users;
 using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
@@ -111,6 +112,10 @@ builder.Services.AddExplivioRag(builder.Configuration);
 // chat assistant hub.
 builder.Services.AddScoped<Explivio.API.Modules.Itinerary.Assistant.ITripAssistantContext,
     Explivio.API.Modules.Itinerary.Assistant.TripAssistantContext>();
+
+// F29: builds the factual context (route + itinerary + budget) the AI trip recap is written from.
+builder.Services.AddScoped<Explivio.API.Modules.Trips.Recap.ITripRecapContext,
+    Explivio.API.Modules.Trips.Recap.TripRecapContext>();
 
 // F14: when Cosmos is configured (the Aspire AppHost injects "cosmos"; Azure provides it when
 // deployed), swap the in-memory retriever for real Cosmos vector search and seed the corpus on
@@ -335,6 +340,7 @@ api.MapSharedTripEndpoint();
 api.MapCalendarEndpoints();
 api.MapCalendarFeedEndpoint();
 api.MapNotificationsEndpoints();
+api.MapRecapModule();
 
 // F13: the streaming itinerary-generation hub. Not versioned like the REST group — SignalR hubs are
 // addressed by a stable path; the default CORS policy and auth apply as for the rest of the app.
@@ -345,6 +351,9 @@ app.MapHub<TripCollaborationHub>("/hubs/trip-collaboration");
 
 // F16: the AI trip assistant hub (NL Q&A + agentic edits over the trip).
 app.MapHub<Explivio.API.Modules.Itinerary.Assistant.TripAssistantHub>("/hubs/trip-assistant");
+
+// F29: the AI trip-recap hub — streams the recap narrative and persists it.
+app.MapHub<Explivio.API.Modules.Trips.Recap.TripRecapHub>("/hubs/trip-recap");
 
 app.Run();
 

@@ -25,7 +25,11 @@ public static class FeatureFlags
     // upload/serve/delete. Needs a real multimodal model (vision), so it's a natural switch.
     public const string AiReceiptScanning = "AiReceiptScanning";
 
+    // F29: gates the AI trip recap — the generation hub and the recap read endpoint. Model-backed, so
+    // a natural switch to turn off with the other AI features.
+    public const string AiTripRecap = "AiTripRecap";
+
     // All flags, so GET /features can report each one's state without reflection.
     public static readonly IReadOnlyList<string> All =
-        [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant, AiReceiptScanning];
+        [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant, AiReceiptScanning, AiTripRecap];
 }

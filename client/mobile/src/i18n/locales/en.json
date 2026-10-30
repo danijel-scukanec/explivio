@@ -366,5 +366,14 @@
     "placeholder": "Ask or tell me to change something…",
     "send": "Send",
     "thinking": "Thinking…"
+  },
+  "recap": {
+    "title": "Trip recap",
+    "generate": "Generate recap",
+    "regenerate": "Regenerate",
+    "generating": "Writing…",
+    "loadFailed": "Could not load the recap.",
+    "empty": "No recap yet. Generate one to look back on this trip.",
+    "generatedOn": "Generated {{date}}"
   }
 }

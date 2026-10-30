@@ -25,6 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Checklist> Checklists => Set<Checklist>();
     public DbSet<ChecklistItem> ChecklistItems => Set<ChecklistItem>();
     public DbSet<TripDocument> TripDocuments => Set<TripDocument>();
+    public DbSet<Explivio.API.Modules.Trips.Recap.TripRecap> TripRecaps => Set<Explivio.API.Modules.Trips.Recap.TripRecap>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 

@@ -115,7 +115,8 @@
     "day": "Day {{number}}",
     "noActivities": "No activities planned",
     "noTime": "No time",
-    "export": "Export"
+    "export": "Export",
+    "recap": "Recap"
   },
   "activity": {
     "edit": "Edit activity",
@@ -365,5 +366,17 @@
     "placeholder": "Ask or tell me to change something…",
     "send": "Send",
     "thinking": "Thinking…"
+  },
+  "recap": {
+    "title": "Trip recap",
+    "trips": "Trips",
+    "itinerary": "Itinerary",
+    "generate": "Generate recap",
+    "regenerate": "Regenerate",
+    "generating": "Writing…",
+    "loading": "Loading…",
+    "loadFailed": "Could not load the recap.",
+    "empty": "No recap yet. Generate one to look back on this trip.",
+    "generatedOn": "Generated {{date}}"
   }
 }

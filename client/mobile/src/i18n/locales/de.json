@@ -366,5 +366,14 @@
     "placeholder": "Frag mich oder bitte um eine Änderung…",
     "send": "Senden",
     "thinking": "Denkt nach…"
+  },
+  "recap": {
+    "title": "Reiserückblick",
+    "generate": "Rückblick erstellen",
+    "regenerate": "Neu erstellen",
+    "generating": "Wird geschrieben…",
+    "loadFailed": "Rückblick konnte nicht geladen werden.",
+    "empty": "Noch kein Rückblick. Erstelle einen, um auf diese Reise zurückzublicken.",
+    "generatedOn": "Erstellt am {{date}}"
   }
 }

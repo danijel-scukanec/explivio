@@ -366,5 +366,14 @@
     "placeholder": "Pregunta o pídeme un cambio…",
     "send": "Enviar",
     "thinking": "Pensando…"
+  },
+  "recap": {
+    "title": "Resumen del viaje",
+    "generate": "Generar resumen",
+    "regenerate": "Regenerar",
+    "generating": "Escribiendo…",
+    "loadFailed": "No se pudo cargar el resumen.",
+    "empty": "Aún no hay resumen. Genera uno para recordar este viaje.",
+    "generatedOn": "Generado el {{date}}"
   }
 }

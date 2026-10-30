@@ -150,6 +150,9 @@ export default function ItineraryScreen() {
               <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/export`)} hitSlop={10}>
                 <Text style={styles.headerButton}>📅</Text>
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/recap`)} hitSlop={10}>
+                <Text style={styles.headerButton}>📖</Text>
+              </TouchableOpacity>
               <NotificationBell />
               <TouchableOpacity
                 onPress={() => router.push(`/trips/${tripId}/generate?startDate=${trip?.startDate ?? ''}&days=${days.length}`)}

@@ -19,6 +19,7 @@ import type {
   GalleryItem,
   ShareLink,
   ExtractedReceipt,
+  TripRecap,
 } from '@explivio/shared';
 import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
 import { authEnabled, getAccessToken } from './auth';
@@ -220,10 +221,20 @@ export async function uploadDocument(
 
 // F17: the bearer header for multipart uploads (fetch handles the FormData Content-Type itself). Empty
 // in dev-identity mode, where the API uses the default dev user.
-async function authHeader(): Promise<Record<string, string>> {
+export async function authHeader(): Promise<Record<string, string>> {
   if (!authEnabled) return {};
   const token = await getAccessToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+// F29: the stored trip recap + photo gallery (read-through cached like other GETs).
+export function getRecap(tripId: string): Promise<TripRecap> {
+  return getJson<TripRecap>(`/trips/${tripId}/recap`);
+}
+
+// F29: a gallery photo's url is API-relative (/v1/...); prefix the host for an <Image> source.
+export function recapPhotoUrl(url: string): string {
+  return `${API_BASE}${url}`;
 }
 
 function imagePart(uri: string) {
