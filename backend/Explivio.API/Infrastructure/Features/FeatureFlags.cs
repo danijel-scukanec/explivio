@@ -29,7 +29,11 @@ public static class FeatureFlags
     // a natural switch to turn off with the other AI features.
     public const string AiTripRecap = "AiTripRecap";
 
+    // F18: gates booking-email parsing — the parse endpoint that turns a confirmation into draft
+    // activities/reservations. Model-backed (text + vision), so a natural switch.
+    public const string AiEmailParsing = "AiEmailParsing";
+
     // All flags, so GET /features can report each one's state without reflection.
     public static readonly IReadOnlyList<string> All =
-        [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant, AiReceiptScanning, AiTripRecap];
+        [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant, AiReceiptScanning, AiTripRecap, AiEmailParsing];
 }

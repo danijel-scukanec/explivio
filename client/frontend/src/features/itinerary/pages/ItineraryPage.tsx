@@ -18,6 +18,7 @@ import { TripConditions } from '../components/TripConditions';
 import { ShareTripModal } from '../../gallery/components/ShareTripModal';
 import { MembersModal } from '../../trips/components/MembersModal';
 import { ExportItineraryModal } from '../components/ExportItineraryModal';
+import { ImportBookingModal } from '../../import/components/ImportBookingModal';
 import { TripAssistantPanel } from '../components/TripAssistantPanel';
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
@@ -49,6 +50,7 @@ export function ItineraryPage() {
   const [showEditStops, setShowEditStops] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
   // F23: the activity being edited, and the set of categories to show (empty = show all).
   const [editing, setEditing] = useState<Activity | null>(null);
@@ -231,6 +233,9 @@ export function ItineraryPage() {
           {isFeatureOn(features, 'AiTripRecap') && (
             <Link className="btn btn--ghost" to={`/trips/${tripId}/recap`}>📖 {t('itinerary.recap')}</Link>
           )}
+          {isFeatureOn(features, 'AiEmailParsing') && (
+            <button className="btn btn--ghost" onClick={() => setShowImport(true)}>📧 {t('itinerary.import')}</button>
+          )}
           <button className="btn btn--ghost" onClick={() => setShowMembers(true)}>👥 {t('members.title')}</button>
           <button className="btn btn--ghost" onClick={() => setShowShare(true)}>🔗 {t('itinerary.share')}</button>
           <button className="btn btn--ghost" onClick={() => setShowExport(true)}>📅 {t('itinerary.export')}</button>
@@ -382,6 +387,15 @@ export function ItineraryPage() {
           shareToken={trip.shareToken ?? null}
           onClose={() => setShowExport(false)}
           onChanged={load}
+        />
+      )}
+
+      {showImport && (
+        <ImportBookingModal
+          tripId={tripId!}
+          trip={trip}
+          onClose={() => setShowImport(false)}
+          onAdded={load}
         />
       )}
 

@@ -116,7 +116,8 @@
     "noActivities": "Sin actividades planeadas",
     "noTime": "Sin hora",
     "export": "Exportar",
-    "recap": "Resumen"
+    "recap": "Resumen",
+    "import": "Importar"
   },
   "activity": {
     "edit": "Editar actividad",
@@ -378,5 +379,17 @@
     "loadFailed": "No se pudo cargar el resumen.",
     "empty": "Aún no hay resumen. Genera uno para recordar este viaje.",
     "generatedOn": "Generado el {{date}}"
+  },
+  "import": {
+    "title": "Importar una reserva",
+    "hint": "Sube una confirmación de reserva (correo .eml, texto o captura) y la convertiremos en borradores de actividades y reservas para revisar.",
+    "chooseFile": "Elegir archivo",
+    "parsing": "Leyendo…",
+    "parseFailed": "No se pudo leer el archivo.",
+    "reservation": "Reserva",
+    "activity": "Actividad",
+    "add": "Añadir {{count}}",
+    "adding": "Añadiendo…",
+    "addFailed": "No se pudieron añadir los elementos seleccionados."
   }
 }

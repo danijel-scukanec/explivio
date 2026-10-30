@@ -22,6 +22,7 @@ using Explivio.API.Modules.Trips.Recap;
 using Explivio.API.Modules.Users;
 using Explivio.API.Modules.Itinerary;
 using Explivio.API.Modules.Itinerary.GenerateItinerary;
+using Explivio.API.Modules.Itinerary.ParseBooking;
 using Explivio.API.Modules.Budget;
 using Explivio.API.Modules.Budget.Export;
 using Explivio.API.Modules.Calendar;
@@ -341,6 +342,7 @@ api.MapCalendarEndpoints();
 api.MapCalendarFeedEndpoint();
 api.MapNotificationsEndpoints();
 api.MapRecapModule();
+api.MapParseBookingEndpoint();
 
 // F13: the streaming itinerary-generation hub. Not versioned like the REST group — SignalR hubs are
 // addressed by a stable path; the default CORS policy and auth apply as for the rest of the app.

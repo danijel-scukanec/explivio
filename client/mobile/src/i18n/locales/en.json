@@ -375,5 +375,17 @@
     "loadFailed": "Could not load the recap.",
     "empty": "No recap yet. Generate one to look back on this trip.",
     "generatedOn": "Generated {{date}}"
+  },
+  "import": {
+    "title": "Import a booking",
+    "hint": "Upload a booking confirmation (email .eml, text, or a screenshot) and we'll turn it into draft activities and reservations to review.",
+    "chooseFile": "Choose file",
+    "parsing": "Reading…",
+    "parseFailed": "Could not read that file.",
+    "reservation": "Reservation",
+    "activity": "Activity",
+    "add": "Add {{count}}",
+    "adding": "Adding…",
+    "addFailed": "Could not add the selected items."
   }
 }

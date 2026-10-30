@@ -116,7 +116,8 @@
     "noActivities": "Keine Aktivitäten geplant",
     "noTime": "Keine Zeit",
     "export": "Exportieren",
-    "recap": "Rückblick"
+    "recap": "Rückblick",
+    "import": "Import"
   },
   "activity": {
     "edit": "Aktivität bearbeiten",
@@ -378,5 +379,17 @@
     "loadFailed": "Rückblick konnte nicht geladen werden.",
     "empty": "Noch kein Rückblick. Erstelle einen, um auf diese Reise zurückzublicken.",
     "generatedOn": "Erstellt am {{date}}"
+  },
+  "import": {
+    "title": "Buchung importieren",
+    "hint": "Lade eine Buchungsbestätigung hoch (E-Mail .eml, Text oder Screenshot) – wir erstellen daraus Entwürfe für Aktivitäten und Reservierungen zum Prüfen.",
+    "chooseFile": "Datei wählen",
+    "parsing": "Wird gelesen…",
+    "parseFailed": "Datei konnte nicht gelesen werden.",
+    "reservation": "Reservierung",
+    "activity": "Aktivität",
+    "add": "{{count}} hinzufügen",
+    "adding": "Wird hinzugefügt…",
+    "addFailed": "Ausgewählte Einträge konnten nicht hinzugefügt werden."
   }
 }

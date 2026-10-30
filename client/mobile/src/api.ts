@@ -20,6 +20,7 @@ import type {
   ShareLink,
   ExtractedReceipt,
   TripRecap,
+  ExtractedBookings,
 } from '@explivio/shared';
 import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
 import { authEnabled, getAccessToken } from './auth';
@@ -235,6 +236,20 @@ export function getRecap(tripId: string): Promise<TripRecap> {
 // F29: a gallery photo's url is API-relative (/v1/...); prefix the host for an <Image> source.
 export function recapPhotoUrl(url: string): string {
   return `${API_BASE}${url}`;
+}
+
+// F18: parse a booking email/file (picked via DocumentPicker) into draft activities/reservations.
+export async function parseBooking(
+  tripId: string, file: { uri: string; name: string; mimeType?: string }): Promise<ExtractedBookings> {
+  const form = new FormData();
+  form.append('file', {
+    uri: file.uri, name: file.name, type: file.mimeType ?? 'application/octet-stream',
+  } as unknown as Blob);
+  const res = await fetch(`${API_URL}/trips/${tripId}/parse-booking`, {
+    method: 'POST', headers: await authHeader(), body: form,
+  });
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return res.json() as Promise<ExtractedBookings>;
 }
 
 function imagePart(uri: string) {
