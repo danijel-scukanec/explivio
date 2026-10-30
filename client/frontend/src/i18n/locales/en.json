@@ -390,6 +390,7 @@
     "activity": "Activity",
     "add": "Add {{count}}",
     "adding": "Adding…",
-    "addFailed": "Could not add the selected items."
+    "addFailed": "Could not add the selected items.",
+    "partialFail": "Added {{added}}. {{failed}} couldn't be added — review and retry."
   }
 }

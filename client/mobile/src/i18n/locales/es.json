@@ -386,6 +386,7 @@
     "activity": "Actividad",
     "add": "Añadir {{count}}",
     "adding": "Añadiendo…",
-    "addFailed": "No se pudieron añadir los elementos seleccionados."
+    "addFailed": "No se pudieron añadir los elementos seleccionados.",
+    "partialFail": "Se añadieron {{added}}. No se pudieron añadir {{failed}} — revisa y reinténtalo."
   }
 }

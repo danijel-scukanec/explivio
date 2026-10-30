@@ -93,16 +93,42 @@ export function ImportBookingModal({ tripId, trip, onClose, onAdded }: Props) {
     if (!result) return;
     setAdding(true);
     setError(null);
-    try {
-      for (let i = 0; i < result.items.length; i++) {
-        if (selected.has(i)) await addItem(result.items[i]);
+
+    // Add each selected item independently so one failure doesn't abort the rest. Track which
+    // succeeded and which failed, by index.
+    const succeeded = new Set<number>();
+    const failed = new Set<number>();
+    for (let i = 0; i < result.items.length; i++) {
+      if (!selected.has(i)) continue;
+      try {
+        await addItem(result.items[i]);
+        succeeded.add(i);
+      } catch {
+        failed.add(i);
       }
-      onAdded();
-      onClose();
-    } catch {
-      setError(t('import.addFailed'));
-      setAdding(false);
     }
+
+    // Reflect anything that was added in the parent (itinerary/bookings refresh).
+    if (succeeded.size > 0) onAdded();
+
+    if (failed.size === 0) {
+      onClose();
+      return;
+    }
+
+    // Some failed: drop the items that were added (so a retry can't duplicate them), keep the rest,
+    // and pre-select the failed ones so the next "Add" re-tries exactly those.
+    const remaining: ExtractedBookingItem[] = [];
+    const reselect = new Set<number>();
+    for (let i = 0; i < result.items.length; i++) {
+      if (succeeded.has(i)) continue;
+      if (failed.has(i)) reselect.add(remaining.length);
+      remaining.push(result.items[i]);
+    }
+    setResult({ ...result, items: remaining });
+    setSelected(reselect);
+    setError(t('import.partialFail', { added: succeeded.size, failed: failed.size }));
+    setAdding(false);
   }
 
   return (

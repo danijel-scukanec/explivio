@@ -95,15 +95,38 @@ export default function ImportBookingScreen() {
     if (!result) return;
     setAdding(true);
     setError(null);
-    try {
-      for (let i = 0; i < result.items.length; i++) {
-        if (selected.has(i)) await addItem(result.items[i]);
+
+    // Add each selected item independently so one failure doesn't abort the rest.
+    const succeeded = new Set<number>();
+    const failed = new Set<number>();
+    for (let i = 0; i < result.items.length; i++) {
+      if (!selected.has(i)) continue;
+      try {
+        await addItem(result.items[i]);
+        succeeded.add(i);
+      } catch {
+        failed.add(i);
       }
-      router.back();
-    } catch {
-      setError(t('import.addFailed'));
-      setAdding(false);
     }
+
+    if (failed.size === 0) {
+      router.back();
+      return;
+    }
+
+    // Some failed: drop the added items (so a retry can't duplicate them), keep the rest, and
+    // pre-select the failed ones so the next "Add" re-tries exactly those.
+    const remaining: ExtractedBookingItem[] = [];
+    const reselect = new Set<number>();
+    for (let i = 0; i < result.items.length; i++) {
+      if (succeeded.has(i)) continue;
+      if (failed.has(i)) reselect.add(remaining.length);
+      remaining.push(result.items[i]);
+    }
+    setResult({ ...result, items: remaining });
+    setSelected(reselect);
+    setError(t('import.partialFail', { added: succeeded.size, failed: failed.size }));
+    setAdding(false);
   }
 
   const busy = parsing || adding;

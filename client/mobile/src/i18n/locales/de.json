@@ -386,6 +386,7 @@
     "activity": "Aktivität",
     "add": "{{count}} hinzufügen",
     "adding": "Wird hinzugefügt…",
-    "addFailed": "Ausgewählte Einträge konnten nicht hinzugefügt werden."
+    "addFailed": "Ausgewählte Einträge konnten nicht hinzugefügt werden.",
+    "partialFail": "{{added}} hinzugefügt. {{failed}} konnten nicht hinzugefügt werden — prüfen und erneut versuchen."
   }
 }
