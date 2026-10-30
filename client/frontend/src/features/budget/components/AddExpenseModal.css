@@ -82,3 +82,19 @@
 .split__summary--off {
   color: #e53e3e;
 }
+
+/* F17: receipt scan row at the top of the add-expense form. */
+.receipt-scan {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+.receipt-scan__file {
+  font-size: 13px;
+  color: var(--text);
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

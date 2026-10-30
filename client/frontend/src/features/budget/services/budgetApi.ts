@@ -1,4 +1,4 @@
-import type { BudgetSummary, BudgetBalances, AddExpenseRequest } from '@explivio/shared';
+import type { BudgetSummary, BudgetBalances, AddExpenseRequest, ExtractedReceipt } from '@explivio/shared';
 import { authHeaders } from '../../../shared/auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
@@ -25,6 +25,37 @@ export async function addExpense(tripId: string, data: AddExpenseRequest): Promi
   if (!res.ok) throw new Error('Failed to add expense');
   const { id } = await res.json();
   return id;
+}
+
+// F17: scan a receipt image → draft expense (vision extraction). Multipart; the browser sets the
+// multipart boundary, so we don't set Content-Type.
+export async function scanReceipt(tripId: string, file: File): Promise<ExtractedReceipt> {
+  const body = new FormData();
+  body.append('file', file);
+  const res = await fetch(`${API_URL}/trips/${tripId}/expenses/scan`, {
+    method: 'POST',
+    headers: await authHeaders(),
+    body,
+  });
+  if (!res.ok) throw new Error('Failed to scan receipt');
+  return res.json();
+}
+
+// F17: attach a receipt image to an existing expense (create → attach, like cover photos).
+export async function uploadReceipt(tripId: string, expenseId: string, file: File): Promise<void> {
+  const body = new FormData();
+  body.append('file', file);
+  const res = await fetch(`${API_URL}/trips/${tripId}/expenses/${expenseId}/receipt`, {
+    method: 'POST',
+    headers: await authHeaders(),
+    body,
+  });
+  if (!res.ok) throw new Error('Failed to upload receipt');
+}
+
+// F17: the API path a receipt is streamed from (behind trip authorization). Load via useAuthedBlobUrl.
+export function receiptUrl(tripId: string, expenseId: string): string {
+  return `${API_URL}/trips/${tripId}/expenses/${expenseId}/receipt`;
 }
 
 export async function deleteExpense(tripId: string, id: string): Promise<void> {

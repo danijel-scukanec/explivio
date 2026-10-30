@@ -7,9 +7,13 @@ using Explivio.API.Modules.Budget.AddExpense;
 using Explivio.API.Modules.Budget.Export;
 using Explivio.API.Modules.Budget.GetBudgetBalances;
 using Explivio.API.Modules.Budget.GetBudgetSummary;
+using Explivio.API.Modules.Budget.Receipt;
+using Explivio.API.Modules.Budget.ScanReceipt;
+using Explivio.API.Infrastructure.Storage;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Trips.Collaboration;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Explivio.API.Modules.Budget;
@@ -65,7 +69,7 @@ public static class BudgetModule
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces<CreatedResponse>(StatusCodes.Status201Created).ProducesValidationProblem();
 
-        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, HttpContext ctx, AppDbContext db, ITripCollaborationNotifier collaboration, CancellationToken token) =>
+        group.MapDelete("/{id:guid}", async (Guid tripId, Guid id, HttpContext ctx, AppDbContext db, ITripCollaborationNotifier collaboration, [FromServices] IReceiptStorage? receiptStorage, CancellationToken token) =>
         {
             // F20: load then remove (instead of a bulk ExecuteDelete) so the outbox interceptor can
             // capture the member notification raised on the tracked entity in the same transaction.
@@ -80,14 +84,26 @@ public static class BudgetModule
                 db, tripId, ctx.GetUserId(), NotificationKind.ExpenseRemoved, detail, token);
             if (notification is not null) db.OutboxMessages.Add(notification);
 
+            var hadReceipt = expense.HasReceipt;
             db.Expenses.Remove(expense);
             await db.SaveChangesAsync(token);
+
+            // F17: reap the receipt blob best-effort after the row is gone (storage is separate from
+            // the DB transaction; a leftover blob is harmless but we clean up).
+            if (hadReceipt && receiptStorage is not null)
+            {
+                try { await receiptStorage.DeleteReceiptAsync(id, token); } catch { /* best-effort */ }
+            }
 
             // F15 Phase B: nudge anyone viewing the trip to refetch — immediate, after the commit.
             await collaboration.TripChangedAsync(tripId, "expense.deleted", token);
             return Results.NoContent();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Editor))
           .Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status404NotFound);
+
+        // F17: receipt scanning (vision → draft) + per-expense receipt image upload/serve/delete.
+        group.MapScanReceiptEndpoint();
+        group.MapExpenseReceiptEndpoints();
 
         return app;
     }

@@ -6,6 +6,8 @@ export type ExpenseResponse = components['schemas']['ExpenseResponse'];
 export type Expense = ExpenseResponse;
 export type ExpenseCategory = components['schemas']['ExpenseCategory'];
 export type AddExpenseRequest = components['schemas']['AddExpenseCommand'];
+// F17: the draft expense a receipt scan returns — used to pre-fill the add-expense form.
+export type ExtractedReceipt = components['schemas']['ExtractedReceipt'];
 export type BudgetSummary = components['schemas']['BudgetSummaryResponse'];
 export type CategoryTotal = components['schemas']['CategoryTotal'];
 // F25: original per-currency subtotal (before conversion to the trip base currency).

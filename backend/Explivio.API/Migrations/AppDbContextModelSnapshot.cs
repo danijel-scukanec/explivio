@@ -110,6 +110,9 @@ namespace Explivio.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("HasReceipt")
+                        .HasColumnType("bit");
+
                     b.Property<Guid?>("PaidByUserId")
                         .HasColumnType("uniqueidentifier");
 

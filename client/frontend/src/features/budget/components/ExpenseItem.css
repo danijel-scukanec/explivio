@@ -90,3 +90,16 @@
   opacity: 0.6;
   flex-shrink: 0;
 }
+
+/* F17: scanned-receipt thumbnail. */
+.expense-item__receipt {
+  flex-shrink: 0;
+  line-height: 0;
+}
+.expense-item__receipt img {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}

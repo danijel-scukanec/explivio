@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ExpenseCategory, AddExpenseRequest, ExpenseShareInput, TripMember } from '@explivio/shared';
-import { addExpense } from '../services/budgetApi';
+import { addExpense, scanReceipt, uploadReceipt } from '../services/budgetApi';
+import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
 import { memberName } from '../memberNames';
 import '../../trips/components/CreateTripModal.css';
 import './AddExpenseModal.css';
@@ -47,6 +48,11 @@ export function AddExpenseModal({ tripId, defaultDate, defaultCurrency, members,
   const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // F17: a scanned receipt — pre-fills the form on scan, and is attached to the expense after it's created.
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const canScan = isFeatureOn(useFeatures(), 'AiReceiptScanning');
 
   const amount = Number(form.amount) || 0;
   const selectedIds = useMemo(() => members.filter(m => selected.has(m.userId)).map(m => m.userId), [members, selected]);
@@ -67,6 +73,30 @@ export function AddExpenseModal({ tripId, defaultDate, defaultCurrency, members,
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
+  }
+
+  // F17: scan a chosen receipt image → pre-fill the form with the extracted draft (the user reviews it).
+  async function handleReceipt(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setReceiptFile(file);
+    setScanning(true);
+    setError(null);
+    try {
+      const draft = await scanReceipt(tripId, file);
+      setForm(prev => ({
+        ...prev,
+        description: draft.description ?? prev.description,
+        amount: draft.amount != null ? String(draft.amount) : prev.amount,
+        currency: draft.currency ?? prev.currency,
+        category: (draft.category as ExpenseCategory) ?? prev.category,
+        date: draft.date ?? prev.date,
+      }));
+    } catch {
+      setError(t('addExpense.scanFailed'));
+    } finally {
+      setScanning(false);
+    }
   }
 
   function toggleMember(userId: string) {
@@ -109,7 +139,12 @@ export function AddExpenseModal({ tripId, defaultDate, defaultCurrency, members,
     };
 
     try {
-      await addExpense(tripId, data);
+      const id = await addExpense(tripId, data);
+      // F17: attach the scanned receipt image after the expense exists (create → attach). Keep the
+      // expense even if the image upload fails — the data is already saved.
+      if (receiptFile) {
+        try { await uploadReceipt(tripId, id, receiptFile); } catch { /* non-fatal */ }
+      }
       onCreated();
     } catch {
       setError(t('common.somethingWrong'));
@@ -127,6 +162,29 @@ export function AddExpenseModal({ tripId, defaultDate, defaultCurrency, members,
         </div>
 
         <form onSubmit={handleSubmit} className="modal__form">
+          {canScan && (
+            <div className="receipt-scan">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+                onChange={handleReceipt}
+              />
+              <button
+                type="button"
+                className="btn btn--ghost receipt-scan__btn"
+                onClick={() => fileRef.current?.click()}
+                disabled={scanning}
+              >
+                {scanning ? t('addExpense.scanning') : t('addExpense.scanReceipt')}
+              </button>
+              {receiptFile && !scanning && (
+                <span className="receipt-scan__file">📎 {receiptFile.name}</span>
+              )}
+            </div>
+          )}
+
           <label>
             {t('addExpense.description')}
             <input name="description" value={form.description} onChange={handleChange} required maxLength={300} placeholder={t('addExpense.descriptionPlaceholder')} />

@@ -185,7 +185,7 @@ export function BudgetPage() {
         {expenses.length === 0
           ? <p className="budget-page__empty">{t('budget.empty')}</p>
           : expenses.map(e => (
-              <ExpenseItem key={e.id} expense={e} baseCurrency={base} members={members} onDelete={handleDelete} />
+              <ExpenseItem key={e.id} expense={e} tripId={tripId!} baseCurrency={base} members={members} onDelete={handleDelete} />
             ))
         }
       </div>

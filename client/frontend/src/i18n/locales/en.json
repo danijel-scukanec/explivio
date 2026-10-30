@@ -163,7 +163,9 @@
     "splitWays": "split {{count}} ways",
     "paidBy": "paid by {{name}}",
     "delete": "Delete expense",
-    "managedFromBooking": "Managed from the booking"
+    "managedFromBooking": "Managed from the booking",
+    "viewReceipt": "View receipt",
+    "receipt": "Receipt"
   },
   "addExpense": {
     "title": "Add expense",
@@ -184,7 +186,10 @@
     "pickPayer": "Choose who paid.",
     "sharesMustSum": "Split shares must add up to the amount.",
     "add": "Add expense",
-    "adding": "Adding…"
+    "adding": "Adding…",
+    "scanReceipt": "📷 Scan receipt",
+    "scanning": "Scanning…",
+    "scanFailed": "Couldn't read the receipt — enter the details manually."
   },
   "bookings": {
     "title": "Bookings",

@@ -1,11 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import type { Expense, TripMember } from '@explivio/shared';
 import { formatCurrency, formatTripDate } from '@explivio/shared';
+import { useAuthedBlobUrl } from '../../../shared/hooks/useAuthedBlobUrl';
+import { receiptUrl } from '../services/budgetApi';
 import { nameFor } from '../memberNames';
 import './ExpenseItem.css';
 
 interface Props {
   expense: Expense;
+  tripId: string;
   baseCurrency: string;
   members: TripMember[];
   onDelete: (id: string) => void;
@@ -20,8 +23,10 @@ const CATEGORY_ICONS: Record<string, string> = {
   Other: '📌',
 };
 
-export function ExpenseItem({ expense, baseCurrency, members, onDelete }: Props) {
+export function ExpenseItem({ expense, tripId, baseCurrency, members, onDelete }: Props) {
   const { t } = useTranslation();
+  // F17: load the scanned receipt image (behind trip authorization) when one exists.
+  const receipt = useAuthedBlobUrl(expense.hasReceipt ? receiptUrl(tripId, expense.id) : null);
   // F23: expenses created from a booking's cost are managed from that booking, so they can't be
   // deleted here (deleting would strand the reservation's cost).
   const fromBooking = expense.reservationId != null;
@@ -46,6 +51,11 @@ export function ExpenseItem({ expense, baseCurrency, members, onDelete }: Props)
           {expense.paidByUserId && <> · {t('expense.paidBy', { name: nameFor(members, expense.paidByUserId) })}</>}
         </span>
       </div>
+      {receipt && (
+        <a className="expense-item__receipt" href={receipt} target="_blank" rel="noreferrer" title={t('expense.viewReceipt')}>
+          <img src={receipt} alt={t('expense.receipt')} />
+        </a>
+      )}
       <span className="expense-item__amount">
         {formatCurrency(Number(expense.amount), expense.currency)}
         {converted != null && (

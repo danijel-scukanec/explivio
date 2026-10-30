@@ -28,7 +28,14 @@
       "expo-router",
       "expo-status-bar",
       "expo-localization",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Explivio uses your photo library to scan receipts into expenses.",
+          "cameraPermission": "Explivio uses the camera to scan receipts into expenses."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false

@@ -18,6 +18,7 @@ import type {
   TripDocument,
   GalleryItem,
   ShareLink,
+  ExtractedReceipt,
 } from '@explivio/shared';
 import { cachedFetch, enqueue, flushQueue, type QueuedMutation } from './offline';
 import { authEnabled, getAccessToken } from './auth';
@@ -215,6 +216,43 @@ export async function uploadDocument(
   const res = await fetch(`${API_URL}/trips/${tripId}/documents`, { method: 'POST', body: form });
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
   return res.json() as Promise<TripDocument>;
+}
+
+// F17: the bearer header for multipart uploads (fetch handles the FormData Content-Type itself). Empty
+// in dev-identity mode, where the API uses the default dev user.
+async function authHeader(): Promise<Record<string, string>> {
+  if (!authEnabled) return {};
+  const token = await getAccessToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function imagePart(uri: string) {
+  // RN FormData takes a {uri, name, type} file object. Infer the type from the extension.
+  const lower = uri.toLowerCase();
+  const type = lower.endsWith('.png') ? 'image/png' : lower.endsWith('.webp') ? 'image/webp' : 'image/jpeg';
+  const name = `receipt.${type.split('/')[1]}`;
+  return { uri, name, type } as unknown as Blob;
+}
+
+// F17: scan a receipt image (uri from the camera/gallery) → draft expense via the vision model.
+export async function scanReceipt(tripId: string, uri: string): Promise<ExtractedReceipt> {
+  const form = new FormData();
+  form.append('file', imagePart(uri));
+  const res = await fetch(`${API_URL}/trips/${tripId}/expenses/scan`, {
+    method: 'POST', headers: await authHeader(), body: form,
+  });
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return res.json() as Promise<ExtractedReceipt>;
+}
+
+// F17: attach a receipt image to an existing expense (create → attach).
+export async function uploadReceipt(tripId: string, expenseId: string, uri: string): Promise<void> {
+  const form = new FormData();
+  form.append('file', imagePart(uri));
+  const res = await fetch(`${API_URL}/trips/${tripId}/expenses/${expenseId}/receipt`, {
+    method: 'POST', headers: await authHeader(), body: form,
+  });
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
 }
 
 // F26: the public gallery, likes, cloning and share links. The gallery list is read-through cached so

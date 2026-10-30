@@ -13,7 +13,9 @@ public record ExpenseResponse(
     DateOnly Date,
     Guid? ReservationId,
     Guid? PaidByUserId,
-    IReadOnlyList<ExpenseShareResponse> Shares);
+    IReadOnlyList<ExpenseShareResponse> Shares,
+    // F17: whether a scanned receipt image is available for this expense (served via GET .../receipt).
+    bool HasReceipt);
 
 public record ExpenseShareResponse(Guid UserId, decimal Amount);
 

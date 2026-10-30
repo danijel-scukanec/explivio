@@ -37,7 +37,8 @@ public class GetBudgetSummaryHandler(AppDbContext db, IFxRateProvider fx)
             .Select(e => new ExpenseResponse(
                 e.Id, e.TripId, e.Description, e.Amount, e.Currency,
                 ToBase(e.Amount, e.Currency), e.Category, e.Date, e.ReservationId, e.PaidByUserId,
-                e.Shares.Select(s => new ExpenseShareResponse(s.UserId, s.Amount)).ToList()))
+                e.Shares.Select(s => new ExpenseShareResponse(s.UserId, s.Amount)).ToList(),
+                e.HasReceipt))
             .ToList();
 
         var total = expenseResponses.Sum(e => e.AmountInBase ?? 0m);

@@ -160,7 +160,8 @@
     "splitWays": "dividido entre {{count}}",
     "paidBy": "pagado por {{name}}",
     "delete": "Eliminar gasto",
-    "managedFromBooking": "Se gestiona desde la reserva"
+    "managedFromBooking": "Se gestiona desde la reserva",
+    "receipt": "Recibo"
   },
   "addExpense": {
     "title": "Añadir gasto",
@@ -181,7 +182,13 @@
     "pickPayer": "Elige quién pagó.",
     "sharesMustSum": "Las partes deben sumar el importe total.",
     "add": "Añadir gasto",
-    "adding": "Añadiendo…"
+    "adding": "Añadiendo…",
+    "scanReceipt": "📷 Escanear recibo",
+    "scanning": "Escaneando…",
+    "scanFailed": "No se pudo leer el recibo — introduce los datos manualmente.",
+    "takePhoto": "Hacer foto",
+    "choosePhoto": "Elegir de la galería",
+    "cameraDenied": "Permiso denegado."
   },
   "bookings": {
     "title": "Reservas",

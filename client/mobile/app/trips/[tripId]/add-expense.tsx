@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import * as ImagePicker from 'expo-image-picker';
 import type { AddExpenseRequest, ExpenseCategory, ExpenseShareInput, TripMember } from '@explivio/shared';
-import { addExpense, getTrip, getTripMembers } from '../../../src/api';
+import { addExpense, getTrip, getTripMembers, scanReceipt, uploadReceipt } from '../../../src/api';
 import { formStyles as s } from '../../../src/formStyles';
 import { theme } from '../../../src/theme';
 
@@ -42,6 +43,50 @@ export default function AddExpenseScreen() {
   const [custom, setCustom] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // F17: a scanned receipt — pre-fills the form on scan, attached to the expense after it's created.
+  const [receiptUri, setReceiptUri] = useState<string | null>(null);
+  const [scanning, setScanning] = useState(false);
+
+  // F17: let the user take a photo or pick one, then scan it into the form.
+  function pickReceipt() {
+    Alert.alert(t('addExpense.scanReceipt'), undefined, [
+      { text: t('addExpense.takePhoto'), onPress: () => void launchPicker('camera') },
+      { text: t('addExpense.choosePhoto'), onPress: () => void launchPicker('library') },
+      { text: t('common.cancel'), style: 'cancel' },
+    ]);
+  }
+
+  async function launchPicker(source: 'camera' | 'library') {
+    const perm = source === 'camera'
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) { setError(t('addExpense.cameraDenied')); return; }
+
+    const result = source === 'camera'
+      ? await ImagePicker.launchCameraAsync({ quality: 0.6 })
+      : await ImagePicker.launchImageLibraryAsync({ quality: 0.6 });
+    if (result.canceled || !result.assets?.[0]) return;
+
+    const uri = result.assets[0].uri;
+    setReceiptUri(uri);
+    setScanning(true);
+    setError(null);
+    try {
+      const draft = await scanReceipt(tripId!, uri);
+      setForm(prev => ({
+        ...prev,
+        description: draft.description ?? prev.description,
+        amount: draft.amount != null ? String(draft.amount) : prev.amount,
+        currency: draft.currency ?? prev.currency,
+        category: (draft.category as ExpenseCategory) ?? prev.category,
+        date: draft.date ?? prev.date,
+      }));
+    } catch {
+      setError(t('addExpense.scanFailed'));
+    } finally {
+      setScanning(false);
+    }
+  }
 
   useEffect(() => {
     if (!tripId) return;
@@ -104,7 +149,11 @@ export default function AddExpenseScreen() {
       splits,
     };
     try {
-      await addExpense(tripId!, data);
+      const result = await addExpense(tripId!, data);
+      // F17: attach the scanned receipt after the expense exists (skipped if offline-queued → no id).
+      if (receiptUri && result?.id) {
+        try { await uploadReceipt(tripId!, result.id, receiptUri); } catch { /* non-fatal */ }
+      }
       router.back();
     } catch {
       setError(t('common.somethingWrong'));
@@ -116,6 +165,13 @@ export default function AddExpenseScreen() {
     <View style={s.screen}>
       <Stack.Screen options={{ title: t('addExpense.title') }} />
       <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+        <TouchableOpacity style={styles.scanBtn} onPress={pickReceipt} disabled={scanning}>
+          <Text style={styles.scanBtnText}>
+            {scanning ? t('addExpense.scanning') : t('addExpense.scanReceipt')}
+          </Text>
+        </TouchableOpacity>
+        {receiptUri && !scanning ? <Text style={styles.scanNote}>📎 {t('expense.receipt')}</Text> : null}
+
         <View>
           <Text style={s.label}>{t('addExpense.description')}</Text>
           <TextInput style={s.input} value={form.description} onChangeText={set('description')} placeholder={t('addExpense.descriptionPlaceholder')} placeholderTextColor={theme.border} />
@@ -233,6 +289,9 @@ export default function AddExpenseScreen() {
 }
 
 const styles = StyleSheet.create({
+  scanBtn: { borderWidth: 1, borderColor: theme.accent, borderRadius: 10, paddingVertical: 11, alignItems: 'center' },
+  scanBtnText: { color: theme.accent, fontWeight: '700' },
+  scanNote: { color: theme.text, fontSize: 13, marginTop: -2 },
   split: { borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 12, gap: 6 },
   splitToggle: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   splitMember: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 6, paddingHorizontal: 10, borderWidth: 1, borderColor: theme.border, borderRadius: 8, marginTop: 6, opacity: 0.6 },

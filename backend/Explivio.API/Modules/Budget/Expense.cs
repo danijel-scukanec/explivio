@@ -20,6 +20,9 @@ public class Expense : Entity
     // behaviour and reservation-linked expenses). When set together with Shares, the expense feeds the
     // settle-up balances: PaidBy is owed, each share's member owes their portion.
     public Guid? PaidByUserId { get; set; }
+    // F17: whether a scanned receipt image is stored for this expense (in blob storage, keyed by the
+    // expense id). The entity only records existence; the bytes + content-type live in the blob.
+    public bool HasReceipt { get; set; }
     public DateTime CreatedAt { get; set; }
 
     // F25: how this expense is split among trip members. Empty = not split. Amounts are in the
@@ -55,6 +58,10 @@ public class Expense : Entity
         expense.AddDomainEvent(new ExpenseAddedDomainEvent(tripId, amount));
         return expense;
     }
+
+    // F17: mark/unmark that a receipt image is stored for this expense.
+    public void SetReceipt() => HasReceipt = true;
+    public void ClearReceipt() => HasReceipt = false;
 }
 
 public enum ExpenseCategory

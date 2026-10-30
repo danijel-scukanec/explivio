@@ -21,6 +21,11 @@ public static class FeatureFlags
     // AiItineraryGeneration, it's the model-backed feature you'd most want to switch off.
     public const string AiAssistant = "AiAssistant";
 
+    // F17: gates receipt scanning — the vision scan endpoint and the per-expense receipt image
+    // upload/serve/delete. Needs a real multimodal model (vision), so it's a natural switch.
+    public const string AiReceiptScanning = "AiReceiptScanning";
+
     // All flags, so GET /features can report each one's state without reflection.
-    public static readonly IReadOnlyList<string> All = [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant];
+    public static readonly IReadOnlyList<string> All =
+        [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant, AiReceiptScanning];
 }

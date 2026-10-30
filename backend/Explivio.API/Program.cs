@@ -145,6 +145,8 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("blobs"
     builder.Services.AddScoped<IPhotoStorage, BlobPhotoStorage>();
     // F24: trip documents share the same blob account (own container), gated the same way as covers.
     builder.Services.AddScoped<IDocumentStorage, BlobDocumentStorage>();
+    // F17: scanned expense receipts share the same blob account (own container), gated the same way.
+    builder.Services.AddScoped<IReceiptStorage, BlobReceiptStorage>();
 }
 
 // F32: feature flags evaluated from the "FeatureManagement" config section (appsettings / env /

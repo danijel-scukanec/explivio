@@ -163,7 +163,9 @@
     "splitWays": "auf {{count}} aufgeteilt",
     "paidBy": "bezahlt von {{name}}",
     "delete": "Ausgabe löschen",
-    "managedFromBooking": "Wird über die Buchung verwaltet"
+    "managedFromBooking": "Wird über die Buchung verwaltet",
+    "viewReceipt": "Beleg ansehen",
+    "receipt": "Beleg"
   },
   "addExpense": {
     "title": "Ausgabe hinzufügen",
@@ -184,7 +186,10 @@
     "pickPayer": "Wähle, wer bezahlt hat.",
     "sharesMustSum": "Die Anteile müssen den Gesamtbetrag ergeben.",
     "add": "Ausgabe hinzufügen",
-    "adding": "Wird hinzugefügt…"
+    "adding": "Wird hinzugefügt…",
+    "scanReceipt": "📷 Beleg scannen",
+    "scanning": "Scannt…",
+    "scanFailed": "Beleg konnte nicht gelesen werden — bitte manuell eingeben."
   },
   "bookings": {
     "title": "Buchungen",
