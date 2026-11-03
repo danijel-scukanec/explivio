@@ -342,6 +342,7 @@ api.MapSharedTripEndpoint();
 api.MapCalendarEndpoints();
 api.MapCalendarFeedEndpoint();
 api.MapNotificationsEndpoints();
+api.MapDeviceEndpoints();
 api.MapRecapModule();
 api.MapParseBookingEndpoint();
 api.MapAiUsageEndpoints();

@@ -39,7 +39,12 @@ public static class FeatureFlags
     public const string AiSemanticCache = "AiSemanticCache";
     public const string AiContentSafety = "AiContentSafety";
 
+    // F20 (push): gates the device register/unregister endpoints. The client reads this through
+    // GET /features and only registers for push when it's on; the Notifications Worker's sender is
+    // gated separately by its own config (PushNotifications:Enabled), so push is off until both agree.
+    public const string PushNotifications = "PushNotifications";
+
     // All flags, so GET /features can report each one's state without reflection.
     public static readonly IReadOnlyList<string> All =
-        [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant, AiReceiptScanning, AiTripRecap, AiEmailParsing, AiSemanticCache, AiContentSafety];
+        [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant, AiReceiptScanning, AiTripRecap, AiEmailParsing, AiSemanticCache, AiContentSafety, PushNotifications];
 }

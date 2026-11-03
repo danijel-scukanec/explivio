@@ -18,6 +18,11 @@ public sealed class NotificationsDbContext(DbContextOptions<NotificationsDbConte
     // without trying to create it. Written in the same transaction as the inbox row (exactly-once).
     public DbSet<Notification> Notifications => Set<Notification>();
 
+    // F20 (push): registered devices. Owned and migrated by the API (in "read"); the worker only reads
+    // tokens from it to send push (and deletes rows Expo reports as no longer registered), so it's
+    // mapped ExcludeFromMigrations here too.
+    public DbSet<PushDevice> PushDevices => Set<PushDevice>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -26,5 +31,9 @@ public sealed class NotificationsDbContext(DbContextOptions<NotificationsDbConte
         var notification = modelBuilder.Entity<Notification>();
         notification.ToTable("Notifications", "read", t => t.ExcludeFromMigrations());
         notification.HasKey(n => n.Id);
+
+        var pushDevice = modelBuilder.Entity<PushDevice>();
+        pushDevice.ToTable("PushDevices", "read", t => t.ExcludeFromMigrations());
+        pushDevice.HasKey(d => d.Id);
     }
 }

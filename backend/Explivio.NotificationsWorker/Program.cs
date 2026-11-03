@@ -1,12 +1,36 @@
 using Explivio.Messaging;
 using Explivio.NotificationsWorker.Consuming;
 using Explivio.NotificationsWorker.Inbox;
+using Explivio.NotificationsWorker.Pushing;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // OpenTelemetry, health checks and resilience, shared with the API via ServiceDefaults.
 builder.AddServiceDefaults();
+
+// F20 (push): the push sender. Enabled only when configured (PushNotifications:Enabled) — it needs
+// FCM credentials on the Expo project to actually deliver, so it's off by default and the worker still
+// fans out in-app notifications. When off, a no-op sender keeps the processor's dependency satisfied.
+var pushEnabled = builder.Configuration.GetValue("PushNotifications:Enabled", false);
+if (pushEnabled)
+{
+    var expoAccessToken = builder.Configuration["PushNotifications:ExpoAccessToken"];
+    builder.Services.AddHttpClient<IPushNotificationSender, ExpoPushSender>(http =>
+    {
+        http.BaseAddress = new Uri("https://exp.host");
+        // Optional: required only if "Enhanced Security for Push Notifications" is on for the project.
+        if (!string.IsNullOrWhiteSpace(expoAccessToken))
+        {
+            http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", expoAccessToken);
+        }
+    });
+}
+else
+{
+    builder.Services.AddSingleton<IPushNotificationSender, NullPushSender>();
+}
 
 // Inbox dedupe store — the worker's own context over the shared SQL database. Gated on the
 // connection string like the API's DbContext, so the worker still builds and serves health checks

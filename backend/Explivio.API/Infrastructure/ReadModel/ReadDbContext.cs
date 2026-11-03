@@ -18,6 +18,10 @@ public sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : DbC
     // rows to it (mapped ExcludeFromMigrations on its side). The API reads + marks them read here.
     public DbSet<Notification> Notifications => Set<Notification>();
 
+    // F20 (push): registered push devices. The API owns and migrates the table and writes rows via the
+    // register/unregister endpoints; the Notifications Worker reads tokens from it to send push.
+    public DbSet<PushDevice> PushDevices => Set<PushDevice>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -49,6 +53,16 @@ public sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : DbC
         notification.Property(n => n.Detail).HasMaxLength(500);
         notification.HasIndex(n => new { n.UserId, n.CreatedAt });
         notification.HasIndex(n => new { n.UserId, n.IsRead });
+
+        // F20 (push): registered devices. The token is unique (one row per physical device; we upsert
+        // by it), and recipients are looked up by UserId when fanning out a push.
+        var pushDevice = modelBuilder.Entity<PushDevice>();
+        pushDevice.ToTable("PushDevices");
+        pushDevice.HasKey(d => d.Id);
+        pushDevice.Property(d => d.ExpoPushToken).HasMaxLength(256);
+        pushDevice.Property(d => d.Platform).HasMaxLength(16);
+        pushDevice.HasIndex(d => d.ExpoPushToken).IsUnique();
+        pushDevice.HasIndex(d => d.UserId);
 
         modelBuilder.ConfigureInbox<ProjectionInboxMessage>();
     }
