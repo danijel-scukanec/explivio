@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "652399245043",
+    "project_id": "explivio-b6be3",
+    "storage_bucket": "explivio-b6be3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:652399245043:android:381644ba064110a13e6986",
+        "android_client_info": {
+          "package_name": "com.explivio.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhcs69sFsScPgTG7VcmtBw5A0CI8aQPwg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

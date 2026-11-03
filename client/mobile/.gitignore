@@ -18,6 +18,12 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# F20 (push): FCM service-account keys are secrets — never commit. The one in use lives OUTSIDE the
+# repo (~/explivio-...-firebase-adminsdk-*.json) and is uploaded to EAS. google-services.json is NOT a
+# secret and is committed (EAS cloud builds need it). These patterns guard against a stray copy.
+*firebase-adminsdk*.json
+*service-account*.json
+
 # Metro
 .metro-health-check*
 
