@@ -2665,6 +2665,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/devices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RegisterDeviceRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete: {
+            parameters: {
+                query: {
+                    token: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/trips/{tripId}/recap": {
         parameters: {
             query?: never;
@@ -3145,6 +3215,10 @@ export interface components {
             generatedAtUtc: null | string;
             model: null | string;
             photos: components["schemas"]["RecapPhoto"][];
+        };
+        RegisterDeviceRequest: {
+            token: string;
+            platform: null | string;
         };
         RegisterUserCommand: {
             email: string;
