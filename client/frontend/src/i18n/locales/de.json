@@ -360,7 +360,10 @@
     "remove": "Entfernen",
     "roleOwner": "Eigentümer",
     "roleEditor": "Bearbeiter",
-    "roleViewer": "Betrachter"
+    "roleViewer": "Betrachter",
+    "pending": "Ausstehende Einladungen",
+    "cancel": "Abbrechen",
+    "cancelError": "Die Einladung konnte nicht storniert werden."
   },
   "assistant": {
     "title": "Reise-Assistent",

@@ -2,6 +2,7 @@ import type {
   Trip,
   TripMember,
   TripRole,
+  TripInvite,
   Activity,
   BudgetSummary,
   BudgetBalances,
@@ -135,6 +136,19 @@ export async function setMemberRole(tripId: string, userId: string, role: TripRo
 export async function removeMember(tripId: string, userId: string): Promise<void> {
   const res = await rawSend('DELETE', `/trips/${tripId}/members/${userId}`);
   if (!res.ok) throw new Error(await problemTitle(res, 'Failed to remove member'));
+}
+
+// Pending invites (account-less emails), Owner-only — and cancelling one. Inviting such an email via
+// inviteMember records one of these; it's claimed into a membership on the person's first sign-in.
+export async function getTripInvites(tripId: string): Promise<TripInvite[]> {
+  const res = await rawSend('GET', `/trips/${tripId}/invites`);
+  if (!res.ok) throw new Error('Failed to fetch pending invites');
+  return (await res.json()) as TripInvite[];
+}
+
+export async function cancelInvite(tripId: string, inviteId: string): Promise<void> {
+  const res = await rawSend('DELETE', `/trips/${tripId}/invites/${inviteId}`);
+  if (!res.ok) throw new Error(await problemTitle(res, 'Failed to cancel invite'));
 }
 
 // Itinerary

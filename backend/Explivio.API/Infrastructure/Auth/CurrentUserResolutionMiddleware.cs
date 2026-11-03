@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -86,6 +87,40 @@ public sealed class CurrentUserResolutionMiddleware(RequestDelegate next)
 
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
+
+        // F15: this is the "sign up" moment — claim any pending trip invites addressed to this email.
+        await ClaimPendingInvitesAsync(db, user, ct);
         return user.Id;
+    }
+
+    // F15: turn pending invites (TripInvite) for the new user's email into real memberships, then drop
+    // them. Matched case-insensitively on the normalized email. Runs only at provisioning (first sign-in
+    // of a new account), which is exactly when an account-less invite becomes claimable.
+    private static async Task ClaimPendingInvitesAsync(AppDbContext db, User user, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(user.Email))
+        {
+            return;
+        }
+
+        var normalized = user.Email.ToLowerInvariant();
+        var invites = await db.TripInvites.Where(i => i.NormalizedEmail == normalized).ToListAsync(ct);
+        if (invites.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var invite in invites)
+        {
+            var alreadyMember = await db.TripMembers
+                .AnyAsync(m => m.TripId == invite.TripId && m.UserId == user.Id, ct);
+            if (!alreadyMember)
+            {
+                db.TripMembers.Add(TripMember.Create(invite.TripId, user.Id, invite.Role));
+            }
+        }
+
+        db.TripInvites.RemoveRange(invites);
+        await db.SaveChangesAsync(ct);
     }
 }

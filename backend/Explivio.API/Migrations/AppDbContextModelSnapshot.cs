@@ -424,6 +424,44 @@ namespace Explivio.API.Migrations
                     b.ToTable("Trips", (string)null);
                 });
 
+            modelBuilder.Entity("Explivio.API.Modules.Trips.TripInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<Guid>("InvitedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NormalizedEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TripId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail");
+
+                    b.HasIndex("TripId", "NormalizedEmail")
+                        .IsUnique();
+
+                    b.ToTable("TripInvites");
+                });
+
             modelBuilder.Entity("Explivio.API.Modules.Trips.TripLike", b =>
                 {
                     b.Property<Guid>("Id")

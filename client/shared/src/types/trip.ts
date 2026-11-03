@@ -12,3 +12,7 @@ export type TripStopInput = components['schemas']['TripStopInput'];
 export type TripMember = components['schemas']['TripMemberResponse'];
 export type TripRole = components['schemas']['TripRole'];
 export type InviteTripMemberRequest = components['schemas']['InviteTripMemberRequest'];
+// F15: a pending invite (an email with no account yet), and the result of POST /members/invite —
+// pending true means a TripInvite was recorded; false means an existing account was added (member set).
+export type TripInvite = components['schemas']['TripInviteResponse'];
+export type InviteResult = components['schemas']['InviteResultResponse'];

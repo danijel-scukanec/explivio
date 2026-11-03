@@ -360,7 +360,10 @@
     "remove": "Quitar",
     "roleOwner": "Propietario",
     "roleEditor": "Editor",
-    "roleViewer": "Lector"
+    "roleViewer": "Lector",
+    "pending": "Invitaciones pendientes",
+    "cancel": "Cancelar",
+    "cancelError": "No se pudo cancelar la invitación."
   },
   "assistant": {
     "title": "Asistente de viaje",

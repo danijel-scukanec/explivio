@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TripMember, TripRole } from '@explivio/shared';
+import type { TripMember, TripRole, TripInvite } from '@explivio/shared';
 import {
   getTripMembers,
   getMemberRole,
+  getTripInvites,
   inviteMember,
+  cancelInvite,
   setMemberRole,
   removeMember,
 } from '../services/tripsApi';
@@ -22,6 +24,7 @@ interface Props {
 export function MembersModal({ tripId, onClose }: Props) {
   const { t } = useTranslation();
   const [members, setMembers] = useState<TripMember[]>([]);
+  const [invites, setInvites] = useState<TripInvite[]>([]);
   const [callerRole, setCallerRole] = useState<TripRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +38,8 @@ export function MembersModal({ tripId, onClose }: Props) {
       const [m, r] = await Promise.all([getTripMembers(tripId), getMemberRole(tripId)]);
       setMembers(m);
       setCallerRole(r);
+      // Pending invites are Owner-only; skip the call for everyone else.
+      setInvites(r === 'Owner' ? await getTripInvites(tripId) : []);
     } catch {
       setError(t('members.loadError'));
     } finally {
@@ -115,6 +120,29 @@ export function MembersModal({ tripId, onClose }: Props) {
               </li>
             ))}
           </ul>
+        )}
+
+        {isOwner && invites.length > 0 && (
+          <div className="members-modal__pending">
+            <h3>{t('members.pending')}</h3>
+            <ul className="members-modal__list">
+              {invites.map(inv => (
+                <li key={inv.id} className="members-modal__row">
+                  <div className="members-modal__person">
+                    <span className="members-modal__name">{inv.email}</span>
+                    <span className="members-modal__email">{roleLabel(inv.role)}</span>
+                  </div>
+                  <button
+                    className="members-modal__remove"
+                    disabled={busy}
+                    onClick={() => run(() => cancelInvite(tripId, inv.id), 'members.cancelError')}
+                  >
+                    {t('members.cancel')}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         {isOwner && (

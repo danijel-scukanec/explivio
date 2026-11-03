@@ -136,3 +136,12 @@
   border-radius: 8px;
   font-size: 0.9rem;
 }
+
+/* F15: pending-invites section — reuses the member list/row styles, just a header + spacing. */
+.members-modal__pending {
+  margin-top: 20px;
+}
+.members-modal__pending h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}

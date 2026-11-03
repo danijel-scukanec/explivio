@@ -63,10 +63,11 @@ public static class TripMembersModule
           .Produces<TripMemberResponse>()
           .ProducesProblem(StatusCodes.Status400BadRequest);
 
-        // F15: invite someone by email. They must already have an Explivio account (signed in at least
-        // once) — we resolve the email to that user and add them. A pending-invite flow for people who
-        // haven't signed up yet is a deliberate follow-up.
-        group.MapPost("/invite", async (Guid tripId, InviteTripMemberRequest request, AppDbContext db) =>
+        // F15: invite someone by email. If the email resolves to an existing account we add them
+        // straight away; if it doesn't, we record a PENDING invite (TripInvite) that's claimed into a
+        // membership the first time that person signs in. The response says which happened so the UI
+        // can refresh the right list.
+        group.MapPost("/invite", async (Guid tripId, InviteTripMemberRequest request, HttpContext ctx, AppDbContext db) =>
         {
             if (!Enum.IsDefined(request.Role))
             {
@@ -82,17 +83,29 @@ public static class TripMembersModule
             var user = await db.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
             if (user is null)
             {
-                return Results.Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    title: "No Explivio account with that email. They need to sign in once first.");
+                // No account yet — create or update a pending invite, claimed on their first sign-in.
+                var normalized = email.ToLowerInvariant();
+                var existing = await db.TripInvites
+                    .FirstOrDefaultAsync(i => i.TripId == tripId && i.NormalizedEmail == normalized);
+                if (existing is null)
+                {
+                    db.TripInvites.Add(TripInvite.Create(tripId, email, request.Role, ctx.GetUserId()));
+                }
+                else
+                {
+                    existing.Role = request.Role;
+                    existing.Email = email;
+                }
+                await db.SaveChangesAsync();
+                return Results.Ok(new InviteResultResponse(Pending: true, Member: null));
             }
 
             var guard = await UpsertMemberAsync(db, tripId, user.Id, request.Role);
-            return guard ?? Results.Ok(await ToMemberResponseAsync(db, user.Id, request.Role));
+            return guard ?? Results.Ok(new InviteResultResponse(
+                Pending: false, Member: await ToMemberResponseAsync(db, user.Id, request.Role)));
         }).AddEndpointFilter(new RequireTripRole(TripRole.Owner))
-          .Produces<TripMemberResponse>()
-          .ProducesProblem(StatusCodes.Status400BadRequest)
-          .ProducesProblem(StatusCodes.Status404NotFound);
+          .Produces<InviteResultResponse>()
+          .ProducesProblem(StatusCodes.Status400BadRequest);
 
         group.MapDelete("/{userId:guid}", async (Guid tripId, Guid userId, AppDbContext db) =>
         {
@@ -116,6 +129,35 @@ public static class TripMembersModule
         }).AddEndpointFilter(new RequireTripRole(TripRole.Owner))
           .Produces(StatusCodes.Status204NoContent)
           .ProducesProblem(StatusCodes.Status400BadRequest)
+          .ProducesProblem(StatusCodes.Status404NotFound);
+
+        // F15: pending invites (emails with no account yet). Owner-only — they're management info, and
+        // only Owners can create or cancel them.
+        var invites = app.MapGroup("/trips/{tripId:guid}/invites").RequireAuthorization();
+
+        invites.MapGet("/", async (Guid tripId, AppDbContext db) =>
+        {
+            var list = await db.TripInvites
+                .Where(i => i.TripId == tripId)
+                .OrderBy(i => i.CreatedAt)
+                .Select(i => new TripInviteResponse(i.Id, i.Email, i.Role, i.CreatedAt))
+                .ToListAsync();
+            return Results.Ok(list);
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Owner))
+          .Produces<IEnumerable<TripInviteResponse>>();
+
+        invites.MapDelete("/{inviteId:guid}", async (Guid tripId, Guid inviteId, AppDbContext db) =>
+        {
+            var invite = await db.TripInvites.FirstOrDefaultAsync(i => i.Id == inviteId && i.TripId == tripId);
+            if (invite is null)
+            {
+                return Results.Problem(statusCode: StatusCodes.Status404NotFound, title: "Invite not found.");
+            }
+            db.TripInvites.Remove(invite);
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        }).AddEndpointFilter(new RequireTripRole(TripRole.Owner))
+          .Produces(StatusCodes.Status204NoContent)
           .ProducesProblem(StatusCodes.Status404NotFound);
 
         return app;
@@ -163,3 +205,10 @@ public sealed record CallerRoleResponse(TripRole Role);
 public sealed record AddTripMemberRequest(Guid UserId, TripRole Role);
 
 public sealed record InviteTripMemberRequest(string Email, TripRole Role);
+
+// F15: the outcome of an invite — Pending true means an account-less email was recorded as a pending
+// invite (Member null); false means an existing account was added (Member populated).
+public sealed record InviteResultResponse(bool Pending, TripMemberResponse? Member);
+
+// F15: a pending invite, for the Owner-only pending list.
+public sealed record TripInviteResponse(Guid Id, string Email, TripRole Role, DateTime CreatedAt);

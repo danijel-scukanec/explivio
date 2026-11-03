@@ -1,4 +1,6 @@
-import type { Trip, TripMember, TripRole, CreateTripRequest, TripStatus, TripStopInput } from '@explivio/shared';
+import type {
+  Trip, TripMember, TripRole, TripInvite, InviteResult, CreateTripRequest, TripStatus, TripStopInput,
+} from '@explivio/shared';
 import { authHeaders } from '../../../shared/auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
@@ -78,8 +80,10 @@ async function problemTitle(res: Response, fallback: string): Promise<string> {
   return (body && typeof body.title === 'string') ? body.title : fallback;
 }
 
-// F15: invite someone by email (they must already have an Explivio account).
-export async function inviteMember(id: string, email: string, role: TripRole): Promise<TripMember> {
+// F15: invite someone by email. If they have an account they're added immediately (result.pending
+// false, result.member set); otherwise a pending invite is recorded (result.pending true) and claimed
+// when they first sign in.
+export async function inviteMember(id: string, email: string, role: TripRole): Promise<InviteResult> {
   const res = await fetch(`${API_URL}/trips/${id}/members/invite`, {
     method: 'POST',
     headers: await authHeaders({ 'Content-Type': 'application/json' }),
@@ -87,6 +91,21 @@ export async function inviteMember(id: string, email: string, role: TripRole): P
   });
   if (!res.ok) throw new Error(await problemTitle(res, 'Failed to invite member'));
   return res.json();
+}
+
+// F15: pending invites for this trip (Owner-only), and cancelling one.
+export async function getTripInvites(id: string): Promise<TripInvite[]> {
+  const res = await fetch(`${API_URL}/trips/${id}/invites`, { headers: await authHeaders() });
+  if (!res.ok) throw new Error('Failed to fetch pending invites');
+  return res.json();
+}
+
+export async function cancelInvite(id: string, inviteId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/trips/${id}/invites/${inviteId}`, {
+    method: 'DELETE',
+    headers: await authHeaders(),
+  });
+  if (!res.ok) throw new Error(await problemTitle(res, 'Failed to cancel invite'));
 }
 
 // F15: change a member's role (Owner only; can't demote the last owner).

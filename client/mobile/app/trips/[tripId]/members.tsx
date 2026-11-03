@@ -4,9 +4,10 @@ import {
 } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import type { TripMember, TripRole } from '@explivio/shared';
+import type { TripMember, TripRole, TripInvite } from '@explivio/shared';
 import {
-  getTrip, getTripMembers, getMemberRole, inviteMember, setMemberRole, removeMember,
+  getTrip, getTripMembers, getMemberRole, getTripInvites,
+  inviteMember, cancelInvite, setMemberRole, removeMember,
 } from '../../../src/api';
 import { theme } from '../../../src/theme';
 
@@ -20,6 +21,7 @@ export default function MembersScreen() {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [tripName, setTripName] = useState('');
   const [members, setMembers] = useState<TripMember[]>([]);
+  const [invites, setInvites] = useState<TripInvite[]>([]);
   const [callerRole, setCallerRole] = useState<TripRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,14 @@ export default function MembersScreen() {
   const load = useCallback(() => {
     if (!tripId) return;
     return Promise.all([getTrip(tripId), getTripMembers(tripId), getMemberRole(tripId)])
-      .then(([trip, m, r]) => { setTripName(trip.name); setMembers(m); setCallerRole(r); setError(null); })
+      .then(async ([trip, m, r]) => {
+        setTripName(trip.name);
+        setMembers(m);
+        setCallerRole(r);
+        // Pending invites are Owner-only; skip the call for everyone else.
+        setInvites(r === 'Owner' ? await getTripInvites(tripId) : []);
+        setError(null);
+      })
       .catch(() => setError(t('members.loadError')))
       .finally(() => setLoading(false));
   }, [tripId]);
@@ -101,6 +110,27 @@ export default function MembersScreen() {
               )}
             </View>
           ))}
+
+          {isOwner && invites.length > 0 && (
+            <View style={styles.pending}>
+              <Text style={styles.pendingHead}>{t('members.pending')}</Text>
+              {invites.map(inv => (
+                <View key={inv.id} style={styles.row}>
+                  <View style={styles.person}>
+                    <Text style={styles.name}>{inv.email}</Text>
+                    <Text style={styles.email}>{roleLabel(inv.role)}</Text>
+                  </View>
+                  <TouchableOpacity
+                    disabled={busy}
+                    onPress={() => run(() => cancelInvite(tripId!, inv.id), 'members.cancelError')}
+                    hitSlop={8}
+                  >
+                    <Text style={styles.remove}>{t('members.cancel')}</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
 
           {isOwner && (
             <View style={styles.invite}>
@@ -178,6 +208,8 @@ const styles = StyleSheet.create({
   segmentBtnActive: { backgroundColor: theme.accent },
   segmentText: { fontSize: 13, color: theme.text, fontWeight: '600' },
   segmentTextActive: { color: '#fff' },
+  pending: { marginTop: 4, marginBottom: 8 },
+  pendingHead: { fontSize: 15, fontWeight: '700', color: theme.textStrong, marginBottom: 8 },
   invite: {
     marginTop: 8, backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border,
     borderRadius: 12, padding: 14, gap: 10,

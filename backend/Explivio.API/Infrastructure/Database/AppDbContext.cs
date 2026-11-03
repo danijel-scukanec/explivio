@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Trip> Trips => Set<Trip>();
     public DbSet<TripStop> TripStops => Set<TripStop>();
     public DbSet<TripMember> TripMembers => Set<TripMember>();
+    public DbSet<TripInvite> TripInvites => Set<TripInvite>();
     public DbSet<TripLike> TripLikes => Set<TripLike>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();

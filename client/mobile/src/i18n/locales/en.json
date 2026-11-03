@@ -400,6 +400,9 @@
     "remove": "Remove",
     "roleOwner": "Owner",
     "roleEditor": "Editor",
-    "roleViewer": "Viewer"
+    "roleViewer": "Viewer",
+    "pending": "Pending invites",
+    "cancel": "Cancel",
+    "cancelError": "Couldn't cancel the invite."
   }
 }
