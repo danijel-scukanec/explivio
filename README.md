@@ -170,7 +170,7 @@ dotnet test --solution Explivio.slnx
 
 Unit tests run anywhere; the integration tests spin up a real SQL Server via Testcontainers (Docker required).
 
-**AI evals** (`Explivio.Evals`) score real-model output, so they run against the configured model and skip when no `AI:*` config is set. They use xunit.v3 on the Microsoft Testing Platform, so run them directly rather than via `dotnet test`:
+**AI evals** (`Explivio.Evals`) score real-model output, so they run against the configured model and skip when no `AI:*` config is set — the solution test above already includes them (skipped in CI, which has no model configured). To run just the evals against your configured model:
 
 ```bash
 dotnet run --project backend/Explivio.Evals
