@@ -6,6 +6,7 @@ import { OfflineBanner } from '../src/OfflineBanner';
 import { theme } from '../src/theme';
 import { AuthProvider } from '../src/AuthProvider';
 import { AuthGate } from '../src/AuthGate';
+import { PushRegistrar } from '../src/PushRegistrar';
 
 export default function RootLayout() {
   return (
@@ -13,6 +14,7 @@ export default function RootLayout() {
       <View style={{ flex: 1, backgroundColor: theme.bg }}>
         <StatusBar style="light" />
         <OfflineBanner />
+        <PushRegistrar />
         <AuthGate>
           <Stack
             screenOptions={{

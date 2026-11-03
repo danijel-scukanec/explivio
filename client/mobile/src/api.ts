@@ -183,6 +183,25 @@ export const getNotifications = () => getJson<NotificationsFeed>('/notifications
 export const markNotificationRead = (id: string) => mutate('POST', `/notifications/${id}/read`);
 export const markAllNotificationsRead = () => mutate('POST', '/notifications/read-all');
 
+// F20 (push): register/unregister this device's Expo push token. Best-effort and online-only — NOT
+// queued for offline replay like mutate(), since a stale token isn't worth sending later; registration
+// just retries on the next launch. A 404 means the PushNotifications feature is off on the server.
+export async function registerDevice(token: string, platform: string): Promise<boolean> {
+  try {
+    const res = await rawSend('POST', '/devices', { token, platform });
+    return res.ok;
+  } catch {
+    return false; // offline — try again next launch
+  }
+}
+export async function unregisterDevice(token: string): Promise<void> {
+  try {
+    await rawSend('DELETE', `/devices?token=${encodeURIComponent(token)}`);
+  } catch {
+    // best-effort on sign-out
+  }
+}
+
 // F24: checklists (packing lists / to-dos). Named lists, each with items. Mutations queue offline
 // like every other JSON mutation.
 export const getChecklists = (tripId: string) => getJson<Checklist[]>(`/trips/${tripId}/checklists`);

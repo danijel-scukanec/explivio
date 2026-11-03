@@ -3,6 +3,7 @@ import * as AuthSession from 'expo-auth-session';
 import { useAuthRequest, useAutoDiscovery, makeRedirectUri } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import { authEnabled, entraConfig, authScopes, setTokens, setDiscovery } from './auth';
+import { unregisterForPush } from './push';
 
 // Dismisses the auth browser once the redirect completes (also required for web).
 WebBrowser.maybeCompleteAuthSession();
@@ -80,6 +81,7 @@ function EntraAuthProvider({ children }: { children: ReactNode }) {
         void promptAsync();
       },
       signOut: () => {
+        void unregisterForPush(); // drop this device's token so push stops after sign-out
         setTokens(null);
         setIsAuthenticated(false);
       },
