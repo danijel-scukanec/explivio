@@ -69,6 +69,7 @@ public sealed class TripAssistantHub(
                 request.TripId, userId, trip.StartDate, trip.BaseCurrency, mediator, db, cancellationToken);
         }
 
+        using var _ = Explivio.API.Infrastructure.AiOps.AiFeatureScope.Push("TripAssistant");
         await foreach (var update in chatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {
             if (!string.IsNullOrEmpty(update.Text))

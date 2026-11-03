@@ -127,6 +127,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/ai/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AiUsageSnapshot"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/trips": {
         parameters: {
             query?: never;
@@ -2784,6 +2819,24 @@ export interface components {
             /** Format: uuid */
             userId: string;
             role: components["schemas"]["TripRole"];
+        };
+        AiUsageRow: {
+            feature: string;
+            model: string;
+            /** Format: int64 */
+            calls: number | string;
+            /** Format: int64 */
+            cacheHits: number | string;
+            /** Format: int64 */
+            inputTokens: number | string;
+            /** Format: int64 */
+            outputTokens: number | string;
+            /** Format: double */
+            estimatedCost: number | string;
+        };
+        AiUsageSnapshot: {
+            total: components["schemas"]["AiUsageRow"];
+            rows: components["schemas"]["AiUsageRow"][];
         };
         BudgetBalancesResponse: {
             baseCurrency: string;

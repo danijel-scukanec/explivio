@@ -8,6 +8,7 @@ export * from './types/document';
 export * from './types/gallery';
 export * from './types/recap';
 export * from './types/booking';
+export * from './types/aiOps';
 export * from './utils/locale';
 export * from './utils/weather';
 export * from './utils/trip';

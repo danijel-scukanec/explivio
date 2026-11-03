@@ -90,6 +90,7 @@ public static partial class ParseBookingEndpoint
                 new(ChatRole.User, content),
             };
 
+            using var _ = Explivio.API.Infrastructure.AiOps.AiFeatureScope.Push("BookingParse");
             var response = await chatClient.GetResponseAsync<ExtractedBookings>(messages, cancellationToken: ct);
             return Results.Ok(response.Result);
         })

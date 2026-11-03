@@ -58,11 +58,17 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    // F21: GenAI token/duration metrics from Microsoft.Extensions.AI's OpenTelemetry
+                    // middleware, plus Explivio's own AI usage/cost counters.
+                    .AddMeter("Experimental.Microsoft.Extensions.AI")
+                    .AddMeter("Explivio.AiOps");
             })
             .WithTracing(tracing =>
             {
                 tracing.AddSource(builder.Environment.ApplicationName)
+                    // F21: GenAI spans from Microsoft.Extensions.AI's OpenTelemetry middleware.
+                    .AddSource("Experimental.Microsoft.Extensions.AI")
                     .AddAspNetCoreInstrumentation(tracing =>
                         // Exclude health check requests from tracing
                         tracing.Filter = context =>

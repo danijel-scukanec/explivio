@@ -45,6 +45,7 @@ export function TripsPage() {
         <h1>{t('trips.title')}</h1>
         <div className="trips-page__header-actions">
           <Link className="btn btn--ghost" to="/gallery">🌍 {t('trips.gallery')}</Link>
+          <Link className="btn btn--ghost" to="/ai-usage">📊 {t('trips.aiUsage')}</Link>
           <NotificationBell />
           <LanguageSwitcher />
           <button className="btn btn--primary" onClick={() => setShowModal(true)}>

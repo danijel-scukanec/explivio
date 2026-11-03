@@ -21,6 +21,7 @@ public sealed class GenerateItineraryHandler(
     {
         var groundingText = await grounding.BuildAsync(command, cancellationToken);
 
+        using var _ = Explivio.API.Infrastructure.AiOps.AiFeatureScope.Push("ItineraryGeneration");
         var response = await chatClient.GetResponseAsync<GeneratedItinerary>(
             ItineraryChat.BuildMessages(command, groundingText), cancellationToken: cancellationToken);
 

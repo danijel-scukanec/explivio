@@ -60,6 +60,7 @@ public static class ScanReceiptEndpoint
                 ]),
             };
 
+            using var _ = Explivio.API.Infrastructure.AiOps.AiFeatureScope.Push("ReceiptScan");
             var response = await chatClient.GetResponseAsync<ExtractedReceipt>(messages, cancellationToken: ct);
             return Results.Ok(response.Result);
         })

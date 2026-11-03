@@ -56,7 +56,8 @@
     "couldNotLoad": "Could not load trips.",
     "empty": "No trips yet. Create your first one!",
     "filterAll": "All",
-    "noneForFilter": "No {{status}} trips."
+    "noneForFilter": "No {{status}} trips.",
+    "aiUsage": "AI usage"
   },
   "tripCard": {
     "summary": "{{count}} days · {{travelers}}",
@@ -392,5 +393,22 @@
     "adding": "Adding…",
     "addFailed": "Could not add the selected items.",
     "partialFail": "Added {{added}}. {{failed}} couldn't be added — review and retry."
+  },
+  "aiUsage": {
+    "title": "AI usage",
+    "subtitle": "Tokens, estimated cost and cache hits per feature and model.",
+    "trips": "Trips",
+    "refresh": "Refresh",
+    "loading": "Loading…",
+    "loadFailed": "Could not load AI usage.",
+    "calls": "Calls",
+    "tokens": "Tokens",
+    "estCost": "Est. cost",
+    "cacheHits": "Cache hits",
+    "feature": "Feature",
+    "model": "Model",
+    "inputTokens": "Input tokens",
+    "outputTokens": "Output tokens",
+    "empty": "No AI calls recorded yet."
   }
 }

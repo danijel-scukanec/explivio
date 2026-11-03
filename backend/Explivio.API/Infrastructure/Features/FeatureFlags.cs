@@ -33,7 +33,13 @@ public static class FeatureFlags
     // activities/reservations. Model-backed (text + vision), so a natural switch.
     public const string AiEmailParsing = "AiEmailParsing";
 
+    // F21: AI-ops toggles. Semantic cache (serve similar prompts from an embedding cache) and content
+    // safety (moderate inputs) are wrapped around the chat client; read at startup, so toggling needs
+    // a restart. Token/cost telemetry is always on (no flag).
+    public const string AiSemanticCache = "AiSemanticCache";
+    public const string AiContentSafety = "AiContentSafety";
+
     // All flags, so GET /features can report each one's state without reflection.
     public static readonly IReadOnlyList<string> All =
-        [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant, AiReceiptScanning, AiTripRecap, AiEmailParsing];
+        [AiItineraryGeneration, TripCoverPhotos, TripDocuments, AiAssistant, AiReceiptScanning, AiTripRecap, AiEmailParsing, AiSemanticCache, AiContentSafety];
 }

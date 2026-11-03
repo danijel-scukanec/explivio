@@ -35,6 +35,7 @@ public sealed class ItineraryGenerationHub(
         var messages = ItineraryChat.BuildMessages(command, groundingText);
         var options = ItineraryChat.StructuredOutputOptions();
 
+        using var _ = Explivio.API.Infrastructure.AiOps.AiFeatureScope.Push("ItineraryGeneration");
         await foreach (var update in chatClient.GetStreamingResponseAsync(messages, options, cancellationToken))
         {
             if (!string.IsNullOrEmpty(update.Text))

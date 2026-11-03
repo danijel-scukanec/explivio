@@ -56,7 +56,8 @@
     "couldNotLoad": "No se pudieron cargar los viajes.",
     "empty": "Aún no hay viajes. ¡Crea el primero!",
     "filterAll": "Todos",
-    "noneForFilter": "No hay viajes {{status}}."
+    "noneForFilter": "No hay viajes {{status}}.",
+    "aiUsage": "Uso de IA"
   },
   "tripCard": {
     "summary": "{{count}} días · {{travelers}}",
@@ -392,5 +393,22 @@
     "adding": "Añadiendo…",
     "addFailed": "No se pudieron añadir los elementos seleccionados.",
     "partialFail": "Se añadieron {{added}}. No se pudieron añadir {{failed}} — revisa y reinténtalo."
+  },
+  "aiUsage": {
+    "title": "Uso de IA",
+    "subtitle": "Tokens, coste estimado y aciertos de caché por función y modelo.",
+    "trips": "Viajes",
+    "refresh": "Actualizar",
+    "loading": "Cargando…",
+    "loadFailed": "No se pudo cargar el uso de IA.",
+    "calls": "Llamadas",
+    "tokens": "Tokens",
+    "estCost": "Coste est.",
+    "cacheHits": "Aciertos de caché",
+    "feature": "Función",
+    "model": "Modelo",
+    "inputTokens": "Tokens de entrada",
+    "outputTokens": "Tokens de salida",
+    "empty": "Aún no se han registrado llamadas de IA."
   }
 }

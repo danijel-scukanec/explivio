@@ -56,7 +56,8 @@
     "couldNotLoad": "Reisen konnten nicht geladen werden.",
     "empty": "Noch keine Reisen. Erstelle deine erste!",
     "filterAll": "Alle",
-    "noneForFilter": "Keine {{status}} Reisen."
+    "noneForFilter": "Keine {{status}} Reisen.",
+    "aiUsage": "KI-Nutzung"
   },
   "tripCard": {
     "summary": "{{count}} Tage · {{travelers}}",
@@ -392,5 +393,22 @@
     "adding": "Wird hinzugefügt…",
     "addFailed": "Ausgewählte Einträge konnten nicht hinzugefügt werden.",
     "partialFail": "{{added}} hinzugefügt. {{failed}} konnten nicht hinzugefügt werden — prüfen und erneut versuchen."
+  },
+  "aiUsage": {
+    "title": "KI-Nutzung",
+    "subtitle": "Tokens, geschätzte Kosten und Cache-Treffer pro Funktion und Modell.",
+    "trips": "Reisen",
+    "refresh": "Aktualisieren",
+    "loading": "Wird geladen…",
+    "loadFailed": "KI-Nutzung konnte nicht geladen werden.",
+    "calls": "Aufrufe",
+    "tokens": "Tokens",
+    "estCost": "Gesch. Kosten",
+    "cacheHits": "Cache-Treffer",
+    "feature": "Funktion",
+    "model": "Modell",
+    "inputTokens": "Eingabe-Tokens",
+    "outputTokens": "Ausgabe-Tokens",
+    "empty": "Noch keine KI-Aufrufe erfasst."
   }
 }

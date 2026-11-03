@@ -3,11 +3,11 @@
 Prioritized feature catalogue for the Explivio showcase. Each feature notes the **capability it demonstrates**, so the roadmap doubles as a map of "what this repo proves I can do."
 
 > ### ⭐ Committed target vs. roadmap
-> A half-finished portfolio repo reads worse than a smaller, polished one. The original **committed target** was **all of P0 + F12 + F13**; in practice the build went well beyond it. See the **Done** column for what has actually shipped — **all of P0; F12–F20 in P1; F22, F23, F24, F25, F26, F27, F28, F29, F30, F31, F32 in P2.** The unticked rows are **roadmap: genuinely planned, may not be built** — kept to show direction, not promised.
+> A half-finished portfolio repo reads worse than a smaller, polished one. The original **committed target** was **all of P0 + F12 + F13**; in practice the build went well beyond it. See the **Done** column for what has actually shipped — **all of P0; F12–F21 in P1; F22, F23, F24, F25, F26, F27, F28, F29, F30, F31, F32 in P2.** The unticked rows are **roadmap: genuinely planned, may not be built** — kept to show direction, not promised.
 
 **Priority tiers**
 - **P0 — Foundation:** the distributed/AI spine + core product. Must exist for the showcase to land. **(shipped)**
-- **P1 — Showcase:** the features a reviewer stops scrolling for. **(F12–F20 shipped; F21 roadmap)**
+- **P1 — Showcase:** the features a reviewer stops scrolling for. **(F12–F21 shipped)**
 - **P2 — Stretch:** breadth once the spine is impressive. **(F22, F23, F24, F25, F26, F27, F28, F29, F30, F31, F32 shipped; rest roadmap)**
 
 Legend for _Proves_: 🧩 distributed-systems · 🤖 AI · 🎨 full-stack · 🛠️ engineering-discipline
@@ -56,7 +56,7 @@ Legend for _Proves_: 🧩 distributed-systems · 🤖 AI · 🎨 full-stack · �
 | F18 | **Booking-email parsing** → auto activities (and reservations) | 🤖 | ✅ |
 | F19 | **Map view** of activities (coordinates already stored) | 🎨 | ✅ |
 | F20 | **Notifications** — in-app + mobile push | 🧩🎨 | ✅ |
-| F21 | **AI ops** — GenAI telemetry (token/cost), semantic cache, Content Safety, eval harness | 🤖🛠️ | |
+| F21 | **AI ops** — GenAI telemetry (token/cost), semantic cache, Content Safety, eval harness | 🤖🛠️ | ✅ |
 
 ## P2 — Stretch (breadth)
 
@@ -109,3 +109,4 @@ Entra External ID, feature flags, docs/README polish for the portfolio.
 - **P-Auth shipped (2026-10-28).** A **Microsoft Entra External ID** (CIAM) tenant validates bearer tokens on the API; web signs in via **MSAL** and mobile via **expo-auth-session** (PKCE). It's **coexistence, env-gated** — real auth turns on only when the client env vars are set, otherwise the fast dev identity still drives local work and the integration tests. Web sign-in is **verified end-to-end** (register → login → authenticated app); mobile sign-in is now **verified end-to-end on an EAS Android dev build** (2026-10-29 — sign-in → `explivio://auth` redirect → trips load; Expo Go can't use the custom-scheme redirect). This **unblocks** the F15 member-management UI, F26 follow, and F25 split-expense UI noted above — now buildable on real identities.
 - **F20 shipped in-app notifications; mobile push is deferred to a follow-up.** Trip changes (activity/expense add + remove, status change) notify the trip's other members through the Notifications Worker (outbox → Service Bus → `read.Notifications`), surfaced as a 🔔 bell with an unread badge on web + mobile. **Push notifications** — an OS-level alert when the app is closed — are **not built yet**; the pipeline already produces the message and recipients, so a follow-up adds Expo push-token registration + a sender in the worker (and, separately, web push). Tracked as the remaining half of F20.
 - **F25 split-expense UI — now REACHABLE (2026-10-28).** The budget split feature (split among trip members, settle-up balances) was already built on the web (`AddExpenseModal` split form, `BalancesPanel`), gated behind a trip having 2+ members. With the F15 member UI shipped, Owners can add members, so UI-reachable splitting is now live — no new code needed. F25's multi-currency + live FX and CSV/PDF export were already usable without members.
+- **F21 AI ops — SHIPPED (2026-11-03).** Every AI call runs through a chain of delegating `IChatClient` middleware in `Infrastructure/AiOps/`: **usage/cost telemetry** (`UsageTrackingChatClient` + `AiUsageTracker` + `AiPricing`) emits per-feature/model token and cost metrics on the `Explivio.AiOps` meter (alongside `Microsoft.Extensions.AI`'s own OpenTelemetry middleware) to the Aspire dashboard, and is surfaced to the user as an **AI usage** page on web; a **semantic cache** (`SemanticCacheChatClient`) short-circuits repeat prompts; and **Azure AI Content Safety** (`ContentSafety` + `ContentSafetyChatClient`) moderates input, all behind feature flags. A separate **`Explivio.Evals`** xUnit.v3 project is the eval harness — unlike the stub-based integration tests, it runs against the **real configured model** and scores output (structured-output itinerary, booking extraction, and an LLM-as-judge groundedness check on the recap), skipping when no `AI:*` config is set. **Verified against live Azure gpt-5-mini (2026-11-03): all 3 evals pass.** Runs via `dotnet run --project backend/Explivio.Evals` — xunit.v3 uses the Microsoft Testing Platform, so `dotnet test` is not used for it on the .NET 10 SDK.

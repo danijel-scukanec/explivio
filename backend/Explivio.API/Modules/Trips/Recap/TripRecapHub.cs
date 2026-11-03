@@ -55,6 +55,7 @@ public sealed class TripRecapHub(
 
         var messages = TripRecapChat.BuildMessages(contextText);
 
+        using var _ = Explivio.API.Infrastructure.AiOps.AiFeatureScope.Push("TripRecap");
         var full = new StringBuilder();
         await foreach (var update in chatClient.GetStreamingResponseAsync(messages, cancellationToken: cancellationToken))
         {

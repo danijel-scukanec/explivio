@@ -104,11 +104,12 @@ This is an evolving portfolio project. The **committed target** — the foundati
 | Export | Itinerary to **iCalendar (.ics)** + **PDF** (QuestPDF), plus a share-token **calendar subscription feed** for Google/Outlook/Apple sync |
 | Notifications | **In-app** notifications of trip changes to other members, delivered through the Notifications Worker (outbox → Service Bus → read model); 🔔 bell + unread badge on web + mobile (mobile **push** is a follow-up) |
 | Auth | **Microsoft Entra External ID** sign-in — bearer-token validation on the API; web (MSAL) + mobile (expo-auth-session), with a **dev-identity fallback** (env-gated, so local work needs no tenant) |
+| AI ops | **Token/cost telemetry**, a **semantic cache**, and **Azure AI Content Safety** moderation wrapped around every AI call as `IChatClient` middleware (metrics on the Aspire dashboard + an **AI usage** page), plus an **eval harness** (`Explivio.Evals`) that scores real-model output |
 | Quality | Testcontainers integration tests + GitHub Actions CI |
 
 **Roadmap (planned, not yet built)**
 
-Push notifications (mobile/web) · AI ops (token/cost telemetry, semantic cache, evals).
+Push notifications (mobile/web).
 
 ---
 
@@ -168,6 +169,12 @@ dotnet test --solution Explivio.slnx
 ```
 
 Unit tests run anywhere; the integration tests spin up a real SQL Server via Testcontainers (Docker required).
+
+**AI evals** (`Explivio.Evals`) score real-model output, so they run against the configured model and skip when no `AI:*` config is set. They use xunit.v3 on the Microsoft Testing Platform, so run them directly rather than via `dotnet test`:
+
+```bash
+dotnet run --project backend/Explivio.Evals
+```
 
 ---
 

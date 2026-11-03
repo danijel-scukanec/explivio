@@ -3,6 +3,7 @@ import { TripsPage } from './features/trips/pages/TripsPage';
 import { ItineraryPage } from './features/itinerary/pages/ItineraryPage';
 import { BudgetPage } from './features/budget/pages/BudgetPage';
 import { RecapPage } from './features/recap/pages/RecapPage';
+import { AiUsagePage } from './features/ai-usage/pages/AiUsagePage';
 import { BookingsPage } from './features/reservations/pages/BookingsPage';
 import { ChecklistsPage } from './features/checklists/pages/ChecklistsPage';
 import { DocumentsPage } from './features/documents/pages/DocumentsPage';
@@ -21,6 +22,7 @@ function App() {
         <Route path="/trips/:tripId/bookings" element={<BookingsPage />} />
         <Route path="/trips/:tripId/checklists" element={<ChecklistsPage />} />
         <Route path="/trips/:tripId/documents" element={<DocumentsPage />} />
+        <Route path="/ai-usage" element={<AiUsagePage />} />
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/gallery/:tripId" element={<PublicTripPage mode="gallery" />} />
         <Route path="/shared/:token" element={<PublicTripPage mode="shared" />} />

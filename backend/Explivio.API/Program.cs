@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
 using Explivio.API.Infrastructure.Ai;
+using Explivio.API.Infrastructure.AiOps;
 using Explivio.API.Infrastructure.Api;
 using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Behaviors;
@@ -343,6 +344,7 @@ api.MapCalendarFeedEndpoint();
 api.MapNotificationsEndpoints();
 api.MapRecapModule();
 api.MapParseBookingEndpoint();
+api.MapAiUsageEndpoints();
 
 // F13: the streaming itinerary-generation hub. Not versioned like the REST group — SignalR hubs are
 // addressed by a stable path; the default CORS policy and auth apply as for the rest of the app.
