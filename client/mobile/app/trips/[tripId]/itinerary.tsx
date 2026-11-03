@@ -144,6 +144,9 @@ export default function ItineraryScreen() {
               <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/documents`)} hitSlop={10}>
                 <Text style={styles.headerButton}>📎</Text>
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/members`)} hitSlop={10}>
+                <Text style={styles.headerButton}>👥</Text>
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/share`)} hitSlop={10}>
                 <Text style={styles.headerButton}>🔗</Text>
               </TouchableOpacity>

@@ -1,6 +1,7 @@
 import type {
   Trip,
   TripMember,
+  TripRole,
   Activity,
   BudgetSummary,
   BudgetBalances,
@@ -102,6 +103,39 @@ export const setTripBaseCurrency = (tripId: string, baseCurrency: string) =>
 
 // F15/F25: the trip's members (with display names), for sharing and splitting expenses.
 export const getTripMembers = (tripId: string) => getJson<TripMember[]>(`/trips/${tripId}/members`);
+
+// F15: member management (mirrors the web Members panel). These are online-only and surface the API's
+// ProblemDetails title on failure (e.g. the last-owner guard), so they use rawSend directly rather than
+// the offline-queuing mutate() — a queued role change or removal isn't something to replay later.
+async function problemTitle(res: Response, fallback: string): Promise<string> {
+  const body = await res.json().catch(() => null);
+  return body && typeof body.title === 'string' ? body.title : fallback;
+}
+
+// The caller's own role on this trip, so the UI can show Owner-only controls.
+export async function getMemberRole(tripId: string): Promise<TripRole> {
+  const res = await rawSend('GET', `/trips/${tripId}/members/me`);
+  if (!res.ok) throw new Error('Failed to fetch your role');
+  return ((await res.json()) as { role: TripRole }).role;
+}
+
+// Invite someone by email (they must already have an Explivio account).
+export async function inviteMember(tripId: string, email: string, role: TripRole): Promise<void> {
+  const res = await rawSend('POST', `/trips/${tripId}/members/invite`, { email, role });
+  if (!res.ok) throw new Error(await problemTitle(res, 'Failed to invite member'));
+}
+
+// Change a member's role (Owner only; the API blocks demoting the last owner).
+export async function setMemberRole(tripId: string, userId: string, role: TripRole): Promise<void> {
+  const res = await rawSend('POST', `/trips/${tripId}/members`, { userId, role });
+  if (!res.ok) throw new Error(await problemTitle(res, 'Failed to change role'));
+}
+
+// Remove a member (Owner only; the API blocks removing the last owner).
+export async function removeMember(tripId: string, userId: string): Promise<void> {
+  const res = await rawSend('DELETE', `/trips/${tripId}/members/${userId}`);
+  if (!res.ok) throw new Error(await problemTitle(res, 'Failed to remove member'));
+}
 
 // Itinerary
 export const getActivities = (tripId: string) => getJson<Activity[]>(`/trips/${tripId}/activities`);

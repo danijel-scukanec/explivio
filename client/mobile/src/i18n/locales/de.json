@@ -388,5 +388,18 @@
     "adding": "Wird hinzugefügt…",
     "addFailed": "Ausgewählte Einträge konnten nicht hinzugefügt werden.",
     "partialFail": "{{added}} hinzugefügt. {{failed}} konnten nicht hinzugefügt werden — prüfen und erneut versuchen."
+  },
+  "members": {
+    "title": "Mitglieder",
+    "loadError": "Mitglieder konnten nicht geladen werden.",
+    "inviteError": "Diese Person konnte nicht eingeladen werden.",
+    "roleError": "Die Rolle konnte nicht geändert werden.",
+    "removeError": "Das Mitglied konnte nicht entfernt werden.",
+    "emailPlaceholder": "E-Mail-Adresse",
+    "invite": "Einladen",
+    "remove": "Entfernen",
+    "roleOwner": "Eigentümer",
+    "roleEditor": "Bearbeiter",
+    "roleViewer": "Betrachter"
   }
 }

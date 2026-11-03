@@ -388,5 +388,18 @@
     "adding": "Añadiendo…",
     "addFailed": "No se pudieron añadir los elementos seleccionados.",
     "partialFail": "Se añadieron {{added}}. No se pudieron añadir {{failed}} — revisa y reinténtalo."
+  },
+  "members": {
+    "title": "Miembros",
+    "loadError": "No se pudieron cargar los miembros.",
+    "inviteError": "No se pudo invitar a esa persona.",
+    "roleError": "No se pudo cambiar el rol.",
+    "removeError": "No se pudo quitar al miembro.",
+    "emailPlaceholder": "Correo electrónico",
+    "invite": "Invitar",
+    "remove": "Quitar",
+    "roleOwner": "Propietario",
+    "roleEditor": "Editor",
+    "roleViewer": "Lector"
   }
 }

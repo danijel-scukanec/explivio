@@ -388,5 +388,18 @@
     "adding": "Adding…",
     "addFailed": "Could not add the selected items.",
     "partialFail": "Added {{added}}. {{failed}} couldn't be added — review and retry."
+  },
+  "members": {
+    "title": "Members",
+    "loadError": "Couldn't load members.",
+    "inviteError": "Couldn't invite that person.",
+    "roleError": "Couldn't change the role.",
+    "removeError": "Couldn't remove the member.",
+    "emailPlaceholder": "Email address",
+    "invite": "Invite",
+    "remove": "Remove",
+    "roleOwner": "Owner",
+    "roleEditor": "Editor",
+    "roleViewer": "Viewer"
   }
 }
