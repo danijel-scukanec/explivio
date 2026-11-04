@@ -109,7 +109,7 @@ This is an evolving portfolio project. The **committed target** — the foundati
 
 **Roadmap (planned, not yet built)**
 
-iOS push (needs an Apple Developer account for APNs / Safari PWA web push).
+iOS push is **deliberately out of scope** — it needs a paid Apple Developer account (APNs / Safari-PWA web push), not justified for a deploy-on-demand showcase. Push ships on Android + web; Apple devices degrade gracefully (no crash, no OS push). See [ADR 0006](docs/adr/0006-ios-push-out-of-scope.md).
 
 ---
 

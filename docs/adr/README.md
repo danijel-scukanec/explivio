@@ -9,5 +9,6 @@ Short records of the significant, hard-to-reverse decisions behind Explivio — 
 | [0003](0003-adopt-dotnet-aspire.md) | Adopt .NET Aspire as orchestration/deploy backbone | Accepted |
 | [0004](0004-defer-authentication.md) | Defer real authentication (fake dev identity for now) | Accepted |
 | [0005](0005-bicep-over-terraform.md) | Bicep + azd for infrastructure (not Terraform) | Accepted |
+| [0006](0006-ios-push-out-of-scope.md) | iOS push out of scope (no Apple Developer account); graceful degradation | Accepted |
 
 New ADR: copy the structure of an existing one, take the next number, start at status **Proposed**.
