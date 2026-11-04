@@ -15,6 +15,9 @@
     <!-- Override transitive vulnerable System.Security.Cryptography.Pkcs (NU1902/NU1903) with the patched
          net10 servicing version. Mirrors the API + workers. -->
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+    <!-- Override MessagePack 2.5.302 (pulled via Aspire.Hosting → StreamJsonRpc) with 2.5.303, the patch
+         that fixes GHSA-qhrr-8q5h-9q3h (NU1902). Same-minor bump, API-compatible. -->
+    <PackageReference Include="MessagePack" Version="2.5.303" />
   </ItemGroup>
 
   <PropertyGroup>
