@@ -279,8 +279,23 @@
     "couldNotLoad": "No se pudo cargar la galería.",
     "couldNotClone": "No se pudo clonar el viaje.",
     "empty": "Aún no hay viajes públicos.",
+    "followingEmpty": "Aún no hay viajes de personas que sigues.",
+    "tabs": { "all": "Todos", "following": "Siguiendo" },
+    "by": "por {{name}}",
+    "someone": "Alguien",
     "clone": "Clonar",
     "cloning": "Clonando…"
+  },
+  "social": {
+    "follow": "Seguir",
+    "following": "Siguiendo",
+    "followers": "seguidores",
+    "followingCount": "siguiendo"
+  },
+  "profile": {
+    "title": "Perfil",
+    "couldNotLoad": "No se pudo cargar este perfil.",
+    "noTrips": "Aún no hay viajes públicos."
   },
   "share": {
     "title": "Compartir viaje",

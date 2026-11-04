@@ -279,8 +279,23 @@
     "couldNotLoad": "Galerie konnte nicht geladen werden.",
     "couldNotClone": "Reise konnte nicht geklont werden.",
     "empty": "Noch keine öffentlichen Reisen.",
+    "followingEmpty": "Noch keine Reisen von Personen, denen du folgst.",
+    "tabs": { "all": "Alle", "following": "Folge ich" },
+    "by": "von {{name}}",
+    "someone": "Jemand",
     "clone": "Klonen",
     "cloning": "Wird geklont…"
+  },
+  "social": {
+    "follow": "Folgen",
+    "following": "Folge ich",
+    "followers": "Follower",
+    "followingCount": "folgt"
+  },
+  "profile": {
+    "title": "Profil",
+    "couldNotLoad": "Dieses Profil konnte nicht geladen werden.",
+    "noTrips": "Noch keine öffentlichen Reisen."
   },
   "share": {
     "title": "Reise teilen",

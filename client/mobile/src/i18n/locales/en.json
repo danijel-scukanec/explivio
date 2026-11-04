@@ -279,8 +279,23 @@
     "couldNotLoad": "Could not load the gallery.",
     "couldNotClone": "Could not clone the trip.",
     "empty": "No public trips yet.",
+    "followingEmpty": "No trips from people you follow yet.",
+    "tabs": { "all": "All", "following": "Following" },
+    "by": "by {{name}}",
+    "someone": "Someone",
     "clone": "Clone",
     "cloning": "Cloning…"
+  },
+  "social": {
+    "follow": "Follow",
+    "following": "Following",
+    "followers": "followers",
+    "followingCount": "following"
+  },
+  "profile": {
+    "title": "Profile",
+    "couldNotLoad": "Could not load this profile.",
+    "noTrips": "No public trips yet."
   },
   "share": {
     "title": "Share trip",

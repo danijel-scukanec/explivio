@@ -19,6 +19,7 @@ import type {
   Checklist,
   TripDocument,
   GalleryItem,
+  UserProfile,
   ShareLink,
   ExtractedReceipt,
   TripRecap,
@@ -356,6 +357,13 @@ export const getSharedTrip = (token: string) => getJson<Trip>(`/trips/shared/${t
 export const likeTrip = (tripId: string) => mutate('POST', `/trips/${tripId}/like`);
 export const unlikeTrip = (tripId: string) => mutate('DELETE', `/trips/${tripId}/like`);
 export const cloneTrip = (tripId: string) => mutate<{ id: string }>('POST', `/trips/${tripId}/clone`);
+
+// F26 (follow): the social graph + its feeds/profile.
+export const getFollowingGallery = () => getJson<GalleryItem[]>('/gallery/following');
+export const getUserProfile = (userId: string) => getJson<UserProfile>(`/users/${userId}/profile`);
+export const getUserTrips = (userId: string) => getJson<GalleryItem[]>(`/users/${userId}/trips`);
+export const followUser = (userId: string) => mutate('POST', `/users/${userId}/follow`);
+export const unfollowUser = (userId: string) => mutate('DELETE', `/users/${userId}/follow`);
 export const setTripVisibility = (tripId: string, isPublic: boolean) =>
   mutate('PATCH', `/trips/${tripId}/visibility`, { isPublic });
 export const revokeShareLink = (tripId: string) => mutate('DELETE', `/trips/${tripId}/share`);
