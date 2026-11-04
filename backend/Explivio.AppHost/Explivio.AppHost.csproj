@@ -12,6 +12,9 @@
     <PackageReference Include="Aspire.Hosting.Azure.ServiceBus" Version="13.4.6" />
     <PackageReference Include="Aspire.Hosting.Azure.Sql" Version="13.4.6" />
     <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="13.4.6" />
+    <!-- Override transitive vulnerable System.Security.Cryptography.Pkcs (NU1902/NU1903) with the patched
+         net10 servicing version. Mirrors the API + workers. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
   </ItemGroup>
 
   <PropertyGroup>
