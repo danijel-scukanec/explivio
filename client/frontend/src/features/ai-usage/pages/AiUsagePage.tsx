@@ -6,8 +6,10 @@ import { getAiUsage } from '../services/aiUsageApi';
 import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
 import './AiUsagePage.css';
 
-const fmt = (n: number) => n.toLocaleString();
-const cost = (n: number) => `$${n.toFixed(4)}`;
+// The generated OpenAPI types model int64/double as `number | string` (they can exceed JS's safe
+// integer range), so coerce at the display boundary rather than hand-editing the generated types.
+const fmt = (n: number | string) => Number(n).toLocaleString();
+const cost = (n: number | string) => `$${Number(n).toFixed(4)}`;
 
 export function AiUsagePage() {
   const { t } = useTranslation();
@@ -29,7 +31,7 @@ export function AiUsagePage() {
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
   const total = data?.total;
-  const totalTokens = total ? total.inputTokens + total.outputTokens : 0;
+  const totalTokens = total ? Number(total.inputTokens) + Number(total.outputTokens) : 0;
 
   return (
     <div className="aiusage-page">
