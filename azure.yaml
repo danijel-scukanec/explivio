@@ -14,3 +14,31 @@ services:
     language: dotnet
     project: ./backend/Explivio.AppHost/Explivio.AppHost.csproj
     host: containerapp
+
+# Before azd packages the container images, build the React web app (with a RELATIVE api base, so it
+# calls the same origin) into the API's wwwroot. The API then serves the SPA — the deployed app is a
+# single Container App + URL with no CORS and no API-URL to reconfigure per spin-up. Runs on the machine
+# running `azd` (which has Node); never affects local `aspire run`.
+hooks:
+  prepackage:
+    posix:
+      shell: sh
+      continueOnError: false
+      run: |
+        set -e
+        npm --prefix client ci
+        npm --prefix client run build -w @explivio/shared
+        VITE_API_URL= npm --prefix client run build -w frontend
+        rm -rf backend/Explivio.API/wwwroot
+        mkdir -p backend/Explivio.API/wwwroot
+        cp -r client/frontend/dist/. backend/Explivio.API/wwwroot/
+    windows:
+      shell: pwsh
+      continueOnError: false
+      run: |
+        npm --prefix client ci
+        npm --prefix client run build -w "@explivio/shared"
+        $env:VITE_API_URL=""; npm --prefix client run build -w frontend
+        Remove-Item -Recurse -Force backend/Explivio.API/wwwroot -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Force backend/Explivio.API/wwwroot | Out-Null
+        Copy-Item -Recurse client/frontend/dist/* backend/Explivio.API/wwwroot/
