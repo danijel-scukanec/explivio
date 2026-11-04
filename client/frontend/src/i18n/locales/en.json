@@ -254,12 +254,27 @@
     "couldNotLoad": "Could not load the gallery.",
     "couldNotClone": "Could not clone the trip.",
     "empty": "No public trips yet. Publish one from its itinerary to get started.",
+    "followingEmpty": "No trips from people you follow yet. Follow someone from the gallery.",
+    "tabs": { "all": "All", "following": "Following" },
+    "by": "by {{name}}",
+    "someone": "Someone",
     "clone": "Clone",
     "cloning": "Cloning…",
     "cloneToMyTrips": "Clone to my trips",
     "tripNotFound": "Trip not found.",
     "travelers_one": "{{count}} traveller",
     "travelers_other": "{{count}} travellers"
+  },
+  "social": {
+    "follow": "Follow",
+    "following": "Following",
+    "followers": "followers",
+    "followingCount": "following"
+  },
+  "profile": {
+    "backToGallery": "Gallery",
+    "couldNotLoad": "Could not load this profile.",
+    "noTrips": "No public trips yet."
   },
   "share": {
     "title": "Share this trip",
@@ -341,7 +356,8 @@
       "ActivityRemoved": "removed an activity",
       "ExpenseAdded": "added an expense",
       "ExpenseRemoved": "removed an expense",
-      "StatusChanged": "changed the trip status"
+      "StatusChanged": "changed the trip status",
+      "TripPublished": "shared a new trip"
     }
   },
   "auth": {

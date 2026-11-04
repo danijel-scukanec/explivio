@@ -254,12 +254,27 @@
     "couldNotLoad": "No se pudo cargar la galería.",
     "couldNotClone": "No se pudo clonar el viaje.",
     "empty": "Aún no hay viajes públicos. Publica uno desde su itinerario para empezar.",
+    "followingEmpty": "Aún no hay viajes de personas que sigues. Sigue a alguien desde la galería.",
+    "tabs": { "all": "Todos", "following": "Siguiendo" },
+    "by": "por {{name}}",
+    "someone": "Alguien",
     "clone": "Clonar",
     "cloning": "Clonando…",
     "cloneToMyTrips": "Clonar a mis viajes",
     "tripNotFound": "Viaje no encontrado.",
     "travelers_one": "{{count}} viajero",
     "travelers_other": "{{count}} viajeros"
+  },
+  "social": {
+    "follow": "Seguir",
+    "following": "Siguiendo",
+    "followers": "seguidores",
+    "followingCount": "siguiendo"
+  },
+  "profile": {
+    "backToGallery": "Galería",
+    "couldNotLoad": "No se pudo cargar este perfil.",
+    "noTrips": "Aún no hay viajes públicos."
   },
   "share": {
     "title": "Compartir este viaje",
@@ -341,7 +356,8 @@
       "ActivityRemoved": "eliminó una actividad",
       "ExpenseAdded": "añadió un gasto",
       "ExpenseRemoved": "eliminó un gasto",
-      "StatusChanged": "cambió el estado del viaje"
+      "StatusChanged": "cambió el estado del viaje",
+      "TripPublished": "compartió un nuevo viaje"
     }
   },
   "auth": {

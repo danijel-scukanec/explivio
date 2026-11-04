@@ -17,7 +17,14 @@ const KIND_ICON: Record<string, string> = {
   ExpenseAdded: '💰',
   ExpenseRemoved: '💰',
   StatusChanged: '🔖',
+  TripPublished: '🌍',
 };
+
+// F26 (follow): a "published" notification targets a follower, who isn't a trip member, so it opens the
+// public gallery view rather than the member-only itinerary.
+function routeFor(n: AppNotification): string {
+  return n.kind === 'TripPublished' ? `/gallery/${n.tripId}` : `/trips/${n.tripId}/itinerary`;
+}
 
 // F20: the in-app notification bell. Polls the unread count on an interval for the badge and refreshes
 // the list when opened. Clicking a notification marks it read and jumps to its trip. Notifications
@@ -88,7 +95,7 @@ export function NotificationBell() {
       await markNotificationRead(n.id);
       refresh();
     }
-    navigate(`/trips/${n.tripId}/itinerary`);
+    navigate(routeFor(n));
   }
 
   async function markAll() {

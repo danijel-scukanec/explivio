@@ -64,7 +64,13 @@ public sealed class NotificationsWorkerProcessor(
             if (recipients.Length == 0) return;
 
             var (title, pushBody) = PushMessageText.For(evt.TripName, evt.Kind, evt.Detail);
-            var data = new Dictionary<string, string> { ["tripId"] = evt.TripId.ToString() };
+            // Carry the kind so the client can route the tap: a TripPublished notification goes to the
+            // public gallery (the recipient is a follower, not a trip member), others to the itinerary.
+            var data = new Dictionary<string, string>
+            {
+                ["tripId"] = evt.TripId.ToString(),
+                ["kind"] = evt.Kind,
+            };
 
             await SendExpoAsync(db, recipients, title, pushBody, data, ct);
             await SendWebAsync(db, recipients, title, pushBody, data, ct);

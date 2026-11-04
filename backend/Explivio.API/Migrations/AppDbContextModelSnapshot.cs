@@ -340,6 +340,31 @@ namespace Explivio.API.Migrations
                     b.ToTable("Reservations");
                 });
 
+            modelBuilder.Entity("Explivio.API.Modules.Social.UserFollow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FollowedUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FollowerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FollowedUserId");
+
+                    b.HasIndex("FollowerUserId", "FollowedUserId")
+                        .IsUnique();
+
+                    b.ToTable("UserFollows", (string)null);
+                });
+
             modelBuilder.Entity("Explivio.API.Modules.Trips.Recap.TripRecap", b =>
                 {
                     b.Property<Guid>("TripId")

@@ -21,4 +21,7 @@ public enum NotificationKind
     ExpenseAdded,
     ExpenseRemoved,
     StatusChanged,
+
+    // F26 (follow): a user published a trip to the public gallery; sent to that owner's followers.
+    TripPublished,
 }

@@ -254,12 +254,27 @@
     "couldNotLoad": "Galerie konnte nicht geladen werden.",
     "couldNotClone": "Reise konnte nicht geklont werden.",
     "empty": "Noch keine öffentlichen Reisen. Veröffentliche eine über ihren Reiseplan.",
+    "followingEmpty": "Noch keine Reisen von Personen, denen du folgst. Folge jemandem aus der Galerie.",
+    "tabs": { "all": "Alle", "following": "Folge ich" },
+    "by": "von {{name}}",
+    "someone": "Jemand",
     "clone": "Klonen",
     "cloning": "Wird geklont…",
     "cloneToMyTrips": "Zu meinen Reisen klonen",
     "tripNotFound": "Reise nicht gefunden.",
     "travelers_one": "{{count}} Reisende/r",
     "travelers_other": "{{count}} Reisende"
+  },
+  "social": {
+    "follow": "Folgen",
+    "following": "Folge ich",
+    "followers": "Follower",
+    "followingCount": "folgt"
+  },
+  "profile": {
+    "backToGallery": "Galerie",
+    "couldNotLoad": "Dieses Profil konnte nicht geladen werden.",
+    "noTrips": "Noch keine öffentlichen Reisen."
   },
   "share": {
     "title": "Diese Reise teilen",
@@ -341,7 +356,8 @@
       "ActivityRemoved": "hat eine Aktivität entfernt",
       "ExpenseAdded": "hat eine Ausgabe hinzugefügt",
       "ExpenseRemoved": "hat eine Ausgabe entfernt",
-      "StatusChanged": "hat den Reisestatus geändert"
+      "StatusChanged": "hat den Reisestatus geändert",
+      "TripPublished": "hat eine neue Reise geteilt"
     }
   },
   "auth": {

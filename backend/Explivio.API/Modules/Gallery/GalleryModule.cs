@@ -1,6 +1,7 @@
 using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Database;
 using Explivio.API.Infrastructure.ReadModel;
+using Explivio.API.Modules.Social;
 using Explivio.API.Modules.Trips;
 using Explivio.API.Modules.Trips.GetTrip;
 using Microsoft.EntityFrameworkCore;
@@ -22,8 +23,7 @@ public static class GalleryModule
             int? skip, int? take, CancellationToken ct) =>
         {
             var userId = ctx.GetUserId();
-            var page = Math.Clamp(take ?? 24, 1, 100);
-            var offset = Math.Max(0, skip ?? 0);
+            var (page, offset) = Paging(skip, take);
 
             var rows = await read.TripPopularity
                 .Where(p => p.IsPublic)
@@ -31,18 +31,29 @@ public static class GalleryModule
                 .Skip(offset).Take(page)
                 .ToListAsync(ct);
 
-            // Resolve which of this page the caller has liked (write model is the source of truth).
-            var ids = rows.Select(r => r.TripId).ToList();
-            var likedIds = await db.TripLikes
-                .Where(l => l.UserId == userId && ids.Contains(l.TripId))
-                .Select(l => l.TripId)
-                .ToListAsync(ct);
-            var liked = likedIds.ToHashSet();
+            return Results.Ok(await MapAsync(db, rows, userId, ct));
+        }).Produces<IEnumerable<GalleryItemResponse>>();
 
-            var items = rows.Select(r => new GalleryItemResponse(
-                r.TripId, r.Name, r.Destination, r.StartDate, r.EndDate,
-                r.TravelerCount, r.HasCoverPhoto, r.LikeCount, liked.Contains(r.TripId)));
-            return Results.Ok(items);
+        // F26 (follow): the "Following" feed — public trips from owners the caller follows, newest first.
+        group.MapGet("/following", async (AppDbContext db, ReadDbContext read, HttpContext ctx,
+            int? skip, int? take, CancellationToken ct) =>
+        {
+            var userId = ctx.GetUserId();
+            var (page, offset) = Paging(skip, take);
+
+            var followedOwnerIds = await db.UserFollows
+                .Where(f => f.FollowerUserId == userId)
+                .Select(f => f.FollowedUserId)
+                .ToListAsync(ct);
+            if (followedOwnerIds.Count == 0) return Results.Ok(Array.Empty<GalleryItemResponse>());
+
+            var rows = await read.TripPopularity
+                .Where(p => p.IsPublic && followedOwnerIds.Contains(p.OwnerUserId))
+                .OrderByDescending(p => p.UpdatedAt)
+                .Skip(offset).Take(page)
+                .ToListAsync(ct);
+
+            return Results.Ok(await MapAsync(db, rows, userId, ct));
         }).Produces<IEnumerable<GalleryItemResponse>>();
 
         // A public trip's full detail (route included), for viewing/cloning. 404 if not public.
@@ -55,6 +66,43 @@ public static class GalleryModule
         }).Produces<TripResponse>().Produces(StatusCodes.Status404NotFound);
 
         return app;
+    }
+
+    private static (int Page, int Offset) Paging(int? skip, int? take) =>
+        (Math.Clamp(take ?? 24, 1, 100), Math.Max(0, skip ?? 0));
+
+    // F26: map a page of TripPopularity read-model rows to gallery cards, resolving the per-viewer flags
+    // and owner names from the write model in one round trip each (liked, followed, owner display name).
+    // Shared by the gallery list, the Following feed, and a user's profile trips.
+    internal static async Task<IReadOnlyList<GalleryItemResponse>> MapAsync(
+        AppDbContext db, IReadOnlyList<TripPopularity> rows, Guid userId, CancellationToken ct)
+    {
+        if (rows.Count == 0) return [];
+
+        var tripIds = rows.Select(r => r.TripId).ToList();
+        var ownerIds = rows.Select(r => r.OwnerUserId).Distinct().ToList();
+
+        var liked = (await db.TripLikes
+            .Where(l => l.UserId == userId && tripIds.Contains(l.TripId))
+            .Select(l => l.TripId)
+            .ToListAsync(ct)).ToHashSet();
+
+        var followed = (await db.UserFollows
+            .Where(f => f.FollowerUserId == userId && ownerIds.Contains(f.FollowedUserId))
+            .Select(f => f.FollowedUserId)
+            .ToListAsync(ct)).ToHashSet();
+
+        var ownerNames = await db.Users
+            .Where(u => ownerIds.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id, u => u.DisplayName, ct);
+
+        return rows.Select(r => new GalleryItemResponse(
+            r.TripId, r.Name, r.Destination, r.StartDate, r.EndDate,
+            r.TravelerCount, r.HasCoverPhoto, r.LikeCount, liked.Contains(r.TripId),
+            r.OwnerUserId,
+            ownerNames.TryGetValue(r.OwnerUserId, out var name) ? name : string.Empty,
+            followed.Contains(r.OwnerUserId),
+            r.OwnerUserId == userId)).ToList();
     }
 
     // F26: view a trip by its share token — grants read access regardless of membership or publicity.

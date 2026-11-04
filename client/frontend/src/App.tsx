@@ -9,6 +9,7 @@ import { ChecklistsPage } from './features/checklists/pages/ChecklistsPage';
 import { DocumentsPage } from './features/documents/pages/DocumentsPage';
 import { GalleryPage } from './features/gallery/pages/GalleryPage';
 import { PublicTripPage } from './features/gallery/pages/PublicTripPage';
+import { UserProfilePage } from './features/gallery/pages/UserProfilePage';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/ai-usage" element={<AiUsagePage />} />
         <Route path="/gallery" element={<GalleryPage />} />
         <Route path="/gallery/:tripId" element={<PublicTripPage mode="gallery" />} />
+        <Route path="/users/:userId" element={<UserProfilePage />} />
         <Route path="/shared/:token" element={<PublicTripPage mode="shared" />} />
       </Routes>
     </BrowserRouter>

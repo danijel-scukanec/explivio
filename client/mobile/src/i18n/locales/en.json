@@ -351,7 +351,8 @@
       "ActivityRemoved": "removed an activity",
       "ExpenseAdded": "added an expense",
       "ExpenseRemoved": "removed an expense",
-      "StatusChanged": "changed the trip status"
+      "StatusChanged": "changed the trip status",
+      "TripPublished": "shared a new trip"
     }
   },
   "auth": {

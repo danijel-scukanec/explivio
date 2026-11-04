@@ -79,3 +79,13 @@ export function tripIdFromResponse(response: Notifications.NotificationResponse)
   const data = response.notification.request.content.data as { tripId?: string } | undefined;
   return typeof data?.tripId === 'string' ? data.tripId : null;
 }
+
+// Where tapping a push should navigate, from its data payload. F26 (follow): a TripPublished push targets
+// a follower (not a trip member), so it opens the public gallery; every other kind opens the itinerary.
+// Returns null when there's no trip to route to.
+export function routeFromResponse(response: Notifications.NotificationResponse): string | null {
+  const data = response.notification.request.content.data as { tripId?: string; kind?: string } | undefined;
+  const tripId = typeof data?.tripId === 'string' ? data.tripId : null;
+  if (!tripId) return null;
+  return data?.kind === 'TripPublished' ? '/gallery' : `/trips/${tripId}/itinerary`;
+}

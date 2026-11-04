@@ -9,6 +9,7 @@ import { theme } from '../src/theme';
 
 const KIND_ICON: Record<string, string> = {
   ActivityAdded: '🗺️', ActivityRemoved: '🗺️', ExpenseAdded: '💰', ExpenseRemoved: '💰', StatusChanged: '🔖',
+  TripPublished: '🌍',
 };
 
 // F20: the current user's notifications. Tap one to mark it read and jump to its trip.
@@ -30,7 +31,8 @@ export default function NotificationsScreen() {
 
   async function open(n: AppNotification) {
     if (!n.isRead) await markNotificationRead(n.id);
-    router.push(`/trips/${n.tripId}/itinerary`);
+    // F26 (follow): a "published" notification targets a follower (not a trip member) → open the gallery.
+    router.push(n.kind === 'TripPublished' ? '/gallery' : `/trips/${n.tripId}/itinerary`);
   }
 
   async function markAll() {

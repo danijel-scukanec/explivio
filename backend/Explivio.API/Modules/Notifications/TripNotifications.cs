@@ -29,6 +29,29 @@ public static class TripNotifications
             .Select(t => t.Name)
             .FirstOrDefaultAsync(ct) ?? "a trip";
 
+        return Build(tripId, tripName, actorId, recipients, kind, detail);
+    }
+
+    // F26 (follow): builds the outbox message that notifies a trip OWNER's followers that they published a
+    // trip. Same event + outbox mechanism as BuildAsync, but recipients come from the follow graph instead
+    // of trip membership. The actor is the owner; returns null when they have no followers.
+    public static async Task<OutboxMessage?> BuildForFollowersAsync(
+        AppDbContext db, Guid tripId, string tripName, Guid ownerId, NotificationKind kind, string? detail,
+        CancellationToken ct)
+    {
+        var followers = await db.UserFollows
+            .Where(f => f.FollowedUserId == ownerId)
+            .Select(f => f.FollowerUserId)
+            .ToListAsync(ct);
+        if (followers.Count == 0) return null;
+
+        return Build(tripId, tripName, ownerId, followers, kind, detail);
+    }
+
+    private static OutboxMessage Build(
+        Guid tripId, string tripName, Guid actorId, IReadOnlyList<Guid> recipients,
+        NotificationKind kind, string? detail)
+    {
         var evt = new TripNotificationRaised(tripId, tripName, actorId, recipients, kind.ToString(), detail);
         return new OutboxMessage
         {

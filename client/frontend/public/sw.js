@@ -28,8 +28,12 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const tripId = event.notification.data && event.notification.data.tripId;
-  const path = tripId ? `/trips/${tripId}/itinerary` : '/';
+  const data = event.notification.data || {};
+  const tripId = data.tripId;
+  // F26 (follow): a "published" notification goes to the public gallery (the recipient is a follower,
+  // not a trip member); every other kind opens the trip's itinerary.
+  let path = '/';
+  if (tripId) path = data.kind === 'TripPublished' ? `/gallery/${tripId}` : `/trips/${tripId}/itinerary`;
   const target = new URL(path, self.location.origin).href;
 
   event.waitUntil(

@@ -351,7 +351,8 @@
       "ActivityRemoved": "eliminó una actividad",
       "ExpenseAdded": "añadió un gasto",
       "ExpenseRemoved": "eliminó un gasto",
-      "StatusChanged": "cambió el estado del viaje"
+      "StatusChanged": "cambió el estado del viaje",
+      "TripPublished": "compartió un nuevo viaje"
     }
   },
   "auth": {

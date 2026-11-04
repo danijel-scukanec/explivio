@@ -1,4 +1,4 @@
-import type { GalleryItem, ShareLink, Trip } from '@explivio/shared';
+import type { GalleryItem, ShareLink, Trip, UserProfile } from '@explivio/shared';
 import { authHeaders } from '../../../shared/auth';
 
 const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
@@ -7,6 +7,35 @@ const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5298'}/v1`;
 export async function getGallery(): Promise<GalleryItem[]> {
   const res = await fetch(`${API_URL}/gallery`, { headers: await authHeaders() });
   if (!res.ok) throw new Error('Failed to load gallery');
+  return res.json();
+}
+
+// F26 (follow): the "Following" feed — public trips from people the caller follows.
+export async function getFollowingGallery(): Promise<GalleryItem[]> {
+  const res = await fetch(`${API_URL}/gallery/following`, { headers: await authHeaders() });
+  if (!res.ok) throw new Error('Failed to load following feed');
+  return res.json();
+}
+
+export async function followUser(userId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/users/${userId}/follow`, { method: 'POST', headers: await authHeaders() });
+  if (!res.ok) throw new Error('Failed to follow');
+}
+
+export async function unfollowUser(userId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/users/${userId}/follow`, { method: 'DELETE', headers: await authHeaders() });
+  if (!res.ok) throw new Error('Failed to unfollow');
+}
+
+export async function getUserProfile(userId: string): Promise<UserProfile> {
+  const res = await fetch(`${API_URL}/users/${userId}/profile`, { headers: await authHeaders() });
+  if (!res.ok) throw new Error('Failed to load profile');
+  return res.json();
+}
+
+export async function getUserTrips(userId: string): Promise<GalleryItem[]> {
+  const res = await fetch(`${API_URL}/users/${userId}/trips`, { headers: await authHeaders() });
+  if (!res.ok) throw new Error('Failed to load user trips');
   return res.json();
 }
 

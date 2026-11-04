@@ -18,6 +18,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<TripMember> TripMembers => Set<TripMember>();
     public DbSet<TripInvite> TripInvites => Set<TripInvite>();
     public DbSet<TripLike> TripLikes => Set<TripLike>();
+    public DbSet<Explivio.API.Modules.Social.UserFollow> UserFollows => Set<Explivio.API.Modules.Social.UserFollow>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserExternalLogin> UserExternalLogins => Set<UserExternalLogin>();
     public DbSet<Activity> Activities => Set<Activity>();

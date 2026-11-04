@@ -1,5 +1,6 @@
 using Explivio.API.Infrastructure.Auth;
 using Explivio.API.Infrastructure.Database;
+using Explivio.API.Modules.Notifications;
 using Microsoft.EntityFrameworkCore;
 
 namespace Explivio.API.Modules.Trips.Sharing;
@@ -22,8 +23,21 @@ public static class TripSharingEndpoints
             var trip = await db.Trips.Include(t => t.Stops).FirstOrDefaultAsync(t => t.Id == id, ct);
             if (trip is null) return Results.NotFound();
 
+            // F26 (follow): notify the owner's followers only on the private→public transition (not on a
+            // re-publish of an already-public trip), in the same transaction as the publish via the outbox.
+            var newlyPublished = body.IsPublic && !trip.IsPublic;
+
             if (body.IsPublic) trip.Publish();
             else trip.Unpublish();
+
+            if (newlyPublished)
+            {
+                var notification = await TripNotifications.BuildForFollowersAsync(
+                    db, trip.Id, trip.Name, trip.UserId, NotificationKind.TripPublished,
+                    trip.DestinationSummary(), ct);
+                if (notification is not null) db.OutboxMessages.Add(notification);
+            }
+
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         }).AddEndpointFilter(new RequireTripRole(TripRole.Owner, "id"))

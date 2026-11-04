@@ -15,6 +15,7 @@ public static class PushMessageText
             "ExpenseAdded" => "Added an expense",
             "ExpenseRemoved" => "Removed an expense",
             "StatusChanged" => "Changed the trip status",
+            "TripPublished" => "Shared a new trip",
             _ => "Updated the trip",
         };
 
