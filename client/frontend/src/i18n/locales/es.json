@@ -333,6 +333,9 @@
     "title": "Notificaciones",
     "empty": "Aún no hay notificaciones",
     "markAllRead": "Marcar todo como leído",
+    "enablePush": "Activar notificaciones del navegador",
+    "disablePush": "Desactivar notificaciones del navegador",
+    "pushBlocked": "Las notificaciones están bloqueadas en la configuración del navegador",
     "kind": {
       "ActivityAdded": "añadió una actividad",
       "ActivityRemoved": "eliminó una actividad",

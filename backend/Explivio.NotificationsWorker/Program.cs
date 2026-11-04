@@ -32,6 +32,26 @@ else
     builder.Services.AddSingleton<IPushNotificationSender, NullPushSender>();
 }
 
+// F20 (web push): the browser Web Push sender. Enabled alongside Expo (same PushNotifications:Enabled
+// gate) but additionally needs a VAPID keypair — the public key is served to clients so they can
+// subscribe, and both keys sign the push. Off (no-op) unless enabled AND both keys are configured, so
+// the worker still fans out in-app + Expo push when web push isn't set up.
+var vapidPublicKey = builder.Configuration["WebPush:PublicKey"];
+var vapidPrivateKey = builder.Configuration["WebPush:PrivateKey"];
+var vapidSubject = builder.Configuration["WebPush:Subject"];
+if (pushEnabled && !string.IsNullOrWhiteSpace(vapidPublicKey) && !string.IsNullOrWhiteSpace(vapidPrivateKey))
+{
+    builder.Services.AddSingleton(new VapidConfiguration(
+        string.IsNullOrWhiteSpace(vapidSubject) ? "mailto:admin@explivio.app" : vapidSubject,
+        vapidPublicKey,
+        vapidPrivateKey));
+    builder.Services.AddSingleton<IWebPushSender, WebPushSender>();
+}
+else
+{
+    builder.Services.AddSingleton<IWebPushSender, NullWebPushSender>();
+}
+
 // Inbox dedupe store — the worker's own context over the shared SQL database. Gated on the
 // connection string like the API's DbContext, so the worker still builds and serves health checks
 // when SQL isn't configured.

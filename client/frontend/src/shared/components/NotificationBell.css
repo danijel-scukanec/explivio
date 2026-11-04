@@ -61,6 +61,41 @@
   padding: 0;
 }
 
+/* F20 (web push): the enable/disable browser-notifications row under the panel head. */
+.notif__push {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border, #f0f0f0);
+  background: var(--surface, #fff);
+}
+
+.notif__push-btn {
+  width: 100%;
+  padding: 6px 10px;
+  background: none;
+  border: 1px solid var(--accent, #6c5ce7);
+  border-radius: 6px;
+  color: var(--accent, #6c5ce7);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notif__push-btn:hover:not(:disabled) {
+  background: var(--surface-hover, #f6f5ff);
+}
+
+.notif__push-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.notif__push-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted, #999);
+  text-align: center;
+}
+
 .notif__empty {
   padding: 24px 14px;
   text-align: center;

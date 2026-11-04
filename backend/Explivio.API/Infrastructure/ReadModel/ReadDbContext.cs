@@ -22,6 +22,10 @@ public sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : DbC
     // register/unregister endpoints; the Notifications Worker reads tokens from it to send push.
     public DbSet<PushDevice> PushDevices => Set<PushDevice>();
 
+    // F20 (web push): browser Web Push subscriptions. Owned + migrated by the API (register/unregister
+    // endpoints); the Notifications Worker reads them to send web push. Parallel to PushDevices.
+    public DbSet<WebPushSubscription> WebPushSubscriptions => Set<WebPushSubscription>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -63,6 +67,18 @@ public sealed class ReadDbContext(DbContextOptions<ReadDbContext> options) : DbC
         pushDevice.Property(d => d.Platform).HasMaxLength(16);
         pushDevice.HasIndex(d => d.ExpoPushToken).IsUnique();
         pushDevice.HasIndex(d => d.UserId);
+
+        // F20 (web push): browser subscriptions. The endpoint URL is unique (one row per browser
+        // profile; we upsert by it) and bounded to 450 chars so it fits a SQL Server unique index
+        // (900-byte key limit). Recipients are looked up by UserId when fanning out a push.
+        var webPush = modelBuilder.Entity<WebPushSubscription>();
+        webPush.ToTable("WebPushSubscriptions");
+        webPush.HasKey(s => s.Id);
+        webPush.Property(s => s.Endpoint).HasMaxLength(450);
+        webPush.Property(s => s.P256dh).HasMaxLength(200);
+        webPush.Property(s => s.Auth).HasMaxLength(100);
+        webPush.HasIndex(s => s.Endpoint).IsUnique();
+        webPush.HasIndex(s => s.UserId);
 
         modelBuilder.ConfigureInbox<ProjectionInboxMessage>();
     }

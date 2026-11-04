@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from '@azure/msal-react';
 import { loginRequest } from '../auth';
+import { disableWebPush } from '../push/webPush';
 import './AuthGate.css';
 
 // P-Auth: wraps the app when Entra auth is enabled. Signed-out users see a sign-in screen; signed-in
@@ -19,7 +20,12 @@ export function AuthGate({ children }: { children: ReactNode }) {
           {name && <span className="auth-chip__name">{name}</span>}
           <button
             className="auth-chip__btn"
-            onClick={() => instance.logoutRedirect()}
+            onClick={async () => {
+              // F20 (web push): drop this browser's subscription so it stops receiving the
+              // signed-out user's notifications. Best-effort — never block sign-out on it.
+              await disableWebPush().catch(() => undefined);
+              await instance.logoutRedirect();
+            }}
           >
             {t('auth.signOut')}
           </button>

@@ -333,6 +333,9 @@
     "title": "Notifications",
     "empty": "No notifications yet",
     "markAllRead": "Mark all read",
+    "enablePush": "Enable browser notifications",
+    "disablePush": "Disable browser notifications",
+    "pushBlocked": "Notifications are blocked in your browser settings",
     "kind": {
       "ActivityAdded": "added an activity",
       "ActivityRemoved": "removed an activity",

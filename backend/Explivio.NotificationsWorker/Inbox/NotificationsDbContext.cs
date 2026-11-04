@@ -23,6 +23,11 @@ public sealed class NotificationsDbContext(DbContextOptions<NotificationsDbConte
     // mapped ExcludeFromMigrations here too.
     public DbSet<PushDevice> PushDevices => Set<PushDevice>();
 
+    // F20 (web push): browser subscriptions. Owned and migrated by the API (in "read"); the worker only
+    // reads them to send web push (and deletes ones the push service reports gone), so it's mapped
+    // ExcludeFromMigrations here too.
+    public DbSet<WebPushSubscription> WebPushSubscriptions => Set<WebPushSubscription>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -35,5 +40,9 @@ public sealed class NotificationsDbContext(DbContextOptions<NotificationsDbConte
         var pushDevice = modelBuilder.Entity<PushDevice>();
         pushDevice.ToTable("PushDevices", "read", t => t.ExcludeFromMigrations());
         pushDevice.HasKey(d => d.Id);
+
+        var webPush = modelBuilder.Entity<WebPushSubscription>();
+        webPush.ToTable("WebPushSubscriptions", "read", t => t.ExcludeFromMigrations());
+        webPush.HasKey(s => s.Id);
     }
 }

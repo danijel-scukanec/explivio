@@ -333,6 +333,9 @@
     "title": "Benachrichtigungen",
     "empty": "Noch keine Benachrichtigungen",
     "markAllRead": "Alle als gelesen markieren",
+    "enablePush": "Browser-Benachrichtigungen aktivieren",
+    "disablePush": "Browser-Benachrichtigungen deaktivieren",
+    "pushBlocked": "Benachrichtigungen sind in den Browsereinstellungen blockiert",
     "kind": {
       "ActivityAdded": "hat eine Aktivität hinzugefügt",
       "ActivityRemoved": "hat eine Aktivität entfernt",

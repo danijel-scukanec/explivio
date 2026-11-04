@@ -66,8 +66,72 @@ public static class DevicesModule
             return Results.NoContent();
         }).Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status400BadRequest);
 
+        // F20 (web push): the VAPID public key the browser needs to subscribe. Non-secret — the private
+        // half lives only on the worker. Empty when web push isn't configured, so the client can tell.
+        group.MapGet("/web/vapid-key", (IConfiguration config) =>
+            Results.Ok(new VapidKeyResponse(config["WebPush:PublicKey"] ?? string.Empty)))
+            .Produces<VapidKeyResponse>();
+
+        // Register (or refresh) a browser Web Push subscription for the current user. Upsert by endpoint:
+        // the endpoint is unique to a browser profile, so if it already exists we re-point it at the
+        // caller and refresh its keys + LastSeenAt rather than inserting a duplicate.
+        group.MapPost("/web", async (RegisterWebPushRequest body, HttpContext ctx, ReadDbContext db, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(body.Endpoint) ||
+                string.IsNullOrWhiteSpace(body.P256dh) ||
+                string.IsNullOrWhiteSpace(body.Auth))
+            {
+                return Results.BadRequest();
+            }
+
+            var userId = ctx.GetUserId();
+            var now = DateTime.UtcNow;
+
+            var existing = await db.WebPushSubscriptions.FirstOrDefaultAsync(s => s.Endpoint == body.Endpoint, ct);
+            if (existing is null)
+            {
+                db.WebPushSubscriptions.Add(new WebPushSubscription
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    Endpoint = body.Endpoint,
+                    P256dh = body.P256dh,
+                    Auth = body.Auth,
+                    CreatedAt = now,
+                    LastSeenAt = now,
+                });
+            }
+            else
+            {
+                existing.UserId = userId;
+                existing.P256dh = body.P256dh;
+                existing.Auth = body.Auth;
+                existing.LastSeenAt = now;
+            }
+
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
+        }).Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status400BadRequest);
+
+        // Unregister a browser Web Push subscription (on sign-out or disable). Only removes the caller's
+        // own; an unknown or foreign endpoint is a no-op 204.
+        group.MapDelete("/web", async (string endpoint, HttpContext ctx, ReadDbContext db, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(endpoint)) return Results.BadRequest();
+
+            var userId = ctx.GetUserId();
+            await db.WebPushSubscriptions
+                .Where(s => s.Endpoint == endpoint && s.UserId == userId)
+                .ExecuteDeleteAsync(ct);
+            return Results.NoContent();
+        }).Produces(StatusCodes.Status204NoContent).Produces(StatusCodes.Status400BadRequest);
+
         return app;
     }
 }
 
 public record RegisterDeviceRequest(string Token, string? Platform);
+
+public record RegisterWebPushRequest(string Endpoint, string P256dh, string Auth);
+
+public record VapidKeyResponse(string PublicKey);

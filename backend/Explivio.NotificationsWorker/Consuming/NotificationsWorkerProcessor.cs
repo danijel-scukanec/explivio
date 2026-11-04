@@ -19,6 +19,7 @@ public sealed class NotificationsWorkerProcessor(
     IServiceScopeFactory scopeFactory,
     DomainEventDispatcher dispatcher,
     IPushNotificationSender pushSender,
+    IWebPushSender webPushSender,
     ILogger<NotificationsWorkerProcessor> logger)
     : InboxProcessor<NotificationsDbContext, InboxMessage>(client, scopeFactory, logger)
 {
@@ -49,12 +50,12 @@ public sealed class NotificationsWorkerProcessor(
         dispatcher.Dispatch(subject, body);
     }
 
-    // Best-effort push to the recipients' registered devices. Runs before the pump commits the in-app
-    // rows + inbox row, and with NullPushSender when push is off, so it's a no-op by default. Any
-    // failure is swallowed — the in-app notification is the source of truth, and throwing here would
-    // abort the inbox transaction and redeliver the message. Tokens Expo reports as DeviceNotRegistered
-    // are marked for deletion, committing with the rest of the handler's changes. Push is at-least-once:
-    // a rare concurrent redelivery can send a duplicate, which is acceptable for notifications.
+    // Best-effort push to the recipients' registered devices across both transports — Expo (mobile) and
+    // Web Push (browsers). Runs before the pump commits the in-app rows + inbox row, and with the no-op
+    // senders when push is off, so it's inert by default. Any failure is swallowed — the in-app
+    // notification is the source of truth, and throwing here would abort the inbox transaction and
+    // redeliver the message. Tokens/subscriptions the transport reports as permanently gone are pruned.
+    // Push is at-least-once: a rare concurrent redelivery can send a duplicate, acceptable for notifications.
     private async Task SendPushAsync(NotificationsDbContext db, TripNotificationRaised evt, CancellationToken ct)
     {
         try
@@ -62,29 +63,58 @@ public sealed class NotificationsWorkerProcessor(
             var recipients = evt.RecipientUserIds;
             if (recipients.Length == 0) return;
 
-            var tokens = await db.PushDevices
-                .Where(d => recipients.Contains(d.UserId))
-                .Select(d => d.ExpoPushToken)
-                .ToListAsync(ct);
-            if (tokens.Count == 0) return;
-
             var (title, pushBody) = PushMessageText.For(evt.TripName, evt.Kind, evt.Detail);
             var data = new Dictionary<string, string> { ["tripId"] = evt.TripId.ToString() };
 
-            var invalid = await pushSender.SendAsync(tokens, title, pushBody, data, ct);
-            if (invalid.Count > 0)
-            {
-                // Standalone delete (its own round trip, not the pump's SaveChanges) — pruning dead
-                // tokens is idempotent and best-effort, so it needn't share the notification's commit.
-                await db.PushDevices
-                    .Where(d => invalid.Contains(d.ExpoPushToken))
-                    .ExecuteDeleteAsync(ct);
-                logger.LogInformation("Pruned {Count} unregistered push device(s).", invalid.Count);
-            }
+            await SendExpoAsync(db, recipients, title, pushBody, data, ct);
+            await SendWebAsync(db, recipients, title, pushBody, data, ct);
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Push send failed for trip {TripId}; in-app notification still delivered.", evt.TripId);
+        }
+    }
+
+    // Expo (mobile) devices.
+    private async Task SendExpoAsync(
+        NotificationsDbContext db, Guid[] recipients,
+        string title, string body, IReadOnlyDictionary<string, string> data, CancellationToken ct)
+    {
+        var tokens = await db.PushDevices
+            .Where(d => recipients.Contains(d.UserId))
+            .Select(d => d.ExpoPushToken)
+            .ToListAsync(ct);
+        if (tokens.Count == 0) return;
+
+        var invalid = await pushSender.SendAsync(tokens, title, body, data, ct);
+        if (invalid.Count > 0)
+        {
+            // Standalone delete (its own round trip, not the pump's SaveChanges) — pruning dead
+            // tokens is idempotent and best-effort, so it needn't share the notification's commit.
+            await db.PushDevices
+                .Where(d => invalid.Contains(d.ExpoPushToken))
+                .ExecuteDeleteAsync(ct);
+            logger.LogInformation("Pruned {Count} unregistered push device(s).", invalid.Count);
+        }
+    }
+
+    // Browser Web Push subscriptions.
+    private async Task SendWebAsync(
+        NotificationsDbContext db, Guid[] recipients,
+        string title, string body, IReadOnlyDictionary<string, string> data, CancellationToken ct)
+    {
+        var subscriptions = await db.WebPushSubscriptions
+            .Where(s => recipients.Contains(s.UserId))
+            .ToListAsync(ct);
+        if (subscriptions.Count == 0) return;
+
+        var invalid = await webPushSender.SendAsync(subscriptions, title, body, data, ct);
+        if (invalid.Count > 0)
+        {
+            await db.WebPushSubscriptions
+                .Where(s => invalid.Contains(s.Endpoint))
+                .ExecuteDeleteAsync(ct);
+            logger.LogInformation("Pruned {Count} expired web push subscription(s).", invalid.Count);
         }
     }
 }

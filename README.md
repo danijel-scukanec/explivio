@@ -102,14 +102,14 @@ This is an evolving portfolio project. The **committed target** — the foundati
 | Storage | Trip **cover photos** in **Azure Blob Storage** (Azurite emulator locally), streamed through the API behind trip authorization |
 | Web | Trips (with **status lifecycle** badge + filter + **cover photos**), Itinerary (day-by-day + AI generate + **map**), Budget, Google Places search; map via **Leaflet + OpenStreetMap** (keyless) |
 | Export | Itinerary to **iCalendar (.ics)** + **PDF** (QuestPDF), plus a share-token **calendar subscription feed** for Google/Outlook/Apple sync |
-| Notifications | **In-app** notifications of trip changes to other members, delivered through the Notifications Worker (outbox → Service Bus → read model); 🔔 bell + unread badge on web + mobile (mobile **push** is a follow-up) |
+| Notifications | **In-app** notifications of trip changes to other members, delivered through the Notifications Worker (outbox → Service Bus → read model); 🔔 bell + unread badge on web + mobile, plus OS-level **push** — **mobile** (Expo + FCM) and **browser** (Web Push: service worker + VAPID) — fanned out from the worker (live delivery tests pending) |
 | Auth | **Microsoft Entra External ID** sign-in — bearer-token validation on the API; web (MSAL) + mobile (expo-auth-session), with a **dev-identity fallback** (env-gated, so local work needs no tenant) |
 | AI ops | **Token/cost telemetry**, a **semantic cache**, and **Azure AI Content Safety** moderation wrapped around every AI call as `IChatClient` middleware (metrics on the Aspire dashboard + an **AI usage** page), plus an **eval harness** (`Explivio.Evals`) that scores real-model output |
 | Quality | Testcontainers integration tests + GitHub Actions CI |
 
 **Roadmap (planned, not yet built)**
 
-Push notifications (mobile/web).
+iOS push (needs an Apple Developer account for APNs / Safari PWA web push).
 
 ---
 
