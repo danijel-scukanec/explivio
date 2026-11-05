@@ -9,12 +9,14 @@
 # Easiest: run `azd pipeline config --provider github` once — it creates the Azure OIDC app + federated
 # credential and sets AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID. Then DELETE the
 # azure-dev.yml it generates (that one is push-triggered) and keep this file. Finally add the app-config
-# secrets/vars below. No AI key is needed — the app uses its managed identity for Azure OpenAI.
+# values below. Everything is a repo VARIABLE (not a secret): OIDC needs no password, and the app uses
+# its managed identity for Azure OpenAI, so there is no API key to protect.
 #
-#   Repo VARIABLES:  AZURE_ENV_NAME (e.g. explivio), AZURE_LOCATION (e.g. swedencentral)
-#   Repo SECRETS:    AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID,
-#                    AI_ENDPOINT, AI_MODEL, AI_EMBEDDING_ENDPOINT, AI_EMBEDDING_MODEL,
-#                    AI_OPENAI_RESOURCE_ID, ENTRA_AUTHORITY, ENTRA_AUDIENCE
+#   Repo VARIABLES (Settings > Secrets and variables > Actions > Variables):
+#     AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID  (set by `azd pipeline config`)
+#     AZURE_ENV_NAME (e.g. explivio), AZURE_LOCATION (e.g. swedencentral)
+#     AI_ENDPOINT, AI_MODEL, AI_EMBEDDING_ENDPOINT, AI_EMBEDDING_MODEL, AI_OPENAI_RESOURCE_ID,
+#     ENTRA_AUTHORITY, ENTRA_AUDIENCE
 
 name: Deploy to Azure (manual)
 
@@ -36,9 +38,11 @@ jobs:
     if: ${{ github.event.inputs.confirm == 'deploy' }}
     runs-on: ubuntu-latest
     env:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      # azd pipeline config stores these as repo VARIABLES (OIDC needs no secret); the app config
+      # (AI/Entra) is non-sensitive too (managed identity, not a key), so everything is a variable.
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
     steps:
@@ -64,18 +68,18 @@ jobs:
             --federated-credential-provider "github" \
             --tenant-id "$AZURE_TENANT_ID"
 
-      - name: Seed azd environment (config comes from repo secrets/vars, not the repo)
+      - name: Seed azd environment (config comes from repo variables, not the repo)
         run: |
           azd env new "$AZURE_ENV_NAME" \
             --subscription "$AZURE_SUBSCRIPTION_ID" \
             --location "$AZURE_LOCATION" || azd env select "$AZURE_ENV_NAME"
-          azd env set AI_ENDPOINT            "${{ secrets.AI_ENDPOINT }}"
-          azd env set AI_MODEL               "${{ secrets.AI_MODEL }}"
-          azd env set AI_EMBEDDING_ENDPOINT  "${{ secrets.AI_EMBEDDING_ENDPOINT }}"
-          azd env set AI_EMBEDDING_MODEL     "${{ secrets.AI_EMBEDDING_MODEL }}"
-          azd env set AI_OPENAI_RESOURCE_ID  "${{ secrets.AI_OPENAI_RESOURCE_ID }}"
-          azd env set ENTRA_AUTHORITY        "${{ secrets.ENTRA_AUTHORITY }}"
-          azd env set ENTRA_AUDIENCE         "${{ secrets.ENTRA_AUDIENCE }}"
+          azd env set AI_ENDPOINT            "${{ vars.AI_ENDPOINT }}"
+          azd env set AI_MODEL               "${{ vars.AI_MODEL }}"
+          azd env set AI_EMBEDDING_ENDPOINT  "${{ vars.AI_EMBEDDING_ENDPOINT }}"
+          azd env set AI_EMBEDDING_MODEL     "${{ vars.AI_EMBEDDING_MODEL }}"
+          azd env set AI_OPENAI_RESOURCE_ID  "${{ vars.AI_OPENAI_RESOURCE_ID }}"
+          azd env set ENTRA_AUTHORITY        "${{ vars.ENTRA_AUTHORITY }}"
+          azd env set ENTRA_AUDIENCE         "${{ vars.ENTRA_AUDIENCE }}"
 
       - name: Provision + deploy (azd up)
         run: azd up --no-prompt
