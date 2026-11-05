@@ -102,7 +102,7 @@ This is an evolving portfolio project. The **committed target** — the foundati
 | Storage | Trip **cover photos** in **Azure Blob Storage** (Azurite emulator locally), streamed through the API behind trip authorization |
 | Web | Trips (with **status lifecycle** badge + filter + **cover photos**), Itinerary (day-by-day + AI generate + **map**), Budget, Google Places search; map via **Leaflet + OpenStreetMap** (keyless) |
 | Export | Itinerary to **iCalendar (.ics)** + **PDF** (QuestPDF), plus a share-token **calendar subscription feed** for Google/Outlook/Apple sync |
-| Notifications | **In-app** notifications of trip changes to other members, delivered through the Notifications Worker (outbox → Service Bus → read model); 🔔 bell + unread badge on web + mobile, plus OS-level **push** — **mobile** (Expo + FCM) and **browser** (Web Push: service worker + VAPID) — fanned out from the worker (live delivery tests pending) |
+| Notifications | **In-app** notifications of trip changes to other members, delivered through the Notifications Worker (outbox → Service Bus → read model); 🔔 bell + unread badge on web + mobile, plus OS-level **push** — **mobile** (Expo + FCM) and **browser** (Web Push: service worker + VAPID) — fanned out from the worker, verified on-device (Android push, browser Web Push) |
 | Auth | **Microsoft Entra External ID** sign-in — bearer-token validation on the API; web (MSAL) + mobile (expo-auth-session), with a **dev-identity fallback** (env-gated, so local work needs no tenant) |
 | AI ops | **Token/cost telemetry**, a **semantic cache**, and **Azure AI Content Safety** moderation wrapped around every AI call as `IChatClient` middleware (metrics on the Aspire dashboard + an **AI usage** page), plus an **eval harness** (`Explivio.Evals`) that scores real-model output |
 | Quality | Testcontainers integration tests + GitHub Actions CI |
@@ -180,28 +180,26 @@ dotnet run --project backend/Explivio.Evals
 
 ## Deploying to Azure
 
-The app deploys to **Azure Container Apps** with the **Azure Developer CLI (`azd`)**, driven entirely by the Aspire model. `azd` reads the AppHost's deployment manifest and **generates the infrastructure itself** — a Container App for the API and each worker, plus Azure SQL, Service Bus, Application Insights, and the managed-identity role assignments — so there is **no hand-written Bicep to maintain**. See [ADR 0005](docs/adr/0005-bicep-over-terraform.md) for why Bicep + azd over Terraform.
+The app deploys to **Azure Container Apps** with the **Azure Developer CLI (`azd`)**, driven by the Aspire model — a Container App for the API and each worker, plus Azure SQL, Cosmos DB, Service Bus, Storage, Application Insights, and the managed-identity role assignments. The Bicep was **generated** from the Aspire manifest (`azd infra gen`) and is **committed under `infra/`** as the source of truth, so it can be hand-tuned where needed (e.g. the Azure SQL managed-identity bootstrap script and the Cosmos vector container). See [ADR 0005](docs/adr/0005-bicep-over-terraform.md) for why Bicep + azd over Terraform.
 
 **Prerequisites:** the [Azure Developer CLI](https://aka.ms/install-azd), the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli), and an Azure subscription.
 
 ```bash
-# authenticate
-azd auth login
-az login
+azd auth login && az login     # az is used by the post-deploy hook
 
-# provision infrastructure + build and deploy every service
-# (prompts once for subscription, region, and an environment name)
+# provision infrastructure + build and deploy every service, then tear down
 azd up
-
-# ... demo it, then tear everything down to stop billing
-azd down
+azd down --purge
 ```
 
-- **Deploy-on-demand** — the app is meant to be brought up with `azd up` and removed with `azd down`, not kept always-on; `azd down` deletes the resources so billing stops.
-- **Passwordless** — services authenticate to SQL and Service Bus with a managed identity (no secrets in config); `azd` provisions the required role assignments.
-- **Schema on startup** — the relational schema and read model are migrated automatically when a service starts, so a fresh deployment comes up ready with no manual migration step.
-- **Observability in the cloud** — the same OpenTelemetry that feeds the Aspire dashboard locally flows to **Application Insights** once deployed.
-- **Inspect the generated infra** — run `azd infra synth` to write the generated Bicep into the repo.
+Or deploy from GitHub without a local toolchain: **Actions → "Deploy to Azure (manual)" → Run workflow** (a `workflow_dispatch` pipeline that runs `azd up` via OIDC — deliberately manual, never on push). One-time setup is in [`.github/workflows/README-deploy.md`](.github/workflows/README-deploy.md).
+
+- **Deploy-on-demand** — brought up with `azd up` and removed with `azd down --purge`, not kept always-on; at rest it costs ~€0 (only the separate Azure OpenAI resource bills per-token).
+- **One URL, no CORS** — the React SPA is built into the API's `wwwroot` (an azd `prepackage` hook) and served by the API, so the whole app is a single Container App + URL.
+- **Passwordless everywhere** — services reach SQL, Cosmos, Service Bus, Storage **and Azure OpenAI** with a managed identity; there are **no secrets in the cloud** (`azd` + a post-deploy hook provision the role assignments and non-secret config).
+- **Schema on startup** — the relational schema and read model migrate automatically when a service starts; no manual migration step.
+- **Observability in the cloud** — the same OpenTelemetry that feeds the Aspire dashboard locally flows to **Application Insights**.
+- **Sign-in after deploy** — add the deployed URL as a redirect URI on the SPA app registration in the Entra External ID tenant (Authentication → Single-page application).
 
 ---
 
@@ -218,7 +216,7 @@ explivio/
     Explivio.*.Tests/        unit + Testcontainers integration tests
   client/            npm workspace
     frontend/          React + Vite (TypeScript)
-    mobile/            React Native + Expo (scaffold)
+    mobile/            React Native + Expo (SDK 58) — full feature parity with web
     shared/            types generated from OpenAPI + shared utils
   azure.yaml         azd config (infrastructure is generated from the Aspire model)
   docs/              ARCHITECTURE.md · FEATURES.md · adr/
