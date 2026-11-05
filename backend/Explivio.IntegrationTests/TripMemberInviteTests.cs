@@ -50,14 +50,17 @@ public sealed class TripMemberInviteTests(ExplivioApiFactory factory) : IClassFi
         var tripId = await CreateTripAsync(ct);
         var bobId = await RegisterUserAsync("bob@example.com", "Bob", ct);
 
-        // Owner invites Bob by email (different casing — resolution is case-insensitive).
+        // Owner invites Bob by email (different casing — resolution is case-insensitive). Bob has an
+        // account, so the invite adds him straight away (not pending).
         var invite = await Send(HttpMethod.Post, $"/v1/trips/{tripId}/members/invite", Owner,
             new { email = "BOB@example.com", role = "Editor" }, ct);
         Assert.Equal(HttpStatusCode.OK, invite.StatusCode);
-        var member = await invite.Content.ReadFromJsonAsync<MemberDto>(ct);
-        Assert.Equal(bobId, member!.UserId);
-        Assert.Equal("Editor", member.Role);
-        Assert.Equal("bob@example.com", member.Email);
+        var result = await invite.Content.ReadFromJsonAsync<InviteResultDto>(ct);
+        Assert.False(result!.Pending);
+        Assert.NotNull(result.Member);
+        Assert.Equal(bobId, result.Member!.UserId);
+        Assert.Equal("Editor", result.Member.Role);
+        Assert.Equal("bob@example.com", result.Member.Email);
 
         // Bob can now read the trip and (as Editor) add an activity.
         var get = await Send(HttpMethod.Get, $"/v1/trips/{tripId}", bobId, null, ct);
@@ -68,13 +71,25 @@ public sealed class TripMemberInviteTests(ExplivioApiFactory factory) : IClassFi
     }
 
     [Fact]
-    public async Task Invite_unknown_email_is_404()
+    public async Task Invite_unknown_email_records_a_pending_invite()
     {
         var ct = TestContext.Current.CancellationToken;
         var tripId = await CreateTripAsync(ct);
+
+        // F15: an email with no account doesn't 404 — it records a pending invite, claimed when that
+        // person first signs in.
         var invite = await Send(HttpMethod.Post, $"/v1/trips/{tripId}/members/invite", Owner,
             new { email = "nobody@example.com", role = "Viewer" }, ct);
-        Assert.Equal(HttpStatusCode.NotFound, invite.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, invite.StatusCode);
+        var result = await invite.Content.ReadFromJsonAsync<InviteResultDto>(ct);
+        Assert.True(result!.Pending);
+        Assert.Null(result.Member);
+
+        // The pending invite shows up on the trip's invite list.
+        var invites = await Send(HttpMethod.Get, $"/v1/trips/{tripId}/invites", Owner, null, ct);
+        Assert.Equal(HttpStatusCode.OK, invites.StatusCode);
+        var list = await invites.Content.ReadFromJsonAsync<List<TripInviteDto>>(ct);
+        Assert.Contains(list!, i => i.Email == "nobody@example.com");
     }
 
     [Fact]
@@ -96,5 +111,7 @@ public sealed class TripMemberInviteTests(ExplivioApiFactory factory) : IClassFi
 
     private sealed record CreatedDto(Guid Id);
     private sealed record MemberDto(Guid UserId, string Role, string? DisplayName, string? Email);
+    private sealed record InviteResultDto(bool Pending, MemberDto? Member);
+    private sealed record TripInviteDto(Guid Id, string Email);
     private sealed record RoleDto(string Role);
 }

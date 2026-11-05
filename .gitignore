@@ -10,6 +10,9 @@ obj/
 aspire-manifest.json
 *.module.bicep
 
+# The built React SPA copied into the API at deploy time by the azd prepackage hook (build artifact)
+backend/Explivio.API/wwwroot/
+
 # Node
 node_modules/
 dist/
