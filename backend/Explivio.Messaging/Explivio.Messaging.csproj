@@ -10,8 +10,8 @@
     <!-- BackgroundService, dependency injection and logging abstractions. -->
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
 
-    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.8" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
   </ItemGroup>
 
 </Project>
