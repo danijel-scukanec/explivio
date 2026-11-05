@@ -1,8 +1,8 @@
 # Expo HAS CHANGED
 
-Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any code.
+Read the exact versioned docs at https://docs.expo.dev/versions/v58.0.0/ before writing any code.
 
-This app is on **Expo SDK 57** (React Native 0.86, React 19.2). Navigation is **Expo Router**
+This app is on **Expo SDK 58** (React Native 0.88, React 19.3). Navigation is **Expo Router**
 (file-based, routes live in `app/`). Shared types AND utils come from `@explivio/shared`, which ships
 compiled JS (`dist/`) so Metro consumes it like any other package.
 

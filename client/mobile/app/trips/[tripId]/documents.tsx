@@ -96,7 +96,7 @@ export default function DocumentsScreen() {
           data={documents}
           keyExtractor={d => d.id}
           contentContainerStyle={styles.list}
-          ListHeaderComponent={error ? <Text style={[styles.error, styles.listError]}>{error}</Text> : null}
+          ListHeaderComponent={error ? <Text style={[styles.error, styles.listError]}>{error}</Text> : undefined}
           renderItem={({ item: doc }) => (
             <View style={styles.card}>
               <Text style={styles.icon}>{fileIcon(doc.contentType)}</Text>

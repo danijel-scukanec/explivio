@@ -54,7 +54,7 @@ if (builder.ExecutionContext.IsPublishMode)
 else if (useCosmosEmulator)
 {
 #pragma warning disable ASPIRECOSMOSDB001
-    cosmos = builder.AddAzureCosmosDB("cosmos").RunAsPreviewEmulator();
+    cosmos = builder.AddAzureCosmosDB("cosmos").RunAsEmulator();
 #pragma warning restore ASPIRECOSMOSDB001
 }
 
