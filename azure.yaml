@@ -42,3 +42,70 @@ hooks:
         Remove-Item -Recurse -Force backend/Explivio.API/wwwroot -ErrorAction SilentlyContinue
         New-Item -ItemType Directory -Force backend/Explivio.API/wwwroot | Out-Null
         Copy-Item -Recurse client/frontend/dist/* backend/Explivio.API/wwwroot/
+
+  # After the containers deploy, apply the runtime config that is NOT carried in the Aspire manifest:
+  #   - Grant the app's user-assigned managed identity the "Cognitive Services OpenAI User" role on the
+  #     external, user-owned Azure OpenAI account, then set endpoint/model (AI:*) with NO API key.
+  #   - Entra bearer-token validation (Entra:*) on the api.
+  #   - Ensure the api ingress is external (public), reinforcing WithExternalHttpEndpoints().
+  # Values come from the azd environment (`azd env set ...`), which lives in the gitignored
+  # .azure/<env>/.env — so no secret or tenant value is ever committed. If AI_ENDPOINT is unset the
+  # hook no-ops, so a deploy without AI still succeeds.
+  postdeploy:
+    posix:
+      shell: sh
+      continueOnError: false
+      run: |
+        set -e
+        RG="${AZURE_RESOURCE_GROUP:-rg-$AZURE_ENV_NAME}"
+        if [ -z "$AI_ENDPOINT" ]; then
+          echo "postdeploy: AI_ENDPOINT not set in azd env - skipping AI/Entra config."
+          exit 0
+        fi
+        # Let the app's managed identity read the external Azure OpenAI account (idempotent).
+        if [ -n "$AI_OPENAI_RESOURCE_ID" ]; then
+          MI_PRINCIPAL=$(az containerapp show -g "$RG" -n api \
+            --query "identity.userAssignedIdentities.*.principalId | [0]" -o tsv)
+          az role assignment create --assignee-object-id "$MI_PRINCIPAL" \
+            --assignee-principal-type ServicePrincipal \
+            --role "Cognitive Services OpenAI User" \
+            --scope "$AI_OPENAI_RESOURCE_ID" -o none 2>/dev/null || true
+        fi
+        for app in api aiworker; do
+          az containerapp update -g "$RG" -n "$app" --set-env-vars \
+            "AI__Endpoint=$AI_ENDPOINT" \
+            "AI__Model=$AI_MODEL" \
+            "AI__EmbeddingEndpoint=$AI_EMBEDDING_ENDPOINT" \
+            "AI__EmbeddingModel=$AI_EMBEDDING_MODEL" -o none
+        done
+        az containerapp update -g "$RG" -n api --set-env-vars \
+          "Entra__Authority=$ENTRA_AUTHORITY" \
+          "Entra__Audience=$ENTRA_AUDIENCE" -o none
+        az containerapp ingress update -g "$RG" -n api --type external -o none || true
+        echo "postdeploy: applied AI + Entra config (api, aiworker); api ingress external."
+    windows:
+      shell: pwsh
+      continueOnError: false
+      run: |
+        $RG = if ($env:AZURE_RESOURCE_GROUP) { $env:AZURE_RESOURCE_GROUP } else { "rg-$($env:AZURE_ENV_NAME)" }
+        if (-not $env:AI_ENDPOINT) {
+          Write-Host "postdeploy: AI_ENDPOINT not set in azd env - skipping AI/Entra config."
+          exit 0
+        }
+        if ($env:AI_OPENAI_RESOURCE_ID) {
+          $MI = az containerapp show -g $RG -n api --query "identity.userAssignedIdentities.*.principalId | [0]" -o tsv
+          az role assignment create --assignee-object-id $MI --assignee-principal-type ServicePrincipal `
+            --role "Cognitive Services OpenAI User" --scope $env:AI_OPENAI_RESOURCE_ID -o none 2>$null
+        }
+        foreach ($app in @("api","aiworker")) {
+          az containerapp update -g $RG -n $app --set-env-vars `
+            "AI__Endpoint=$($env:AI_ENDPOINT)" `
+            "AI__Model=$($env:AI_MODEL)" `
+            "AI__EmbeddingEndpoint=$($env:AI_EMBEDDING_ENDPOINT)" `
+            "AI__EmbeddingModel=$($env:AI_EMBEDDING_MODEL)" -o none
+        }
+        az containerapp update -g $RG -n api --set-env-vars `
+          "Entra__Authority=$($env:ENTRA_AUTHORITY)" `
+          "Entra__Audience=$($env:ENTRA_AUDIENCE)" -o none
+        az containerapp ingress update -g $RG -n api --type external -o none
+        Write-Host "postdeploy: applied AI + Entra config (api, aiworker); api ingress external."

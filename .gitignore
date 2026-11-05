@@ -6,9 +6,11 @@ obj/
 .vs/
 *.nupkg
 
-# Aspire / azd generated artifacts (regenerated on demand; azd regenerates its own on deploy)
+# Aspire / azd: the live deployment manifest is ephemeral and regenerated on demand.
+# NOTE: infra/ (incl. *.module.bicep) IS committed and is the source of truth for the Azure deploy.
+# We generated it with `azd infra gen` to hand-fix the Azure SQL bootstrap script (upstream module bug)
+# and to declare the Cosmos vector container, so it must not be ignored. See docs/adr.
 aspire-manifest.json
-*.module.bicep
 
 # The built React SPA copied into the API at deploy time by the azd prepackage hook (build artifact)
 backend/Explivio.API/wwwroot/

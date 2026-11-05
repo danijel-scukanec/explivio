@@ -88,6 +88,9 @@ readModelSubscription.Resource.MaxDeliveryCount = 5;
 // from the AppHost; the injected connection strings replace the appsettings values in every
 // environment.
 var api = builder.AddProject<Projects.Explivio_API>("api")
+    // Publicly reachable: the API also serves the React SPA, so its ingress must be external when
+    // deployed to Container Apps (Aspire defaults projects to internal-only ingress).
+    .WithExternalHttpEndpoints()
     .WithReference(database)
     .WaitFor(database)
     .WithReference(serviceBus)

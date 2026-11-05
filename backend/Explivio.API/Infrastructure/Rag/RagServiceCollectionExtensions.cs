@@ -1,4 +1,7 @@
 using System.ClientModel;
+using Azure.AI.OpenAI;
+using Azure.Identity;
+using Explivio.API.Infrastructure.Ai;
 using Microsoft.Extensions.AI;
 using OpenAI;
 
@@ -35,13 +38,21 @@ public static class RagServiceCollectionExtensions
         var apiKey = configuration["AI:EmbeddingApiKey"] ?? configuration["AI:ApiKey"];
         var model = configuration["AI:EmbeddingModel"] ?? "text-embedding-3-small";
 
-        if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(apiKey))
+        if (string.IsNullOrWhiteSpace(endpoint))
         {
             return new FakePlaceEmbeddingGenerator();
         }
 
-        var options = new OpenAIClientOptions { Endpoint = new Uri(endpoint) };
-        var client = new OpenAIClient(new ApiKeyCredential(apiKey), options);
-        return client.GetEmbeddingClient(model).AsIEmbeddingGenerator();
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            var options = new OpenAIClientOptions { Endpoint = new Uri(endpoint) };
+            var client = new OpenAIClient(new ApiKeyCredential(apiKey), options);
+            return client.GetEmbeddingClient(model).AsIEmbeddingGenerator();
+        }
+
+        // No key: Azure OpenAI with the hosting identity (managed identity in Container Apps).
+        var azure = new AzureOpenAIClient(
+            AiServiceCollectionExtensions.NormalizeAzureEndpoint(endpoint), new DefaultAzureCredential());
+        return azure.GetEmbeddingClient(model).AsIEmbeddingGenerator();
     }
 }
