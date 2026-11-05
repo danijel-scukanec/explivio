@@ -1,6 +1,8 @@
 using System.ClientModel;
 using Azure;
 using Azure.AI.ContentSafety;
+using Azure.AI.OpenAI;
+using Azure.Identity;
 using Explivio.API.Infrastructure.AiOps;
 using Explivio.API.Infrastructure.Features;
 using Microsoft.Extensions.AI;
@@ -55,14 +57,9 @@ public static class AiServiceCollectionExtensions
         // Build the pipeline. First .Use is outermost, so: usage tracking (sees the final response) →
         // content safety (blocks before anything) → semantic cache (serves before the model) →
         // OpenTelemetry (measures the real call) → function invocation → the inner client.
-        var builder = string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(apiKey)
+        var builder = string.IsNullOrWhiteSpace(endpoint)
             ? services.AddChatClient(new FakeItineraryChatClient())
-            : services.AddChatClient(_ =>
-            {
-                var options = new OpenAIClientOptions { Endpoint = new Uri(endpoint) };
-                var client = new OpenAIClient(new ApiKeyCredential(apiKey), options);
-                return client.GetChatClient(model).AsIChatClient();
-            });
+            : services.AddChatClient(_ => CreateChatClient(endpoint!, apiKey, model));
 
         builder.Use((inner, sp) => new UsageTrackingChatClient(
             inner, sp.GetRequiredService<IAiUsageTracker>(), pricing, model));
@@ -85,5 +82,35 @@ public static class AiServiceCollectionExtensions
         builder.UseFunctionInvocation();
 
         return services;
+    }
+
+    // A real chat client: API key when one is configured (local dev / non-Azure providers), otherwise
+    // Azure OpenAI with the hosting identity (managed identity in Container Apps — no secret). The
+    // endpoint value is shared between both; AzureOpenAIClient wants the account base URL, so the
+    // OpenAI-compatible "/openai/v1" suffix (if present) is trimmed off.
+    private static IChatClient CreateChatClient(string endpoint, string? apiKey, string model)
+    {
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            var options = new OpenAIClientOptions { Endpoint = new Uri(endpoint) };
+            var client = new OpenAIClient(new ApiKeyCredential(apiKey), options);
+            return client.GetChatClient(model).AsIChatClient();
+        }
+
+        var azure = new AzureOpenAIClient(NormalizeAzureEndpoint(endpoint), new DefaultAzureCredential());
+        return azure.GetChatClient(model).AsIChatClient();
+    }
+
+    // Azure OpenAI's native client expects the account root (https://<name>.openai.azure.com/), not the
+    // "/openai/v1" OpenAI-compatibility path the key-based OpenAIClient uses.
+    internal static Uri NormalizeAzureEndpoint(string endpoint)
+    {
+        var trimmed = endpoint.TrimEnd('/');
+        if (trimmed.EndsWith("/openai/v1", StringComparison.OrdinalIgnoreCase))
+        {
+            trimmed = trimmed[..^"/openai/v1".Length];
+        }
+
+        return new Uri(trimmed + "/");
     }
 }

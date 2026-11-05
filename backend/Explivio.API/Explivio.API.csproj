@@ -13,6 +13,11 @@
     <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="13.4.6" />
     <PackageReference Include="Aspire.Microsoft.Azure.Cosmos" Version="13.4.6" />
     <PackageReference Include="Azure.AI.ContentSafety" Version="1.0.0" />
+    <!-- F12/F14: Azure OpenAI with managed identity (no API key in the cloud). Azure.AI.OpenAI's
+         AzureOpenAIClient takes a TokenCredential and auto-refreshes; Azure.Identity provides
+         DefaultAzureCredential, which uses the container's user-assigned identity (AZURE_CLIENT_ID). -->
+    <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
