@@ -284,6 +284,19 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors();
 
+// Serve the built React SPA from the same origin as the API. At deploy time the azd prepackage hook
+// builds the web app (with a relative API base) into wwwroot, so the deployed app is a SINGLE container
+// and URL — no CORS and no API-URL to reconfigure on each spin-up. Placed before auth/identity so static
+// assets short-circuit without touching the database. Guarded on wwwroot existing, because
+// UseStaticFiles/UseDefaultFiles throw at startup when it doesn't — which is the normal case locally,
+// in the integration tests, and in prod before the hook runs (there the web app is served by Vite).
+var hasWebRoot = !string.IsNullOrEmpty(app.Environment.WebRootPath) && Directory.Exists(app.Environment.WebRootPath);
+if (hasWebRoot)
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+}
+
 if (app.Environment.IsDevelopment())
 {
     // Inject a fake identity so RequireAuthorization() passes without a real B2C token.
@@ -361,6 +374,12 @@ app.MapHub<Explivio.API.Modules.Itinerary.Assistant.TripAssistantHub>("/hubs/tri
 
 // F29: the AI trip-recap hub — streams the recap narrative and persists it.
 app.MapHub<Explivio.API.Modules.Trips.Recap.TripRecapHub>("/hubs/trip-recap");
+
+// SPA client-side routing: any request that didn't match an API route, hub or static file falls back to
+// index.html so deep links (e.g. /trips/123/itinerary) load the app shell. Only mapped when the SPA was
+// built into wwwroot (deploy); absent locally/in tests where there's no wwwroot.
+if (hasWebRoot)
+    app.MapFallbackToFile("index.html");
 
 app.Run();
 
