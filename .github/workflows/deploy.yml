@@ -1,0 +1,84 @@
+# Manual, push-button deploy to Azure Container Apps via azd.
+#
+# This is deliberately NOT triggered on push: the stack costs money while it is up, so you deploy on
+# demand (Actions tab -> "Deploy to Azure (manual)" -> Run workflow -> type "deploy"), and tear it down
+# with `azd down --purge` when you are done. CI (build + test) still runs automatically on every PR;
+# only the deploy is manual.
+#
+# ── One-time setup (see .github/workflows/README-deploy.md) ──────────────────────────────────────────
+# Easiest: run `azd pipeline config --provider github` once — it creates the Azure OIDC app + federated
+# credential and sets AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID. Then DELETE the
+# azure-dev.yml it generates (that one is push-triggered) and keep this file. Finally add the app-config
+# secrets/vars below. No AI key is needed — the app uses its managed identity for Azure OpenAI.
+#
+#   Repo VARIABLES:  AZURE_ENV_NAME (e.g. explivio), AZURE_LOCATION (e.g. swedencentral)
+#   Repo SECRETS:    AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID,
+#                    AI_ENDPOINT, AI_MODEL, AI_EMBEDDING_ENDPOINT, AI_EMBEDDING_MODEL,
+#                    AI_OPENAI_RESOURCE_ID, ENTRA_AUTHORITY, ENTRA_AUDIENCE
+
+name: Deploy to Azure (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm provisioning + deploying to Azure (this costs money).'
+        required: true
+        default: ''
+
+permissions:
+  id-token: write   # request the OIDC token used to log in to Azure (no stored Azure password)
+  contents: read
+
+jobs:
+  deploy:
+    # Guard: only run when the operator explicitly typed "deploy".
+    if: ${{ github.event.inputs.confirm == 'deploy' }}
+    runs-on: ubuntu-latest
+    env:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
+      AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install azd
+        uses: Azure/setup-azd@v2
+
+      - name: Log in to Azure (OIDC federated credential)
+        run: |
+          azd auth login \
+            --client-id "$AZURE_CLIENT_ID" \
+            --federated-credential-provider "github" \
+            --tenant-id "$AZURE_TENANT_ID"
+
+      - name: Seed azd environment (config comes from repo secrets/vars, not the repo)
+        run: |
+          azd env new "$AZURE_ENV_NAME" \
+            --subscription "$AZURE_SUBSCRIPTION_ID" \
+            --location "$AZURE_LOCATION" || azd env select "$AZURE_ENV_NAME"
+          azd env set AI_ENDPOINT            "${{ secrets.AI_ENDPOINT }}"
+          azd env set AI_MODEL               "${{ secrets.AI_MODEL }}"
+          azd env set AI_EMBEDDING_ENDPOINT  "${{ secrets.AI_EMBEDDING_ENDPOINT }}"
+          azd env set AI_EMBEDDING_MODEL     "${{ secrets.AI_EMBEDDING_MODEL }}"
+          azd env set AI_OPENAI_RESOURCE_ID  "${{ secrets.AI_OPENAI_RESOURCE_ID }}"
+          azd env set ENTRA_AUTHORITY        "${{ secrets.ENTRA_AUTHORITY }}"
+          azd env set ENTRA_AUDIENCE         "${{ secrets.ENTRA_AUDIENCE }}"
+
+      - name: Provision + deploy (azd up)
+        run: azd up --no-prompt
+
+      - name: Show the app URL
+        run: azd show --output json | python3 -c "import sys,json; d=json.load(sys.stdin); [print(s.get('endpoint','')) for s in d.get('services',{}).values()] if isinstance(d.get('services'),dict) else None" || true
