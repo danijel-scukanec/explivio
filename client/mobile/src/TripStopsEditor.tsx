@@ -2,8 +2,9 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import { useTranslation } from 'react-i18next';
 import type { TripStopInput } from '@explivio/shared';
 import { PlaceSearch } from './PlaceSearch';
-import { formStyles as s } from './formStyles';
-import { theme } from './theme';
+import { makeFormStyles } from './formStyles';
+import type { Theme } from './theme';
+import { useTheme, useThemedStyles } from './useTheme';
 
 interface Props {
   stops: TripStopInput[];
@@ -23,6 +24,9 @@ const EMPTY_STOP: TripStopInput = {
 // new-trip and edit-route screens. Mirrors the web TripStopsEditor.
 export function TripStopsEditor({ stops, onChange }: Props) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const s = useThemedStyles(makeFormStyles);
+  const styles = useThemedStyles(makeStyles);
   const update = (index: number, patch: Partial<TripStopInput>) =>
     onChange(stops.map((stop, i) => (i === index ? { ...stop, ...patch } : stop)));
 
@@ -108,7 +112,7 @@ export function TripStopsEditor({ stops, onChange }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   wrap: { gap: 10 },
   card: { borderWidth: 1, borderColor: theme.border, borderRadius: 12, padding: 12, gap: 10, backgroundColor: theme.accentBg },
   head: { flexDirection: 'row', alignItems: 'center', gap: 8 },

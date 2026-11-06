@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { theme } from './theme';
+import type { Theme } from './theme';
+import { useTheme, useThemedStyles } from './useTheme';
 
 // Native place search over the SAME Google Places (New) API the web client uses — called via REST
 // (the web's <gmp-place-autocomplete> is an HTML element that can't run in React Native). Autocomplete
@@ -25,6 +26,8 @@ interface Props {
 }
 
 export function PlaceSearch({ onSelect }: Props) {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -110,7 +113,7 @@ export function PlaceSearch({ onSelect }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: theme.border,

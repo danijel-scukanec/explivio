@@ -5,8 +5,9 @@ import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import type { AddExpenseRequest, ExpenseCategory, ExpenseShareInput, TripMember } from '@explivio/shared';
 import { addExpense, getTrip, getTripMembers, scanReceipt, uploadReceipt } from '../../../src/api';
-import { formStyles as s } from '../../../src/formStyles';
-import { theme } from '../../../src/theme';
+import { makeFormStyles } from '../../../src/formStyles';
+import type { Theme } from '../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 const CATEGORIES: ExpenseCategory[] = ['Transport', 'Accommodation', 'Food', 'Activities', 'Shopping', 'Other'];
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'AUD', 'CAD'];
@@ -25,6 +26,9 @@ function equalShares(amount: number, n: number): number[] {
 }
 
 export default function AddExpenseScreen() {
+  const theme = useTheme();
+  const s = useThemedStyles(makeFormStyles);
+  const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
@@ -288,7 +292,7 @@ export default function AddExpenseScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   scanBtn: { borderWidth: 1, borderColor: theme.accent, borderRadius: 10, paddingVertical: 11, alignItems: 'center' },
   scanBtnText: { color: theme.accent, fontWeight: '700' },
   scanNote: { color: theme.text, fontSize: 13, marginTop: -2 },

@@ -9,7 +9,9 @@ import {
   getTrip, getTripMembers, getMemberRole, getTripInvites,
   inviteMember, cancelInvite, setMemberRole, removeMember,
 } from '../../../src/api';
-import { theme } from '../../../src/theme';
+import type { Theme } from '../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
+import { confirmDelete } from '../../../src/confirm';
 
 const ROLES: TripRole[] = ['Owner', 'Editor', 'Viewer'];
 
@@ -18,6 +20,8 @@ const ROLES: TripRole[] = ['Owner', 'Editor', 'Viewer'];
 // enforces the same rules (incl. the last-owner guard) and its error title is surfaced here.
 export default function MembersScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [tripName, setTripName] = useState('');
   const [members, setMembers] = useState<TripMember[]>([]);
@@ -99,7 +103,7 @@ export default function MembersScreen() {
                   />
                   <TouchableOpacity
                     disabled={busy}
-                    onPress={() => run(() => removeMember(tripId!, m.userId), 'members.removeError')}
+                    onPress={() => confirmDelete(t, () => run(() => removeMember(tripId!, m.userId), 'members.removeError'))}
                     hitSlop={8}
                   >
                     <Text style={styles.remove}>{t('members.remove')}</Text>
@@ -169,6 +173,7 @@ function RolePicker({ value, disabled, onChange, label }: {
   onChange: (role: TripRole) => void;
   label: (role: TripRole) => string;
 }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.segment}>
       {ROLES.map(role => {
@@ -188,7 +193,7 @@ function RolePicker({ value, disabled, onChange, label }: {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   content: { padding: 16 },
   center: { marginTop: 40 },

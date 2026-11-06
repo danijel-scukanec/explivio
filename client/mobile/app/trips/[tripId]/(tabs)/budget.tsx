@@ -4,9 +4,11 @@ import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-rou
 import { useTranslation } from 'react-i18next';
 import type { BudgetSummary, BudgetBalances, Expense, TripMember } from '@explivio/shared';
 import { formatCurrency, formatTripDate } from '@explivio/shared';
-import { getBudget, getBudgetBalances, getTripMembers, setTripBaseCurrency, deleteExpense, fetchBudgetCsv } from '../../../src/api';
-import { useTripCollaboration } from '../../../src/useTripCollaboration';
-import { theme } from '../../../src/theme';
+import { getBudget, getBudgetBalances, getTripMembers, setTripBaseCurrency, deleteExpense, fetchBudgetCsv } from '../../../../src/api';
+import { useTripCollaboration } from '../../../../src/useTripCollaboration';
+import type { Theme } from '../../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../../src/useTheme';
+import { confirmDelete } from '../../../../src/confirm';
 
 const CATEGORY_ICONS: Record<string, string> = {
   Transport: '🚌',
@@ -26,6 +28,8 @@ function nameFor(members: TripMember[], userId: string | null | undefined): stri
 }
 
 export default function BudgetScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
@@ -49,10 +53,12 @@ export default function BudgetScreen() {
   const { presentUserIds } = useTripCollaboration(tripId, load);
   const othersViewing = Math.max(0, presentUserIds.length - 1);
 
-  async function handleDelete(id: string) {
+  function handleDelete(id: string) {
     if (!tripId) return;
-    await deleteExpense(tripId, id);
-    load();
+    confirmDelete(t, async () => {
+      await deleteExpense(tripId, id);
+      load();
+    });
   }
 
   async function changeBase(currency: string) {
@@ -72,16 +78,11 @@ export default function BudgetScreen() {
   }
 
   const header = (
-    <Stack.Screen
-      options={{
-        title: t('budget.title'),
-        headerRight: () => (
-          <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/add-expense`)} hitSlop={10}>
-            <Text style={styles.headerButton}>{t('mobile.addShort')}</Text>
-          </TouchableOpacity>
-        ),
-      }}
-    />
+    <View style={{ padding: 12, alignItems: 'flex-end' }}>
+      <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/add-expense`)} hitSlop={10}>
+        <Text style={{ color: theme.accent, fontWeight: '700', fontSize: 15 }}>{t('mobile.addShort')}</Text>
+      </TouchableOpacity>
+    </View>
   );
 
   if (loading) return <View style={styles.screen}>{header}<ActivityIndicator style={styles.center} color={theme.accent} /></View>;
@@ -224,7 +225,7 @@ export default function BudgetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   content: { padding: 16 },
   center: { textAlign: 'center', marginTop: 40, color: theme.text },

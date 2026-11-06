@@ -2,7 +2,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { formatTripDate, type GalleryItem } from '@explivio/shared';
-import { theme } from '../theme';
+import type { Theme } from '../theme';
+import { useThemedStyles } from '../useTheme';
 
 // A stable accent per trip id — stands in for a cover photo (the cover endpoint is member-gated).
 function hueFor(id: string): string {
@@ -24,6 +25,7 @@ interface Props {
 export function GalleryCard({ item, cloning, onToggleLike, onToggleFollow, onClone }: Props) {
   const { t } = useTranslation();
   const router = useRouter();
+  const styles = useThemedStyles(makeStyles);
 
   return (
     <View style={styles.card}>
@@ -70,7 +72,7 @@ export function GalleryCard({ item, cloning, onToggleLike, onToggleFollow, onClo
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   card: {
     borderWidth: 1, borderColor: theme.border, borderRadius: 14, overflow: 'hidden',
     backgroundColor: theme.card, marginBottom: 14,

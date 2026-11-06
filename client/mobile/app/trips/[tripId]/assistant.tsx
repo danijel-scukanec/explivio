@@ -12,12 +12,15 @@ import {
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useTripAssistant, type ChatMessage } from '../../../src/useTripAssistant';
-import { theme } from '../../../src/theme';
+import type { Theme } from '../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 // F16: the mobile AI trip assistant screen — NL Q&A + agentic edits, streaming over SignalR. Mirrors
 // the web floating panel. Edits the assistant makes refresh the itinerary screen on focus (its
 // useFocusEffect / collaboration refetch).
 export default function AssistantScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const { messages, status, send } = useTripAssistant(tripId!);
@@ -85,7 +88,7 @@ export default function AssistantScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   list: { padding: 14, gap: 10, flexGrow: 1 },
   empty: { color: theme.text, opacity: 0.7, textAlign: 'center', marginTop: 40, fontSize: 14 },

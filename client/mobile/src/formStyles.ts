@@ -1,8 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { theme } from './theme';
+import type { Theme } from './theme';
 
-// Shared styling for the create/add form screens so they stay consistent.
-export const formStyles = StyleSheet.create({
+// Shared styling for the create/add form screens so they stay consistent. A factory over the active
+// palette; screens call `const formStyles = useThemedStyles(makeFormStyles)`.
+export const makeFormStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   content: { padding: 16, gap: 14 },
   label: { fontSize: 13, color: theme.text, marginBottom: 6, fontWeight: '600' },

@@ -1,4 +1,5 @@
 {
+  "theme": { "toggle": "Cambiar tema claro / oscuro" },
   "common": {
     "cancel": "Cancelar",
     "close": "Cerrar",

@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { authEnabled, useAuth } from './AuthProvider';
-import { theme } from './theme';
+import type { Theme } from './theme';
+import { useThemedStyles } from './useTheme';
 
 // P-Auth: when Entra auth is enabled and the user isn't signed in, cover the app with a sign-in
 // screen. Rendered as an overlay (not a replacement) so expo-router's navigator stays mounted
@@ -10,6 +11,7 @@ import { theme } from './theme';
 export function AuthGate({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const { isAuthenticated, ready, signIn } = useAuth();
+  const styles = useThemedStyles(makeStyles);
 
   return (
     <>
@@ -31,7 +33,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   overlay: {
     position: 'absolute',
     top: 0,

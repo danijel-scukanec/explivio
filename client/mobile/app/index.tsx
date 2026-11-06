@@ -7,12 +7,16 @@ import { formatTripDate, getTripDuration, tripStatusColor } from '@explivio/shar
 import { getTrips, deleteTrip } from '../src/api';
 import { LanguageSwitcher } from '../src/LanguageSwitcher';
 import { NotificationBell } from '../src/NotificationBell';
-import { theme } from '../src/theme';
+import type { Theme } from '../src/theme';
+import { useTheme, useThemedStyles } from '../src/useTheme';
+import { coverColor } from '../src/coverImage';
 import { useAuth, authEnabled } from '../src/AuthProvider';
 
 export default function TripsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { isAuthenticated, signOut } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,19 +88,21 @@ export default function TripsScreen() {
                 onPress={() => router.push(`/trips/${item.id}/itinerary`)}
                 onLongPress={() => confirmDelete(item)}
               >
-                <View style={styles.cardTitleRow}>
-                  <Text style={styles.cardTitle}>{item.name}</Text>
+                <View style={[styles.cover, { backgroundColor: coverColor(item.id) }]}>
                   {item.status ? (
                     <View style={[styles.statusBadge, { backgroundColor: tripStatusColor(item.status) }]}>
                       <Text style={styles.statusBadgeText}>{t(`enums.tripStatus.${item.status}`)}</Text>
                     </View>
                   ) : null}
                 </View>
-                <Text style={styles.cardDestination}>{item.destination}</Text>
-                <Text style={styles.cardMeta}>
-                  {formatTripDate(item.startDate)} – {formatTripDate(item.endDate)}
-                  {nights > 0 ? ` · ${t('mobile.nights', { count: nights })}` : ''}
-                </Text>
+                <View style={styles.cardBody}>
+                  <Text style={styles.cardTitle}>{item.name}</Text>
+                  <Text style={styles.cardDestination}>{item.destination}</Text>
+                  <Text style={styles.cardMeta}>
+                    {formatTripDate(item.startDate)} – {formatTripDate(item.endDate)}
+                    {nights > 0 ? ` · ${t('mobile.nights', { count: nights })}` : ''}
+                  </Text>
+                </View>
               </TouchableOpacity>
             );
           }}
@@ -106,7 +112,7 @@ export default function TripsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   list: { padding: 16, gap: 12 },
   langRow: { alignItems: 'flex-end', marginBottom: 4 },
@@ -119,10 +125,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.border,
     borderRadius: 12,
-    padding: 16,
+    overflow: 'hidden',
   },
-  cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  cardTitle: { flex: 1, fontSize: 18, fontWeight: '700', color: theme.textStrong },
+  // Every card gets a coloured cover band; the status badge sits on it, top-right.
+  cover: { height: 96, padding: 10, alignItems: 'flex-end' },
+  cardBody: { padding: 16 },
+  cardTitle: { fontSize: 18, fontWeight: '700', color: theme.textStrong },
   statusBadge: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
   statusBadgeText: { color: '#fff', fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.3 },
   cardDestination: { fontSize: 14, color: theme.accent, marginTop: 2 },

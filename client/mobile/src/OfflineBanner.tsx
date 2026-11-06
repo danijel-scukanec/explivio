@@ -2,7 +2,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useOnline } from './useOnline';
-import { theme } from './theme';
+import type { Theme } from './theme';
+import { useThemedStyles } from './useTheme';
 
 // F31: a thin bar shown only when the device is offline or there are changes waiting to sync.
 // It sits at the very top of the app (above each screen's header), so it pads itself past the
@@ -11,6 +12,7 @@ export function OfflineBanner() {
   const { online, pending } = useOnline();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const styles = useThemedStyles(makeStyles);
   if (online && pending === 0) return null;
 
   const text = !online
@@ -32,7 +34,7 @@ export function OfflineBanner() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   banner: { paddingBottom: 6, paddingHorizontal: 16, alignItems: 'center' },
   offline: { backgroundColor: '#6b6375' },
   syncing: { backgroundColor: theme.accent },

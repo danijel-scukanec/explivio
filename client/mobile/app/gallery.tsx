@@ -7,11 +7,14 @@ import {
   getGallery, getFollowingGallery, likeTrip, unlikeTrip, cloneTrip, followUser, unfollowUser,
 } from '../src/api';
 import { GalleryCard } from '../src/components/GalleryCard';
-import { theme } from '../src/theme';
+import type { Theme } from '../src/theme';
+import { useTheme, useThemedStyles } from '../src/useTheme';
 
 type Tab = 'all' | 'following';
 
 export default function GalleryScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>('all');
@@ -112,7 +115,7 @@ export default function GalleryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   tabs: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingTop: 12 },
   tab: { borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 6 },

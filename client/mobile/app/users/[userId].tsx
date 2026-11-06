@@ -7,9 +7,12 @@ import {
   getUserProfile, getUserTrips, followUser, unfollowUser, likeTrip, unlikeTrip, cloneTrip,
 } from '../../src/api';
 import { GalleryCard } from '../../src/components/GalleryCard';
-import { theme } from '../../src/theme';
+import type { Theme } from '../../src/theme';
+import { useTheme, useThemedStyles } from '../../src/useTheme';
 
 export default function UserProfileScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const id = String(userId);
   const { t } = useTranslation();
@@ -118,7 +121,7 @@ export default function UserProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   list: { padding: 16 },
   center: { textAlign: 'center', marginTop: 40, color: theme.text, paddingHorizontal: 24 },

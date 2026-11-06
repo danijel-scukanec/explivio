@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import {
   getNotifications, markNotificationRead, markAllNotificationsRead, type AppNotification,
 } from '../src/api';
-import { theme } from '../src/theme';
+import type { Theme } from '../src/theme';
+import { useTheme, useThemedStyles } from '../src/useTheme';
 
 const KIND_ICON: Record<string, string> = {
   ActivityAdded: '🗺️', ActivityRemoved: '🗺️', ExpenseAdded: '💰', ExpenseRemoved: '💰', StatusChanged: '🔖',
@@ -14,6 +15,8 @@ const KIND_ICON: Record<string, string> = {
 
 // F20: the current user's notifications. Tap one to mark it read and jump to its trip.
 export default function NotificationsScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const router = useRouter();
   const [items, setItems] = useState<AppNotification[]>([]);
@@ -74,7 +77,7 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   center: { marginTop: 40 },
   empty: { textAlign: 'center', marginTop: 40, color: theme.text },

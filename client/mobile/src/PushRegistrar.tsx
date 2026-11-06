@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { authEnabled, useAuth } from './AuthProvider';
@@ -7,7 +8,14 @@ import { registerForPush, routeFromResponse } from './push';
 // F20 (push): mounts under the auth context and the router. Registers the device for push once the
 // user is signed in (or immediately in dev-identity mode) and deep-links to a trip when a push is
 // tapped. Renders nothing. Everything it calls is best-effort, so it's inert until push is set up.
+// Native-only: expo-notifications' APIs aren't available on web, so the web build skips it (web push
+// is handled by the web client, not this build).
 export function PushRegistrar() {
+  if (Platform.OS === 'web') return null;
+  return <PushRegistrarNative />;
+}
+
+function PushRegistrarNative() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const lastResponse = Notifications.useLastNotificationResponse();

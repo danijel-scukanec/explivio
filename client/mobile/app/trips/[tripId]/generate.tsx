@@ -4,8 +4,8 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { createActivity } from '../../../src/api';
 import { useItineraryGeneration } from '../../../src/useItineraryGeneration';
-import { formStyles as s } from '../../../src/formStyles';
-import { theme } from '../../../src/theme';
+import { makeFormStyles } from '../../../src/formStyles';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 const CATEGORY_ICONS: Record<string, string> = {
   Sightseeing: '🏛', Food: '🍽', Transport: '🚌', Accommodation: '🏨', Adventure: '🧗', Other: '📌',
@@ -18,6 +18,8 @@ function addDays(dateStr: string, n: number): string {
 }
 
 export default function GenerateScreen() {
+  const theme = useTheme();
+  const s = useThemedStyles(makeFormStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const { tripId, startDate, days: daysParam } = useLocalSearchParams<{ tripId: string; startDate?: string; days?: string }>();
