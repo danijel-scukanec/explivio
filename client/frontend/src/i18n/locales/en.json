@@ -1,4 +1,5 @@
 {
+  "theme": { "toggle": "Toggle light / dark theme" },
   "common": {
     "cancel": "Cancel",
     "close": "Close",

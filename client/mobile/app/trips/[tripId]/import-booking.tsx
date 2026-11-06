@@ -5,14 +5,16 @@ import { useTranslation } from 'react-i18next';
 import * as DocumentPicker from 'expo-document-picker';
 import type { Trip, ExtractedBookings, ExtractedBookingItem } from '@explivio/shared';
 import { getTrip, parseBooking, createActivity, createReservation } from '../../../src/api';
-import { formStyles as s } from '../../../src/formStyles';
-import { theme } from '../../../src/theme';
+import { makeFormStyles } from '../../../src/formStyles';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 const KIND_ICON: Record<string, string> = {
   Flight: '✈️', Accommodation: '🏨', CarRental: '🚗', Restaurant: '🍽️', Transport: '🚆', Tour: '🎟️', Other: '📌',
 };
 
 export default function ImportBookingScreen() {
+  const theme = useTheme();
+  const s = useThemedStyles(makeFormStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();

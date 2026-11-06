@@ -6,10 +6,12 @@ import type { Trip, TripRecap } from '@explivio/shared';
 import { formatTripDate } from '@explivio/shared';
 import { getTrip, getRecap, recapPhotoUrl, authHeader } from '../../../src/api';
 import { useTripRecap } from '../../../src/useTripRecap';
-import { formStyles as s } from '../../../src/formStyles';
-import { theme } from '../../../src/theme';
+import { makeFormStyles } from '../../../src/formStyles';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 export default function RecapScreen() {
+  const theme = useTheme();
+  const s = useThemedStyles(makeFormStyles);
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [trip, setTrip] = useState<Trip | null>(null);

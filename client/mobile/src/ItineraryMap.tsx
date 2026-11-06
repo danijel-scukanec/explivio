@@ -2,7 +2,8 @@ import { createElement, useMemo } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import type { Activity } from '@explivio/shared';
-import { theme } from './theme';
+import type { Theme } from './theme';
+import { useThemedStyles } from './useTheme';
 
 // A per-day color so pins group by day (cycles if more days than colors).
 const DAY_COLORS = ['#aa3bff', '#ef4444', '#059669', '#f59e0b', '#3b82f6', '#ec4899', '#14b8a6', '#8b5cf6'];
@@ -34,6 +35,7 @@ export function ItineraryMap({ activities, days }: Props) {
       }),
     [activities, days],
   );
+  const styles = useThemedStyles(makeStyles);
 
   if (points.length === 0) {
     return (
@@ -91,7 +93,7 @@ if(ll.length){map.fitBounds(ll,{padding:[30,30],maxZoom:15});if(map.getZoom()<6)
 </script></body></html>`;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   wrap: { height: 240, marginBottom: 8, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: theme.border },
   web: { flex: 1, backgroundColor: '#e5e4e7' },
   empty: {

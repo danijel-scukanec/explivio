@@ -5,12 +5,15 @@ import { useTranslation } from 'react-i18next';
 import type { TripConditions, StopConditions, DailyConditions } from '@explivio/shared';
 import { weatherCodeInfo, formatLocalTime, formatUtcOffset, formatTripDate } from '@explivio/shared';
 import { getTripConditions } from '../../../src/api';
-import { theme } from '../../../src/theme';
+import type { Theme } from '../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 // F28: per-stop destination conditions — local time (resolved time zone), local currency + live rate
 // against the trip's base currency, and a horizontal strip of per-day weather.
 export default function ConditionsScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [data, setData] = useState<TripConditions | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,6 +52,7 @@ export default function ConditionsScreen() {
 
 function StopCard({ stop, baseCurrency }: { stop: StopConditions; baseCurrency: string }) {
   const { t } = useTranslation();
+  const styles = useThemedStyles(makeStyles);
   const offset = stop.utcOffsetSeconds != null ? Number(stop.utcOffsetSeconds) : null;
 
   return (
@@ -85,6 +89,7 @@ function StopCard({ stop, baseCurrency }: { stop: StopConditions; baseCurrency: 
 
 function WeatherDay({ day }: { day: DailyConditions }) {
   const { t } = useTranslation();
+  const styles = useThemedStyles(makeStyles);
   const info = weatherCodeInfo(Number(day.weatherCode));
   const max = Math.round(Number(day.temperatureMaxC));
   const min = Math.round(Number(day.temperatureMinC));
@@ -101,7 +106,7 @@ function WeatherDay({ day }: { day: DailyConditions }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   content: { padding: 16 },
   center: { textAlign: 'center', marginTop: 40, color: theme.text },

@@ -252,6 +252,8 @@
     "nights_other": "{{count}} noches",
     "deleteTripTitle": "Eliminar viaje",
     "deleteTripConfirm": "¿Eliminar «{{name}}»? No se puede deshacer.",
+    "confirmDeleteTitle": "¿Eliminar?",
+    "confirmDeleteBody": "No se puede deshacer.",
     "delete": "Eliminar",
     "fillNameDates": "Completa el nombre y las fechas.",
     "couldNotLoadRoute": "No se pudo cargar la ruta.",

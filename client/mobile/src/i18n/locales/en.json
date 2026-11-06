@@ -252,6 +252,8 @@
     "nights_other": "{{count}} nights",
     "deleteTripTitle": "Delete trip",
     "deleteTripConfirm": "Delete “{{name}}”? This can't be undone.",
+    "confirmDeleteTitle": "Delete?",
+    "confirmDeleteBody": "This can't be undone.",
     "delete": "Delete",
     "fillNameDates": "Please fill in name and dates.",
     "couldNotLoadRoute": "Could not load the route.",

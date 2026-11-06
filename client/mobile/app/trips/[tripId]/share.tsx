@@ -3,7 +3,8 @@ import { ActivityIndicator, Share, StyleSheet, Switch, Text, TouchableOpacity, V
 import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { getTrip, setTripVisibility, createShareLink, revokeShareLink } from '../../../src/api';
-import { theme } from '../../../src/theme';
+import type { Theme } from '../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 // The web app that renders a share link. Configurable like the API base; falls back to the local dev
 // web server.
@@ -13,6 +14,8 @@ const shareUrl = (token: string) => `${WEB_URL}/shared/${token}`;
 // F26: the owner's share controls — publish to the public gallery and mint/share/revoke a read-only
 // link, opened from the itinerary header.
 export default function ShareScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [isPublic, setIsPublic] = useState(false);
@@ -102,7 +105,7 @@ export default function ShareScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   center: { marginTop: 40 },
   content: { padding: 20, gap: 20 },

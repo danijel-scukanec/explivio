@@ -1,15 +1,17 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { ActivityIndicator, ScrollView, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import type { Trip, Activity, ActivityCategory, Reservation, TripStatus } from '@explivio/shared';
 import { formatActivityTime, formatCurrency, formatTripDate, getDaysInRange, TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
-import { getTrip, getActivities, getReservations, deleteActivity, deleteReservation, reorderActivities, setTripStatus } from '../../../src/api';
-import { TYPE_ICONS, reservationStatusColor, formatReservationTime, reservationDateKey } from '../../../src/reservationMeta';
-import { useTripCollaboration } from '../../../src/useTripCollaboration';
-import { ItineraryMap } from '../../../src/ItineraryMap';
-import { NotificationBell } from '../../../src/NotificationBell';
-import { theme } from '../../../src/theme';
+import { getTrip, getActivities, getReservations, deleteActivity, deleteReservation, reorderActivities, setTripStatus } from '../../../../src/api';
+import { TYPE_ICONS, reservationStatusColor, formatReservationTime, reservationDateKey } from '../../../../src/reservationMeta';
+import { useTripCollaboration } from '../../../../src/useTripCollaboration';
+import { ItineraryMap } from '../../../../src/ItineraryMap';
+import { NotificationBell } from '../../../../src/NotificationBell';
+import type { Theme } from '../../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../../src/useTheme';
+import { confirmDelete } from '../../../../src/confirm';
 
 const CATEGORY_ICONS: Record<string, string> = {
   Sightseeing: '🏛', Food: '🍽', Transport: '🚌', Accommodation: '🏨', Adventure: '🧗', Other: '📌',
@@ -23,6 +25,8 @@ type Row =
 interface DaySection { title: string; dayNumber: number; data: Row[] }
 
 export default function ItineraryScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
@@ -48,16 +52,20 @@ export default function ItineraryScreen() {
   const { presentUserIds } = useTripCollaboration(tripId, load);
   const othersViewing = Math.max(0, presentUserIds.length - 1);
 
-  async function handleDelete(id: string) {
+  function handleDelete(id: string) {
     if (!tripId) return;
-    await deleteActivity(tripId, id);
-    load();
+    confirmDelete(t, async () => {
+      await deleteActivity(tripId, id);
+      load();
+    });
   }
 
-  async function handleDeleteReservation(id: string) {
+  function handleDeleteReservation(id: string) {
     if (!tripId) return;
-    await deleteReservation(tripId, id);
-    setReservations(prev => prev.filter(r => r.id !== id));
+    confirmDelete(t, async () => {
+      await deleteReservation(tripId, id);
+      setReservations(prev => prev.filter(r => r.id !== id));
+    });
   }
 
   // F23: reorder within a day via ↑/↓, then persist; revert to server truth on failure.
@@ -121,64 +129,40 @@ export default function ItineraryScreen() {
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen
-        options={{
-          title: trip?.name ?? t('itinerary.title'),
-          headerRight: () => (
-            <View style={styles.headerActions}>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/edit-route`)} hitSlop={10}>
-                <Text style={styles.headerButton}>🧭</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/bookings`)} hitSlop={10}>
-                <Text style={styles.headerButton}>🎫</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/budget`)} hitSlop={10}>
-                <Text style={styles.headerButton}>💰</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/conditions`)} hitSlop={10}>
-                <Text style={styles.headerButton}>🌦</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/checklists`)} hitSlop={10}>
-                <Text style={styles.headerButton}>✅</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/documents`)} hitSlop={10}>
-                <Text style={styles.headerButton}>📎</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/members`)} hitSlop={10}>
-                <Text style={styles.headerButton}>👥</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/share`)} hitSlop={10}>
-                <Text style={styles.headerButton}>🔗</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/export`)} hitSlop={10}>
-                <Text style={styles.headerButton}>📅</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/recap`)} hitSlop={10}>
-                <Text style={styles.headerButton}>📖</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/import-booking`)} hitSlop={10}>
-                <Text style={styles.headerButton}>📧</Text>
-              </TouchableOpacity>
-              <NotificationBell />
-              <TouchableOpacity
-                onPress={() => router.push(`/trips/${tripId}/generate?startDate=${trip?.startDate ?? ''}&days=${days.length}`)}
-                hitSlop={10}
-              >
-                <Text style={styles.headerButton}>✨</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/assistant`)} hitSlop={10}>
-                <Text style={styles.headerButton}>💬</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => router.push(`/trips/${tripId}/add-activity?startDate=${trip?.startDate ?? ''}`)}
-                hitSlop={10}
-              >
-                <Text style={styles.headerButton}>+ Add</Text>
-              </TouchableOpacity>
-            </View>
-          ),
-        }}
-      />
+      {/* Trip actions that aren't bottom tabs. Bookings / Budget / Checklists / Documents are tabs now. */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actions}>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/add-activity?startDate=${trip?.startDate ?? ''}`)} hitSlop={8}>
+          <Text style={styles.actionText}>{t('mobile.addShort')}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/generate?startDate=${trip?.startDate ?? ''}&days=${days.length}`)} hitSlop={8}>
+          <Text style={styles.actionEmoji}>✨</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/assistant`)} hitSlop={8}>
+          <Text style={styles.actionEmoji}>💬</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/edit-route`)} hitSlop={8}>
+          <Text style={styles.actionEmoji}>🧭</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/conditions`)} hitSlop={8}>
+          <Text style={styles.actionEmoji}>🌦</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/members`)} hitSlop={8}>
+          <Text style={styles.actionEmoji}>👥</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/share`)} hitSlop={8}>
+          <Text style={styles.actionEmoji}>🔗</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/export`)} hitSlop={8}>
+          <Text style={styles.actionEmoji}>📅</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/recap`)} hitSlop={8}>
+          <Text style={styles.actionEmoji}>📖</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/import-booking`)} hitSlop={8}>
+          <Text style={styles.actionEmoji}>📧</Text>
+        </TouchableOpacity>
+        <NotificationBell />
+      </ScrollView>
 
       {othersViewing > 0 ? (
         <View style={styles.presence}>
@@ -309,13 +293,16 @@ export default function ItineraryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   list: { padding: 16 },
   center: { textAlign: 'center', marginTop: 40, color: theme.text },
   error: { color: theme.danger },
   headerActions: { flexDirection: 'row', gap: 14 },
   headerButton: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 18, paddingHorizontal: 16, paddingVertical: 10 },
+  actionEmoji: { fontSize: 20 },
+  actionText: { color: theme.accent, fontSize: 14, fontWeight: '700' },
   presence: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.accentBg },
   routeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 16, paddingTop: 12 },
   routeChip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },

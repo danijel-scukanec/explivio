@@ -5,12 +5,15 @@ import { useTranslation } from 'react-i18next';
 import {
   getTrip, createShareLink, fetchItineraryIcs, calendarFeedUrl, calendarWebcalUrl,
 } from '../../../src/api';
-import { theme } from '../../../src/theme';
+import type { Theme } from '../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 // F27: export / calendar-sync for a trip. Download the itinerary as an .ics file (shared via the OS
 // share sheet) or subscribe to a live feed Google/Outlook/Apple Calendar poll. The feed reuses the
 // F26 share token, minted here on demand. (PDF export is web-only — see fetchItineraryIcs.)
 export default function ExportScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [token, setToken] = useState<string | null>(null);
@@ -97,7 +100,7 @@ export default function ExportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   center: { marginTop: 40 },
   content: { padding: 20, gap: 20 },

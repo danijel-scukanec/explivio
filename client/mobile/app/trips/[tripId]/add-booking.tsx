@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import type { ReservationType, ReservationStatus, CreateReservationRequest } from '@explivio/shared';
 import { getReservations, createReservation, updateReservation } from '../../../src/api';
 import { RESERVATION_TYPES, RESERVATION_STATUSES } from '../../../src/reservationMeta';
-import { formStyles as s } from '../../../src/formStyles';
-import { theme } from '../../../src/theme';
+import { makeFormStyles } from '../../../src/formStyles';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 // Compose/parse "YYYY-MM-DD" + "HH:mm" against the API's zone-less ISO date-time.
 const toIso = (date: string, time: string) => `${date}T${(time || '00:00')}:00`;
@@ -21,6 +21,8 @@ type FormState = {
 };
 
 export default function AddBookingScreen() {
+  const theme = useTheme();
+  const s = useThemedStyles(makeFormStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const { tripId, bookingId, startDate } = useLocalSearchParams<{ tripId: string; bookingId?: string; startDate?: string }>();

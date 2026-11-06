@@ -1,4 +1,5 @@
 {
+  "theme": { "toggle": "Helles / dunkles Design umschalten" },
   "common": {
     "cancel": "Abbrechen",
     "close": "Schließen",

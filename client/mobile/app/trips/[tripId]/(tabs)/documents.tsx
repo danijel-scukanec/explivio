@@ -7,8 +7,10 @@ import { useTranslation } from 'react-i18next';
 import * as DocumentPicker from 'expo-document-picker';
 import type { TripDocument } from '@explivio/shared';
 import { formatTripDate } from '@explivio/shared';
-import { getTrip, getDocuments, uploadDocument, deleteDocument, documentContentUrl } from '../../../src/api';
-import { theme } from '../../../src/theme';
+import { getTrip, getDocuments, uploadDocument, deleteDocument, documentContentUrl } from '../../../../src/api';
+import type { Theme } from '../../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../../src/useTheme';
+import { confirmDelete } from '../../../../src/confirm';
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -29,6 +31,8 @@ function fileIcon(contentType: string): string {
 // multipart (online-only — binary bodies don't fit the offline replay queue). Tapping a document
 // opens it via the content endpoint in the system viewer/browser.
 export default function DocumentsScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [tripName, setTripName] = useState('');
@@ -64,26 +68,23 @@ export default function DocumentsScreen() {
     }
   }
 
-  async function handleDelete(id: string) {
+  function handleDelete(id: string) {
     if (!tripId) return;
-    await deleteDocument(tripId, id);
-    load();
+    confirmDelete(t, async () => {
+      await deleteDocument(tripId, id);
+      load();
+    });
   }
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen
-        options={{
-          title: tripName || t('documents.title'),
-          headerRight: () => (
-            <TouchableOpacity onPress={handleUpload} hitSlop={10} disabled={uploading}>
-              <Text style={styles.headerButton}>
-                {uploading ? t('documents.uploading') : t('documents.upload')}
-              </Text>
-            </TouchableOpacity>
-          ),
-        }}
-      />
+      <View style={{ padding: 12, alignItems: 'flex-end' }}>
+        <TouchableOpacity onPress={handleUpload} hitSlop={10} disabled={uploading}>
+          <Text style={{ color: theme.accent, fontWeight: '700', fontSize: 15 }}>
+            {uploading ? t('documents.uploading') : t('documents.upload')}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {loading ? (
         <ActivityIndicator style={styles.center} color={theme.accent} />
@@ -118,7 +119,7 @@ export default function DocumentsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   list: { padding: 16 },
   listError: { marginBottom: 12 },

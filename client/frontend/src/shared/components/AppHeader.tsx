@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Compass } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
+import { ThemeToggle } from './ThemeToggle';
 
 // Global app header: brand (logo + name, links home) on the left, notifications on the right.
 // Tinted background so it reads as a distinct bar. Not sticky.
@@ -13,7 +14,10 @@ export function AppHeader() {
         </span>
         <span className="text-foreground text-lg font-bold tracking-tight">Explivio</span>
       </Link>
-      <NotificationBell />
+      <div className="flex items-center gap-1">
+        <ThemeToggle />
+        <NotificationBell />
+      </div>
     </header>
   );
 }

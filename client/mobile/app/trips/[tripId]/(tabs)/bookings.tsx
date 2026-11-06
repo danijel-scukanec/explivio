@@ -4,13 +4,17 @@ import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-rou
 import { useTranslation } from 'react-i18next';
 import type { Reservation } from '@explivio/shared';
 import { formatCurrency, formatTripDate } from '@explivio/shared';
-import { getTrip, getReservations, deleteReservation } from '../../../src/api';
-import { TYPE_ICONS, reservationStatusColor, formatReservationTime, reservationDateKey } from '../../../src/reservationMeta';
-import { theme } from '../../../src/theme';
+import { getTrip, getReservations, deleteReservation } from '../../../../src/api';
+import { TYPE_ICONS, reservationStatusColor, formatReservationTime, reservationDateKey } from '../../../../src/reservationMeta';
+import type { Theme } from '../../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../../src/useTheme';
+import { confirmDelete } from '../../../../src/confirm';
 
 interface DaySection { title: string; data: Reservation[] }
 
 export default function BookingsScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
@@ -29,10 +33,12 @@ export default function BookingsScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  async function handleDelete(id: string) {
+  function handleDelete(id: string) {
     if (!tripId) return;
-    await deleteReservation(tripId, id);
-    load();
+    confirmDelete(t, async () => {
+      await deleteReservation(tripId, id);
+      load();
+    });
   }
 
   // Reservations arrive sorted by StartsAt; group into consecutive day sections.
@@ -49,16 +55,11 @@ export default function BookingsScreen() {
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen
-        options={{
-          title: tripName,
-          headerRight: () => (
-            <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/add-booking`)} hitSlop={10}>
-              <Text style={styles.headerButton}>{t('mobile.addShort')}</Text>
-            </TouchableOpacity>
-          ),
-        }}
-      />
+      <View style={{ padding: 12, alignItems: 'flex-end' }}>
+        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/add-booking`)} hitSlop={10}>
+          <Text style={{ color: theme.accent, fontWeight: '700', fontSize: 15 }}>{t('mobile.addShort')}</Text>
+        </TouchableOpacity>
+      </View>
 
       {loading ? (
         <ActivityIndicator style={styles.center} color={theme.accent} />
@@ -109,7 +110,7 @@ export default function BookingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   list: { padding: 16 },
   center: { textAlign: 'center', marginTop: 40, color: theme.text, paddingHorizontal: 24 },

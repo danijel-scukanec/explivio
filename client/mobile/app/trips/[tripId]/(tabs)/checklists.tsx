@@ -8,13 +8,17 @@ import type { Checklist } from '@explivio/shared';
 import {
   getTrip, getChecklists, createChecklist, deleteChecklist,
   addChecklistItem, updateChecklistItem, deleteChecklistItem,
-} from '../../../src/api';
-import { theme } from '../../../src/theme';
+} from '../../../../src/api';
+import type { Theme } from '../../../../src/theme';
+import { useTheme, useThemedStyles } from '../../../../src/useTheme';
+import { confirmDelete } from '../../../../src/confirm';
 
 // F24: packing lists / checklists — several named lists per trip, each with checkable items. Mutations
 // go through the offline-aware api layer, so ticking an item works on a plane and syncs on reconnect.
 export default function ChecklistsScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
   const [tripName, setTripName] = useState('');
   const [checklists, setChecklists] = useState<Checklist[]>([]);
@@ -40,10 +44,12 @@ export default function ChecklistsScreen() {
     load();
   }
 
-  async function handleDeleteList(id: string) {
+  function handleDeleteList(id: string) {
     if (!tripId) return;
-    await deleteChecklist(tripId, id);
-    load();
+    confirmDelete(t, async () => {
+      await deleteChecklist(tripId, id);
+      load();
+    });
   }
 
   async function handleToggle(list: Checklist, itemId: string, isChecked: boolean, text: string) {
@@ -72,7 +78,6 @@ export default function ChecklistsScreen() {
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen options={{ title: tripName || t('checklists.title') }} />
 
       {loading ? (
         <ActivityIndicator style={styles.center} color={theme.accent} />
@@ -128,6 +133,8 @@ function ChecklistCard({ list, onDeleteList, onToggle, onAddItem, onDeleteItem }
   onDeleteItem: (listId: string, itemId: string) => void;
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const [newItem, setNewItem] = useState('');
   const done = list.items.filter(i => i.isChecked).length;
 
@@ -181,7 +188,7 @@ function ChecklistCard({ list, onDeleteList, onToggle, onAddItem, onDeleteItem }
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   content: { padding: 16 },
   center: { textAlign: 'center', marginTop: 40, color: theme.text, paddingHorizontal: 24 },

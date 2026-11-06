@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import type { CreateTripRequest, TripStopInput } from '@explivio/shared';
 import { createTrip } from '../src/api';
 import { TripStopsEditor } from '../src/TripStopsEditor';
-import { formStyles as s } from '../src/formStyles';
-import { theme } from '../src/theme';
+import { makeFormStyles } from '../src/formStyles';
+import { useTheme, useThemedStyles } from '../src/useTheme';
 
 // The backend overrides this with the authenticated caller; it's just a placeholder for the body.
 const PLACEHOLDER_USER_ID = '00000000-0000-0000-0000-000000000001';
@@ -15,6 +15,8 @@ const PLACEHOLDER_USER_ID = '00000000-0000-0000-0000-000000000001';
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'AUD', 'CAD'];
 
 export default function NewTripScreen() {
+  const theme = useTheme();
+  const s = useThemedStyles(makeFormStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const [form, setForm] = useState({ name: '', startDate: '', endDate: '', travelerCount: '1', baseCurrency: 'EUR' });

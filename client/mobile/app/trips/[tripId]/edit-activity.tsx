@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import type { ActivityCategory, UpdateActivityRequest } from '@explivio/shared';
 import { getActivities, updateActivity } from '../../../src/api';
 import { PlaceSearch, type PlaceResult } from '../../../src/PlaceSearch';
-import { formStyles as s } from '../../../src/formStyles';
-import { theme } from '../../../src/theme';
+import { makeFormStyles } from '../../../src/formStyles';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 const CATEGORIES: ActivityCategory[] = ['Sightseeing', 'Food', 'Transport', 'Accommodation', 'Adventure', 'Other'];
 
@@ -14,6 +14,8 @@ const CATEGORIES: ActivityCategory[] = ['Sightseeing', 'Food', 'Transport', 'Acc
 const toInputTime = (t: string | null) => (t ? t.slice(0, 5) : '');
 
 export default function EditActivityScreen() {
+  const theme = useTheme();
+  const s = useThemedStyles(makeFormStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const { tripId, activityId } = useLocalSearchParams<{ tripId: string; activityId: string }>();

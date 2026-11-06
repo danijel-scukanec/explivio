@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import type { TripStop, TripStopInput } from '@explivio/shared';
 import { getTrip, setTripStops } from '../../../src/api';
 import { TripStopsEditor } from '../../../src/TripStopsEditor';
-import { formStyles as s } from '../../../src/formStyles';
-import { theme } from '../../../src/theme';
+import { makeFormStyles } from '../../../src/formStyles';
+import { useTheme, useThemedStyles } from '../../../src/useTheme';
 
 const toInput = (stop: TripStop): TripStopInput => ({
   place: stop.place,
@@ -19,6 +19,8 @@ const toInput = (stop: TripStop): TripStopInput => ({
 // F22: edit a trip's ordered route after creation. Loads the current stops, reuses TripStopsEditor,
 // and PUTs the whole list.
 export default function EditRouteScreen() {
+  const theme = useTheme();
+  const s = useThemedStyles(makeFormStyles);
   const router = useRouter();
   const { t } = useTranslation();
   const { tripId } = useLocalSearchParams<{ tripId: string }>();

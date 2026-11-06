@@ -252,6 +252,8 @@
     "nights_other": "{{count}} Nächte",
     "deleteTripTitle": "Reise löschen",
     "deleteTripConfirm": "„{{name}}“ löschen? Das kann nicht rückgängig gemacht werden.",
+    "confirmDeleteTitle": "Löschen?",
+    "confirmDeleteBody": "Das kann nicht rückgängig gemacht werden.",
     "delete": "Löschen",
     "fillNameDates": "Bitte Name und Daten ausfüllen.",
     "couldNotLoadRoute": "Route konnte nicht geladen werden.",
