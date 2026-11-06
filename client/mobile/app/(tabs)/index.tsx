@@ -1,23 +1,19 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import type { Trip } from '@explivio/shared';
 import { formatTripDate, getTripDuration, tripStatusColor } from '@explivio/shared';
-import { getTrips, deleteTrip } from '../src/api';
-import { LanguageSwitcher } from '../src/LanguageSwitcher';
-import { NotificationBell } from '../src/NotificationBell';
-import type { Theme } from '../src/theme';
-import { useTheme, useThemedStyles } from '../src/useTheme';
-import { coverColor } from '../src/coverImage';
-import { useAuth, authEnabled } from '../src/AuthProvider';
+import { getTrips, deleteTrip } from '../../src/api';
+import type { Theme } from '../../src/theme';
+import { useTheme, useThemedStyles } from '../../src/useTheme';
+import { coverColor } from '../../src/coverImage';
 
 export default function TripsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const { isAuthenticated, signOut } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,23 +38,6 @@ export default function TripsScreen() {
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen
-        options={{
-          title: t('mobile.tripsTitle'),
-          headerRight: () => (
-            <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
-              <NotificationBell />
-              <TouchableOpacity onPress={() => router.push('/gallery')} hitSlop={12}>
-                <Text style={styles.headerButton}>🌍</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push('/new-trip')} hitSlop={12}>
-                <Text style={styles.headerButton}>{t('mobile.newShort')}</Text>
-              </TouchableOpacity>
-            </View>
-          ),
-        }}
-      />
-
       {loading ? (
         <ActivityIndicator style={styles.center} color={theme.accent} />
       ) : error ? (
@@ -68,16 +47,6 @@ export default function TripsScreen() {
           data={trips}
           keyExtractor={trip => trip.id}
           contentContainerStyle={styles.list}
-          ListHeaderComponent={
-            <View style={styles.langRow}>
-              <LanguageSwitcher />
-              {authEnabled && isAuthenticated && (
-                <TouchableOpacity onPress={signOut} hitSlop={8}>
-                  <Text style={styles.signOut}>{t('auth.signOut')}</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          }
           ListEmptyComponent={<Text style={styles.center}>{t('mobile.tripsEmpty')}</Text>}
           renderItem={({ item }) => {
             const nights = getTripDuration(item.startDate, item.endDate);
@@ -115,11 +84,8 @@ export default function TripsScreen() {
 const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   list: { padding: 16, gap: 12 },
-  langRow: { alignItems: 'flex-end', marginBottom: 4 },
-  signOut: { color: theme.text, fontSize: 13, marginTop: 6 },
   center: { textAlign: 'center', marginTop: 40, color: theme.text },
   error: { color: theme.danger },
-  headerButton: { color: '#fff', fontSize: 16, fontWeight: '600' },
   card: {
     backgroundColor: theme.card,
     borderWidth: 1,

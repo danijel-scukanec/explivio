@@ -1,14 +1,14 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import type { GalleryItem } from '@explivio/shared';
 import {
   getGallery, getFollowingGallery, likeTrip, unlikeTrip, cloneTrip, followUser, unfollowUser,
-} from '../src/api';
-import { GalleryCard } from '../src/components/GalleryCard';
-import type { Theme } from '../src/theme';
-import { useTheme, useThemedStyles } from '../src/useTheme';
+} from '../../src/api';
+import { GalleryCard } from '../../src/components/GalleryCard';
+import type { Theme } from '../../src/theme';
+import { useTheme, useThemedStyles } from '../../src/useTheme';
 
 type Tab = 'all' | 'following';
 
@@ -73,8 +73,6 @@ export default function GalleryScreen() {
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen options={{ title: t('gallery.title') }} />
-
       <View style={styles.tabs}>
         {(['all', 'following'] as Tab[]).map(which => (
           <TouchableOpacity

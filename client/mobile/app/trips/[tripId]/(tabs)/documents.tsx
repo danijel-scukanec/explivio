@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator, FlatList, Linking, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
-import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Stack, useFocusEffect, useGlobalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import * as DocumentPicker from 'expo-document-picker';
 import type { TripDocument } from '@explivio/shared';
@@ -34,7 +34,7 @@ export default function DocumentsScreen() {
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
   const { t } = useTranslation();
-  const { tripId } = useLocalSearchParams<{ tripId: string }>();
+  const { tripId } = useGlobalSearchParams<{ tripId: string }>();
   const [tripName, setTripName] = useState('');
   const [documents, setDocuments] = useState<TripDocument[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +42,7 @@ export default function DocumentsScreen() {
   const [uploading, setUploading] = useState(false);
 
   const load = useCallback(() => {
-    if (!tripId) return;
+    if (!tripId) { setLoading(false); return; }
     return Promise.all([getTrip(tripId), getDocuments(tripId)])
       .then(([trip, docs]) => { setTripName(trip.name); setDocuments(docs); setError(null); })
       .catch(() => setError(t('documents.couldNotLoad')))

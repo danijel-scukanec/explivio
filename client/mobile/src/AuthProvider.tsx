@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import * as AuthSession from 'expo-auth-session';
 import { useAuthRequest, useAutoDiscovery, makeRedirectUri } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
-import { authEnabled, entraConfig, authScopes, setTokens, setDiscovery } from './auth';
+import { authEnabled, entraConfig, authScopes, setTokens, setDiscovery, decodeIdToken, type IdentityClaims } from './auth';
 import { unregisterForPush } from './push';
 
 // Dismisses the auth browser once the redirect completes (also required for web).
@@ -11,6 +11,7 @@ WebBrowser.maybeCompleteAuthSession();
 interface AuthState {
   isAuthenticated: boolean;
   ready: boolean;
+  user: IdentityClaims | null;
   signIn: () => void;
   signOut: () => void;
 }
@@ -18,6 +19,7 @@ interface AuthState {
 const AuthContext = createContext<AuthState>({
   isAuthenticated: false,
   ready: true,
+  user: null,
   signIn: () => {},
   signOut: () => {},
 });
@@ -42,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 function EntraAuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<IdentityClaims | null>(null);
 
   // Safe here: EntraAuthProvider only mounts when authEnabled, so authority/clientId are present.
   const discovery = useAutoDiscovery(entraConfig.authority ?? '');
@@ -68,6 +71,7 @@ function EntraAuthProvider({ children }: { children: ReactNode }) {
     )
       .then((result) => {
         setTokens(result);
+        setUser(decodeIdToken(result.idToken));
         setIsAuthenticated(true);
       })
       .catch(() => {});
@@ -77,16 +81,18 @@ function EntraAuthProvider({ children }: { children: ReactNode }) {
     () => ({
       isAuthenticated,
       ready: Boolean(request),
+      user,
       signIn: () => {
         void promptAsync();
       },
       signOut: () => {
         void unregisterForPush(); // drop this device's token so push stops after sign-out
         setTokens(null);
+        setUser(null);
         setIsAuthenticated(false);
       },
     }),
-    [isAuthenticated, request, promptAsync],
+    [isAuthenticated, user, request, promptAsync],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

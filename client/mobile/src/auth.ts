@@ -55,3 +55,62 @@ export async function hubAccessToken(): Promise<string> {
   if (!authEnabled) return '';
   return (await getAccessToken()) ?? '';
 }
+
+export interface IdentityClaims {
+  name?: string;
+  email?: string;
+}
+
+// Decode an ID token's claims for display (name/email). Self-contained base64url+UTF-8 decoder so it
+// works in Hermes/Expo Go without depending on atob/TextDecoder. Never throws — returns null on any
+// problem. This is for DISPLAY ONLY; the backend validates the token's signature, not this code.
+export function decodeIdToken(idToken: string | undefined): IdentityClaims | null {
+  if (!idToken) return null;
+  try {
+    const payload = idToken.split('.')[1];
+    if (!payload) return null;
+    const claims = JSON.parse(utf8(base64ToBytes(payload.replace(/-/g, '+').replace(/_/g, '/')))) as Record<string, unknown>;
+    const name = typeof claims.name === 'string' ? claims.name : undefined;
+    const email =
+      typeof claims.email === 'string' ? claims.email :
+      typeof claims.preferred_username === 'string' ? claims.preferred_username :
+      undefined;
+    return { name, email };
+  } catch {
+    return null;
+  }
+}
+
+const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+function base64ToBytes(b64: string): number[] {
+  const clean = b64.replace(/[^A-Za-z0-9+/]/g, '');
+  const bytes: number[] = [];
+  for (let i = 0; i < clean.length; i += 4) {
+    const e1 = B64.indexOf(clean[i]);
+    const e2 = B64.indexOf(clean[i + 1]);
+    const e3 = B64.indexOf(clean[i + 2]);
+    const e4 = B64.indexOf(clean[i + 3]);
+    bytes.push((e1 << 2) | (e2 >> 4));
+    if (e3 !== -1) bytes.push(((e2 & 15) << 4) | (e3 >> 2));
+    if (e4 !== -1) bytes.push(((e3 & 3) << 6) | e4);
+  }
+  return bytes;
+}
+
+function utf8(bytes: number[]): string {
+  let out = '';
+  let i = 0;
+  while (i < bytes.length) {
+    const b = bytes[i++];
+    if (b < 0x80) out += String.fromCharCode(b);
+    else if (b < 0xe0) out += String.fromCharCode(((b & 0x1f) << 6) | (bytes[i++] & 0x3f));
+    else if (b < 0xf0) out += String.fromCharCode(((b & 0x0f) << 12) | ((bytes[i++] & 0x3f) << 6) | (bytes[i++] & 0x3f));
+    else {
+      const cp = ((b & 0x07) << 18) | ((bytes[i++] & 0x3f) << 12) | ((bytes[i++] & 0x3f) << 6) | (bytes[i++] & 0x3f);
+      const c = cp - 0x10000;
+      out += String.fromCharCode(0xd800 + (c >> 10), 0xdc00 + (c & 0x3ff));
+    }
+  }
+  return out;
+}

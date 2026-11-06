@@ -8,10 +8,28 @@
     "somethingWrong": "Algo salió mal. Inténtalo de nuevo.",
     "location": "Ubicación",
     "optional": "Opcional",
+    "more": "Más",
     "enterNameDate": "Introduce un nombre y una fecha."
   },
   "language": {
     "label": "Idioma"
+  },
+  "nav": {
+    "trips": "Viajes",
+    "explore": "Explorar",
+    "notifications": "Alertas",
+    "profile": "Perfil"
+  },
+  "settings": {
+    "title": "Perfil",
+    "account": "Cuenta",
+    "devUser": "Usuario dev",
+    "devHint": "Sesión iniciada con la identidad de desarrollo local.",
+    "appearance": "Apariencia",
+    "language": "Idioma",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro"
   },
   "enums": {
     "tripStatus": {

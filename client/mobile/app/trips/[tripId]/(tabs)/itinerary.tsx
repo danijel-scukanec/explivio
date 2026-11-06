@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import type { Trip, Activity, ActivityCategory, Reservation, TripStatus } from '@explivio/shared';
@@ -8,7 +8,6 @@ import { getTrip, getActivities, getReservations, deleteActivity, deleteReservat
 import { TYPE_ICONS, reservationStatusColor, formatReservationTime, reservationDateKey } from '../../../../src/reservationMeta';
 import { useTripCollaboration } from '../../../../src/useTripCollaboration';
 import { ItineraryMap } from '../../../../src/ItineraryMap';
-import { NotificationBell } from '../../../../src/NotificationBell';
 import type { Theme } from '../../../../src/theme';
 import { useTheme, useThemedStyles } from '../../../../src/useTheme';
 import { confirmDelete } from '../../../../src/confirm';
@@ -36,6 +35,7 @@ export default function ItineraryScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<Set<ActivityCategory>>(new Set());
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const load = useCallback(() => {
     if (!tripId) return;
@@ -127,42 +127,52 @@ export default function ItineraryScreen() {
     [days, activities, reservations, filterActive, categoryFilter],
   );
 
+  // Many trip-level actions; show the primary one inline and tuck the rest into a labelled menu so the
+  // bar stays legible and nothing scrolls off screen.
+  const menuActions: { icon: string; label: string; href: string }[] = [
+    { icon: '✨', label: t('itinerary.generate'), href: `/trips/${tripId}/generate?startDate=${trip?.startDate ?? ''}&days=${days.length}` },
+    { icon: '💬', label: t('assistant.title'), href: `/trips/${tripId}/assistant` },
+    { icon: '🧭', label: t('editRoute.title'), href: `/trips/${tripId}/edit-route` },
+    { icon: '🌦', label: t('conditions.title'), href: `/trips/${tripId}/conditions` },
+    { icon: '👥', label: t('members.title'), href: `/trips/${tripId}/members` },
+    { icon: '🔗', label: t('share.title'), href: `/trips/${tripId}/share` },
+    { icon: '📅', label: t('export.title'), href: `/trips/${tripId}/export` },
+    { icon: '📖', label: t('recap.title'), href: `/trips/${tripId}/recap` },
+    { icon: '📧', label: t('import.title'), href: `/trips/${tripId}/import-booking` },
+  ];
+
   return (
     <View style={styles.screen}>
-      {/* Trip actions that aren't bottom tabs. Bookings / Budget / Checklists / Documents are tabs now. */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actions}>
-        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/add-activity?startDate=${trip?.startDate ?? ''}`)} hitSlop={8}>
-          <Text style={styles.actionText}>{t('mobile.addShort')}</Text>
+      {/* Primary action inline; the rest live in the "More" sheet. (Planning sections are bottom tabs.) */}
+      <View style={styles.actions}>
+        <TouchableOpacity
+          style={styles.primaryAction}
+          onPress={() => router.push(`/trips/${tripId}/add-activity?startDate=${trip?.startDate ?? ''}`)}
+        >
+          <Text style={styles.primaryActionText}>{t('itinerary.addActivity')}</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/generate?startDate=${trip?.startDate ?? ''}&days=${days.length}`)} hitSlop={8}>
-          <Text style={styles.actionEmoji}>✨</Text>
+        <TouchableOpacity style={styles.moreAction} onPress={() => setMenuOpen(true)}>
+          <Text style={styles.moreActionText}>⋯  {t('common.more')}</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/assistant`)} hitSlop={8}>
-          <Text style={styles.actionEmoji}>💬</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/edit-route`)} hitSlop={8}>
-          <Text style={styles.actionEmoji}>🧭</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/conditions`)} hitSlop={8}>
-          <Text style={styles.actionEmoji}>🌦</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/members`)} hitSlop={8}>
-          <Text style={styles.actionEmoji}>👥</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/share`)} hitSlop={8}>
-          <Text style={styles.actionEmoji}>🔗</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/export`)} hitSlop={8}>
-          <Text style={styles.actionEmoji}>📅</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/recap`)} hitSlop={8}>
-          <Text style={styles.actionEmoji}>📖</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push(`/trips/${tripId}/import-booking`)} hitSlop={8}>
-          <Text style={styles.actionEmoji}>📧</Text>
-        </TouchableOpacity>
-        <NotificationBell />
-      </ScrollView>
+      </View>
+
+      <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
+        <Pressable style={styles.sheetBackdrop} onPress={() => setMenuOpen(false)}>
+          <Pressable style={styles.sheet}>
+            <View style={styles.sheetHandle} />
+            {menuActions.map(a => (
+              <TouchableOpacity
+                key={a.label}
+                style={styles.sheetRow}
+                onPress={() => { setMenuOpen(false); router.push(a.href); }}
+              >
+                <Text style={styles.sheetIcon}>{a.icon}</Text>
+                <Text style={styles.sheetLabel}>{a.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {othersViewing > 0 ? (
         <View style={styles.presence}>
@@ -300,9 +310,17 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   error: { color: theme.danger },
   headerActions: { flexDirection: 'row', gap: 14 },
   headerButton: { color: '#fff', fontSize: 15, fontWeight: '600' },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: 18, paddingHorizontal: 16, paddingVertical: 10 },
-  actionEmoji: { fontSize: 20 },
-  actionText: { color: theme.accent, fontSize: 14, fontWeight: '700' },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10 },
+  primaryAction: { flex: 1, backgroundColor: theme.accent, borderRadius: 10, paddingVertical: 11, alignItems: 'center' },
+  primaryActionText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  moreAction: { borderWidth: 1, borderColor: theme.border, borderRadius: 10, paddingVertical: 11, paddingHorizontal: 16, alignItems: 'center' },
+  moreActionText: { color: theme.textStrong, fontSize: 15, fontWeight: '600' },
+  sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: theme.card, borderTopLeftRadius: 18, borderTopRightRadius: 18, paddingBottom: 28, paddingTop: 8, paddingHorizontal: 8 },
+  sheetHandle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: theme.border, marginVertical: 8 },
+  sheetRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 12 },
+  sheetIcon: { fontSize: 20, width: 26, textAlign: 'center' },
+  sheetLabel: { fontSize: 16, color: theme.textStrong, fontWeight: '500' },
   presence: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: theme.accentBg },
   routeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 16, paddingTop: 12 },
   routeChip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderColor: theme.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },

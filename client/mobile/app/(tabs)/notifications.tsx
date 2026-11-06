@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
   getNotifications, markNotificationRead, markAllNotificationsRead, type AppNotification,
-} from '../src/api';
-import type { Theme } from '../src/theme';
-import { useTheme, useThemedStyles } from '../src/useTheme';
+} from '../../src/api';
+import type { Theme } from '../../src/theme';
+import { useTheme, useThemedStyles } from '../../src/useTheme';
 
 const KIND_ICON: Record<string, string> = {
   ActivityAdded: '🗺️', ActivityRemoved: '🗺️', ExpenseAdded: '💰', ExpenseRemoved: '💰', StatusChanged: '🔖',
@@ -45,12 +45,11 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.screen}>
-      <Stack.Screen options={{
-        title: t('notifications.title'),
-        headerRight: () => hasUnread
-          ? <TouchableOpacity onPress={markAll} hitSlop={12}><Text style={styles.markAll}>{t('notifications.markAllRead')}</Text></TouchableOpacity>
-          : undefined,
-      }} />
+      {hasUnread && !loading && (
+        <TouchableOpacity onPress={markAll} hitSlop={8} style={styles.markAllRow}>
+          <Text style={styles.markAll}>{t('notifications.markAllRead')}</Text>
+        </TouchableOpacity>
+      )}
 
       {loading ? (
         <ActivityIndicator style={styles.center} color={theme.accent} />
@@ -81,6 +80,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   center: { marginTop: 40 },
   empty: { textAlign: 'center', marginTop: 40, color: theme.text },
+  markAllRow: { alignItems: 'flex-end', paddingHorizontal: 16, paddingTop: 12 },
   markAll: { color: theme.accent, fontSize: 13, fontWeight: '600' },
   item: { flexDirection: 'row', gap: 12, padding: 14, borderBottomWidth: 1, borderBottomColor: theme.border },
   unread: { backgroundColor: '#f3f1ff' },

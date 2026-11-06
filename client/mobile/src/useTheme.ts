@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { useColorScheme } from 'react-native';
-import { darkTheme, lightTheme, type Theme } from './theme';
+import { type Theme } from './theme';
+import { useThemeState } from './ThemeProvider';
 
-// The active palette for the current device appearance. Re-renders when the system switches light/dark.
+// The active palette, resolved from the user's theme preference (system/light/dark). Re-renders when
+// the preference changes or — in "system" mode — when the device switches appearance.
 export function useTheme(): Theme {
-  return useColorScheme() === 'dark' ? darkTheme : lightTheme;
+  return useThemeState().theme;
 }
 
 // Build a StyleSheet from the active palette, memoised per theme. Screens define a `makeStyles(theme)`
