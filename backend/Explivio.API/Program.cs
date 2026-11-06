@@ -275,11 +275,13 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("SqlSer
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
-// Aspire health endpoints (/health, /alive) — Development only by default
+// Aspire health endpoints (/health, /alive), mapped in all environments (see ServiceDefaults).
 app.MapDefaultEndpoints();
 
-if (app.Environment.IsDevelopment())
-    app.MapOpenApi();
+// OpenAPI document (/openapi/v1.json) in all environments, so the deployed API can be browsed and its
+// client types regenerated against the live app — not only locally. Explicit route, so it resolves
+// ahead of the SPA fallback in production.
+app.MapOpenApi();
 
 app.UseHttpsRedirection();
 app.UseCors();
