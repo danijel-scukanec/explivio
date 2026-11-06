@@ -1,31 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Trip, Activity, ActivityCategory, Reservation, TripStatus } from '@explivio/shared';
-import { getDaysInRange, TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
-import { getTrip, setTripStatus, setTripCover, tripCoverUrl } from '../../trips/services/tripsApi';
+import type { Activity, ActivityCategory, Reservation } from '@explivio/shared';
+import { getDaysInRange } from '@explivio/shared';
 import { getActivities, deleteActivity, reorderActivities } from '../services/itineraryApi';
+import { setTripStops } from '../../trips/services/tripsApi';
+import { reverseGeocodeCity, cityFromAddress } from '../geocode';
 import { getReservations, deleteReservation } from '../../reservations/services/reservationsApi';
 import { reservationDateKey } from '../../reservations/components/reservationMeta';
 import { ReservationModal } from '../../reservations/components/ReservationModal';
 import { DaySchedule } from '../components/DaySchedule';
 import { AddActivityModal } from '../components/AddActivityModal';
 import { EditActivityModal } from '../components/EditActivityModal';
-import { EditStopsModal } from '../../trips/components/EditStopsModal';
 import { GenerateItineraryModal } from '../components/GenerateItineraryModal';
 import { ItineraryMap } from '../components/ItineraryMap';
 import { TripConditions } from '../components/TripConditions';
-import { ShareTripModal } from '../../gallery/components/ShareTripModal';
-import { MembersModal } from '../../trips/components/MembersModal';
-import { ExportItineraryModal } from '../components/ExportItineraryModal';
 import { ImportBookingModal } from '../../import/components/ImportBookingModal';
 import { TripAssistantPanel } from '../components/TripAssistantPanel';
-import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
+import { nearestStop, stopColor } from '../stopAssignment';
+import { useTrip } from '../../trips/pages/TripLayout';
+import { useConfirm } from '../../../shared/components/ConfirmProvider';
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
-import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
-import { NotificationBell } from '../../../shared/components/NotificationBell';
-import { useAuthedBlobUrl } from '../../../shared/hooks/useAuthedBlobUrl';
-import './ItineraryPage.css';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 // F23: categories available for the itinerary view filter (mirrors the ActivityCategory enum).
 const ACTIVITY_CATEGORIES: { value: ActivityCategory; icon: string }[] = [
@@ -39,73 +35,54 @@ const ACTIVITY_CATEGORIES: { value: ActivityCategory; icon: string }[] = [
 
 export function ItineraryPage() {
   const { t } = useTranslation();
-  const { tripId } = useParams<{ tripId: string }>();
-  const [trip, setTrip] = useState<Trip | null>(null);
+  const { trip, tripId, reloadTrip, changeSignal } = useTrip();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
+  // The day a new activity is being added to (its date pre-fills the modal); null = closed.
+  const [addDate, setAddDate] = useState<string | null>(null);
   const [showGenerate, setShowGenerate] = useState(false);
-  const [showEditStops, setShowEditStops] = useState(false);
-  const [showShare, setShowShare] = useState(false);
-  const [showExport, setShowExport] = useState(false);
   const [showImport, setShowImport] = useState(false);
-  const [showMembers, setShowMembers] = useState(false);
-  // F23: the activity being edited, and the set of categories to show (empty = show all).
   const [editing, setEditing] = useState<Activity | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<Set<ActivityCategory>>(new Set());
-  // F23: the booking being edited from a day card (adding bookings lives on the Bookings page).
   const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
-  // F22: bumps on each cover upload so the <img> reloads past the browser cache (the blob URL is stable).
-  const [coverVersion, setCoverVersion] = useState(() => Date.now());
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  // P-Auth: load the cover via fetch (with the auth header) as an object URL — an <img> can't send a
-  // bearer token. Re-fetches when coverVersion bumps after an upload.
-  const coverSrc = useAuthedBlobUrl(trip && trip.hasCoverPhoto ? tripCoverUrl(trip.id) : null, coverVersion);
+  // Which route stop is briefly highlighted (after a click in the route sidebar).
+  const [highlightStopName, setHighlightStopName] = useState<string | null>(null);
+  const highlightTimer = useRef<number | undefined>(undefined);
+  const [addingStopId, setAddingStopId] = useState<string | null>(null);
 
-  async function load() {
-    if (!tripId) return;
-    setError(null);
-    try {
-      const [tripData, activitiesData, reservationsData] = await Promise.all([
-        getTrip(tripId),
-        getActivities(tripId),
-        getReservations(tripId),
-      ]);
-      setTrip(tripData);
-      setActivities(activitiesData);
-      setReservations(reservationsData);
-    } catch {
-      setError(t('itinerary.couldNotLoad'));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => { load(); }, [tripId]);
-
-  // F32: hide controls whose feature flag is off on the server (unknown flags default to on).
   const features = useFeatures();
+  const confirm = useConfirm();
+  const stops = trip.stops;
 
-  // F15 Phase B: live collaboration — refetch when another member edits, and show who's viewing.
-  const { presentUserIds } = useTripCollaboration(tripId, load);
-  const othersViewing = Math.max(0, presentUserIds.length - 1);
+  const load = useCallback(async () => {
+    const [activitiesData, reservationsData] = await Promise.all([
+      getActivities(tripId),
+      getReservations(tripId),
+    ]);
+    setActivities(activitiesData);
+    setReservations(reservationsData);
+  }, [tripId]);
+
+  useEffect(() => { void load(); }, [load, changeSignal]);
+  useEffect(() => () => window.clearTimeout(highlightTimer.current), []);
+
+  // Derived route-stop for an activity → { place name, color } (color matches the map + legend).
+  const stopIndexById = useMemo(() => new Map(stops.map((s, i) => [s.id, i])), [stops]);
+  const stopFor = useCallback((a: Activity) => {
+    const s = nearestStop(a, stops);
+    return s ? { name: s.place, color: stopColor(stopIndexById.get(s.id) ?? 0) } : null;
+  }, [stops, stopIndexById]);
 
   async function handleDelete(id: string) {
-    if (!tripId) return;
+    if (!(await confirm())) return;
     await deleteActivity(tripId, id);
     setActivities(prev => prev.filter(a => a.id !== id));
   }
 
-  // F23: reorder a day's activities. Update local order optimistically (the list is grouped by array
-  // order within a date), then persist; revert to the server's truth on failure.
+  // F23: reorder a day's activities. Optimistic, then persist; revert on failure.
   async function handleReorder(date: string, orderedIds: string[]) {
-    if (!tripId) return;
     setActivities(prev => {
-      const reorderedForDate = orderedIds
-        .map(id => prev.find(a => a.id === id))
-        .filter((a): a is Activity => !!a);
+      const reorderedForDate = orderedIds.map(id => prev.find(a => a.id === id)).filter((a): a is Activity => !!a);
       let k = 0;
       return prev.map(a => (a.date === date ? reorderedForDate[k++] : a));
     });
@@ -116,14 +93,12 @@ export function ItineraryPage() {
     }
   }
 
-  // F23: delete a booking from its day card (also removes its linked budget expense, server-side).
   async function handleDeleteReservation(id: string) {
-    if (!tripId) return;
+    if (!(await confirm())) return;
     await deleteReservation(tripId, id);
     setReservations(prev => prev.filter(r => r.id !== id));
   }
 
-  // F23: toggle a category in the view filter.
   function toggleCategory(category: ActivityCategory) {
     setCategoryFilter(prev => {
       const next = new Set(prev);
@@ -132,48 +107,12 @@ export function ItineraryPage() {
     });
   }
 
-  // F22: change the trip's status, updating the local copy optimistically.
-  async function handleStatusChange(status: TripStatus) {
-    if (!tripId) return;
-    setTrip(prev => (prev ? { ...prev, status } : prev));
-    try {
-      await setTripStatus(tripId, status);
-    } catch {
-      load(); // revert to the server's truth on failure
-    }
-  }
-
-  // F22: upload a cover photo, then reveal it (and bust the image cache).
-  async function handleCoverSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ''; // let the same file be picked again later
-    if (!file || !tripId) return;
-    try {
-      await setTripCover(tripId, file);
-      setCoverVersion(Date.now());
-      setTrip(prev => (prev ? { ...prev, hasCoverPhoto: true } : prev));
-    } catch {
-      setError(t('itinerary.couldNotUploadCover'));
-    }
-  }
-
-  function handleCreated() {
-    setShowModal(false);
-    load();
-  }
-
-  if (loading) return <div className="itinerary-page"><p className="itinerary-page__status">{t('common.loading')}</p></div>;
-  if (error || !trip) return <div className="itinerary-page"><p className="itinerary-page__status itinerary-page__status--error">{error ?? t('itinerary.notFound')}</p></div>;
-
   const days = getDaysInRange(trip.startDate, trip.endDate);
-  // F23: dragging is disabled while a filter is active — reordering a partial list is ambiguous.
   const filterActive = categoryFilter.size > 0;
   const byDate = Object.fromEntries(days.map(d => [d, [] as Activity[]]));
   activities.forEach(a => {
     if (byDate[a.date] && (!filterActive || categoryFilter.has(a.category))) byDate[a.date].push(a);
   });
-  // F23: bookings surface on the day they start. Hidden while a category filter is active (they have
-  // no category), so the filtered view stays about activities only.
   const reservationsByDate = Object.fromEntries(days.map(d => [d, [] as Reservation[]]));
   if (!filterActive) {
     reservations.forEach(r => {
@@ -182,151 +121,159 @@ export function ItineraryPage() {
     });
   }
 
+  // Add an off-route activity's city to the route (opt-in). Resolve the city from the activity's
+  // coordinates (reverse geocode, falling back to its address), then append it as a stop — or backfill
+  // coordinates onto a same-named stop that was added without them. The layout re-fetches the trip, so
+  // the activity then matches and its "Add to route" nudge disappears.
+  async function handleAddStop(a: Activity) {
+    const lat = a.latitude != null ? Number(a.latitude) : NaN;
+    const lng = a.longitude != null ? Number(a.longitude) : NaN;
+    if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+    setAddingStopId(a.id);
+    try {
+      const city = (await reverseGeocodeCity(lat, lng)) || cityFromAddress(a.location) || a.name;
+      const toInput = (s: typeof stops[number]) => ({
+        place: s.place, arriveDate: s.arriveDate, departDate: s.departDate, latitude: s.latitude, longitude: s.longitude,
+      });
+      const existing = stops.findIndex(s => s.place.toLowerCase() === city.toLowerCase());
+      const next = existing >= 0
+        ? stops.map((s, i) => i === existing
+            ? { ...toInput(s), latitude: s.latitude ?? lat, longitude: s.longitude ?? lng }
+            : toInput(s))
+        : [...stops.map(toInput), { place: city, arriveDate: null, departDate: null, latitude: lat, longitude: lng }];
+      await setTripStops(tripId, next);
+      reloadTrip();
+    } catch {
+      /* best-effort; leave the nudge for a retry */
+    } finally {
+      setAddingStopId(null);
+    }
+  }
+
+  // Route sidebar: clicking a stop scrolls to the first day it appears on and briefly rings its cards.
+  function handleStopClick(place: string) {
+    const idx = days.findIndex(d => activities.some(a => a.date === d && stopFor(a)?.name === place));
+    if (idx >= 0) document.getElementById(`day-${idx}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setHighlightStopName(place);
+    window.clearTimeout(highlightTimer.current);
+    highlightTimer.current = window.setTimeout(() => setHighlightStopName(null), 1800);
+  }
+
   return (
-    <div className="itinerary-page">
-      <div className="itinerary-page__header">
-        <div className="itinerary-page__back">
-          <Link to="/trips">← Trips</Link>
-          <h1>{trip.name}</h1>
-          <span className="itinerary-page__destination">{trip.destination}</span>
-          {othersViewing > 0 && (
-            <span
-              className="itinerary-page__presence"
-              title={presentUserIds.join(', ')}
-            >
-              <span className="itinerary-page__presence-dot" aria-hidden="true" />
-              {t('itinerary.othersViewing', { count: othersViewing })}
-            </span>
-          )}
-        </div>
-        <div className="itinerary-page__actions">
-          {trip.status && (
-            <select
-              className="itinerary-page__status"
-              style={{ backgroundColor: tripStatusColor(trip.status) }}
-              value={trip.status}
-              onChange={e => handleStatusChange(e.target.value as TripStatus)}
-              aria-label="Trip status"
-            >
-              {TRIP_STATUSES.map(s => (
-                <option key={s} value={s}>{t(`enums.tripStatus.${s}`)}</option>
-              ))}
-            </select>
-          )}
-          <input
-            ref={coverInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            hidden
-            onChange={handleCoverSelected}
-          />
-          {isFeatureOn(features, 'TripCoverPhotos') && (
-            <button className="btn btn--ghost" onClick={() => coverInputRef.current?.click()}>
-              🖼️ {trip.hasCoverPhoto ? t('itinerary.changeCover') : t('itinerary.addCover')}
-            </button>
-          )}
-          <button className="btn btn--ghost" onClick={() => setShowEditStops(true)}>🧭 {t('itinerary.editRoute')}</button>
-          <Link className="btn btn--ghost" to={`/trips/${tripId}/bookings`}>🎫 {t('itinerary.bookings')}</Link>
-          <Link className="btn btn--ghost" to={`/trips/${tripId}/checklists`}>✅ {t('itinerary.checklists')}</Link>
-          <Link className="btn btn--ghost" to={`/trips/${tripId}/documents`}>📎 {t('itinerary.documents')}</Link>
-          <Link className="btn btn--ghost" to={`/trips/${tripId}/budget`}>💰 {t('itinerary.budget')}</Link>
-          {isFeatureOn(features, 'AiTripRecap') && (
-            <Link className="btn btn--ghost" to={`/trips/${tripId}/recap`}>📖 {t('itinerary.recap')}</Link>
-          )}
+    <div>
+      {/* View controls: category filter (left) + page actions (right), full width so the chips fit one row. */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        {activities.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground mr-0.5 text-[13px] font-semibold">{t('itinerary.filter')}</span>
+            {ACTIVITY_CATEGORIES.map(c => (
+              <button
+                key={c.value}
+                type="button"
+                className={cn(
+                  'rounded-full border px-3 py-1 text-[13px] transition-colors',
+                  categoryFilter.has(c.value)
+                    ? 'border-primary bg-primary/10 text-primary font-semibold'
+                    : 'text-foreground hover:border-primary',
+                )}
+                onClick={() => toggleCategory(c.value)}
+                aria-pressed={categoryFilter.has(c.value)}
+              >
+                {c.icon} {t(`enums.activityCategory.${c.value}`)}
+              </button>
+            ))}
+            {filterActive && (
+              <button type="button" className="text-primary px-2 py-1 text-[13px]" onClick={() => setCategoryFilter(new Set())}>
+                {t('itinerary.clear')}
+              </button>
+            )}
+          </div>
+        ) : <div />}
+
+        <div className="flex items-center gap-2">
           {isFeatureOn(features, 'AiEmailParsing') && (
-            <button className="btn btn--ghost" onClick={() => setShowImport(true)}>📧 {t('itinerary.import')}</button>
+            <Button variant="ghost" size="sm" onClick={() => setShowImport(true)}>📧 {t('itinerary.import')}</Button>
           )}
-          <button className="btn btn--ghost" onClick={() => setShowMembers(true)}>👥 {t('members.title')}</button>
-          <button className="btn btn--ghost" onClick={() => setShowShare(true)}>🔗 {t('itinerary.share')}</button>
-          <button className="btn btn--ghost" onClick={() => setShowExport(true)}>📅 {t('itinerary.export')}</button>
           {isFeatureOn(features, 'AiItineraryGeneration') && (
-            <button className="btn btn--ghost" onClick={() => setShowGenerate(true)}>✨ {t('itinerary.generate')}</button>
+            <Button variant="ghost" size="sm" onClick={() => setShowGenerate(true)}>✨ {t('itinerary.generate')}</Button>
           )}
-          <NotificationBell />
-          <LanguageSwitcher />
-          <button className="btn btn--primary" onClick={() => setShowModal(true)}>{t('itinerary.addActivity')}</button>
         </div>
       </div>
 
-      {coverSrc && (
-        <img className="itinerary-page__cover" src={coverSrc} alt="" />
-      )}
+      <div className="lg:grid lg:grid-cols-[1fr_340px] lg:items-start lg:gap-6">
+        {/* Main column: the day-by-day plan (primary). */}
+        <div className="min-w-0">
+          {filterActive && <p className="text-muted-foreground mb-2 text-xs">{t('itinerary.clearToReorder')}</p>}
 
-      {trip.stops.length > 0 && (
-        <ol className="itinerary-page__route">
-          {trip.stops.map((stop, i) => (
-            <li key={stop.id} className="itinerary-page__route-stop">
-              <span className="itinerary-page__route-num">{i + 1}</span>
-              <span className="itinerary-page__route-place">{stop.place}</span>
-              {stop.arriveDate && (
-                <span className="itinerary-page__route-dates">
-                  {stop.arriveDate}{stop.departDate ? ` – ${stop.departDate}` : ''}
-                </span>
-              )}
-            </li>
-          ))}
-        </ol>
-      )}
-
-      <TripConditions tripId={tripId!} />
-
-      <ItineraryMap activities={activities} days={days} />
-
-      {activities.length > 0 && (
-        <div className="itinerary-page__filters">
-          <span className="itinerary-page__filters-label">{t('itinerary.filter')}</span>
-          {ACTIVITY_CATEGORIES.map(c => (
-            <button
-              key={c.value}
-              type="button"
-              className={`itinerary-page__chip${categoryFilter.has(c.value) ? ' itinerary-page__chip--on' : ''}`}
-              onClick={() => toggleCategory(c.value)}
-              aria-pressed={categoryFilter.has(c.value)}
-            >
-              {c.icon} {t(`enums.activityCategory.${c.value}`)}
-            </button>
-          ))}
-          {filterActive && (
-            <button type="button" className="itinerary-page__chip-clear" onClick={() => setCategoryFilter(new Set())}>
-              {t('itinerary.clear')}
-            </button>
-          )}
+          <div className="flex flex-col gap-4">
+            {days.map((date, i) => (
+              <DaySchedule
+                key={date}
+                id={`day-${i}`}
+                date={date}
+                dayNumber={i + 1}
+                activities={byDate[date]}
+                onDelete={handleDelete}
+                onEdit={setEditing}
+                stopFor={stopFor}
+                highlightStopName={highlightStopName}
+                onAddStop={handleAddStop}
+                addingStopId={addingStopId}
+                onAddActivity={setAddDate}
+                onReorder={filterActive ? undefined : handleReorder}
+                reservations={reservationsByDate[date]}
+                onEditReservation={setEditingReservation}
+                onDeleteReservation={handleDeleteReservation}
+              />
+            ))}
+          </div>
         </div>
-      )}
-      {filterActive && (
-        <p className="itinerary-page__filter-hint">{t('itinerary.clearToReorder')}</p>
-      )}
 
-      <div className="itinerary-page__days">
-        {days.map((date, i) => (
-          <DaySchedule
-            key={date}
-            date={date}
-            dayNumber={i + 1}
-            activities={byDate[date]}
-            onDelete={handleDelete}
-            onEdit={setEditing}
-            onReorder={filterActive ? undefined : handleReorder}
-            reservations={reservationsByDate[date]}
-            onEditReservation={setEditingReservation}
-            onDeleteReservation={handleDeleteReservation}
-          />
-        ))}
+        {/* Sidebar: map + weather + route (context). Sticky on desktop; stacks below on mobile. */}
+        <aside className="mt-6 flex flex-col gap-4 lg:mt-0 lg:sticky lg:top-6">
+          <ItineraryMap activities={activities} days={days} stops={stops} />
+          <TripConditions tripId={tripId} />
+          {stops.length > 0 && (
+            <div className="rounded-xl border p-4">
+              <h3 className="text-muted-foreground mb-2 text-xs font-semibold tracking-wide uppercase">{t('itinerary.route')}</h3>
+              <ol className="flex flex-col gap-1">
+                {stops.map((s, i) => (
+                  <li key={s.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleStopClick(s.place)}
+                      className="hover:bg-muted flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
+                    >
+                      <span className="grid size-5 shrink-0 place-items-center rounded-full text-[11px] font-semibold text-white" style={{ backgroundColor: stopColor(i) }}>{i + 1}</span>
+                      <span className="text-foreground font-medium">{s.place}</span>
+                      {(s.arriveDate || s.departDate) && (
+                        <span className="text-muted-foreground ml-auto text-xs">
+                          {s.arriveDate ?? ''}{s.departDate ? ` – ${s.departDate}` : ''}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </aside>
       </div>
 
-      {showModal && (
+      {addDate && (
         <AddActivityModal
-          tripId={tripId!}
+          tripId={tripId}
+          initialDate={addDate}
           minDate={trip.startDate}
           maxDate={trip.endDate}
-          onClose={() => setShowModal(false)}
-          onCreated={handleCreated}
+          onClose={() => setAddDate(null)}
+          onCreated={() => { setAddDate(null); load(); }}
         />
       )}
 
       {editing && (
         <EditActivityModal
-          tripId={tripId!}
+          tripId={tripId}
           activity={editing}
           minDate={trip.startDate}
           maxDate={trip.endDate}
@@ -337,7 +284,7 @@ export function ItineraryPage() {
 
       {editingReservation && (
         <ReservationModal
-          tripId={tripId!}
+          tripId={tripId}
           reservation={editingReservation}
           defaultDate={trip.startDate}
           onClose={() => setEditingReservation(null)}
@@ -347,7 +294,7 @@ export function ItineraryPage() {
 
       {showGenerate && (
         <GenerateItineraryModal
-          tripId={tripId!}
+          tripId={tripId}
           startDate={trip.startDate}
           endDate={trip.endDate}
           onClose={() => setShowGenerate(false)}
@@ -355,53 +302,11 @@ export function ItineraryPage() {
         />
       )}
 
-      {showEditStops && (
-        <EditStopsModal
-          tripId={tripId!}
-          initialStops={trip.stops}
-          minDate={trip.startDate}
-          maxDate={trip.endDate}
-          onClose={() => setShowEditStops(false)}
-          onSaved={() => { setShowEditStops(false); load(); }}
-        />
-      )}
-
-      {showMembers && (
-        <MembersModal tripId={tripId!} onClose={() => setShowMembers(false)} />
-      )}
-
-      {showShare && (
-        <ShareTripModal
-          tripId={tripId!}
-          isPublic={trip.isPublic}
-          shareToken={trip.shareToken ?? null}
-          onClose={() => setShowShare(false)}
-          onChanged={load}
-        />
-      )}
-
-      {showExport && (
-        <ExportItineraryModal
-          tripId={tripId!}
-          tripName={trip.name}
-          shareToken={trip.shareToken ?? null}
-          onClose={() => setShowExport(false)}
-          onChanged={load}
-        />
-      )}
-
       {showImport && (
-        <ImportBookingModal
-          tripId={tripId!}
-          trip={trip}
-          onClose={() => setShowImport(false)}
-          onAdded={load}
-        />
+        <ImportBookingModal tripId={tripId} trip={trip} onClose={() => setShowImport(false)} onAdded={load} />
       )}
 
-      {/* F16: AI trip assistant — gated by the AiAssistant feature flag. Edits it makes refresh the
-          page via the collaboration broadcast above (useTripCollaboration(tripId, load)). */}
-      {isFeatureOn(features, 'AiAssistant') && <TripAssistantPanel tripId={tripId!} />}
+      {isFeatureOn(features, 'AiAssistant') && <TripAssistantPanel tripId={tripId} />}
     </div>
   );
 }

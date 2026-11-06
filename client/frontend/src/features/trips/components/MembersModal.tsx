@@ -10,7 +10,11 @@ import {
   setMemberRole,
   removeMember,
 } from '../services/tripsApi';
-import './MembersModal.css';
+import { useConfirm } from '../../../shared/components/ConfirmProvider';
+import { Modal, ModalBody } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 
 const ROLES: TripRole[] = ['Owner', 'Editor', 'Viewer'];
 
@@ -23,6 +27,7 @@ interface Props {
 // members (the API enforces the same, plus the last-owner guard); everyone else sees a read-only list.
 export function MembersModal({ tripId, onClose }: Props) {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [members, setMembers] = useState<TripMember[]>([]);
   const [invites, setInvites] = useState<TripInvite[]>([]);
   const [callerRole, setCallerRole] = useState<TripRole | null>(null);
@@ -75,47 +80,47 @@ export function MembersModal({ tripId, onClose }: Props) {
     }, 'members.inviteError');
   }
 
-  return (
-    <div className="members-modal__backdrop" onClick={onClose}>
-      <div className="members-modal" onClick={e => e.stopPropagation()}>
-        <div className="members-modal__head">
-          <h2>{t('members.title')}</h2>
-          <button className="members-modal__close" onClick={onClose} aria-label={t('members.close')}>×</button>
-        </div>
+  const row = 'flex items-center justify-between gap-3 border-b py-2.5 last:border-b-0';
+  const name = 'text-card-foreground text-sm font-medium';
+  const sub = 'text-muted-foreground text-xs';
 
-        {error && <p className="members-modal__error">{error}</p>}
+  return (
+    <Modal title={t('members.title')} onClose={onClose}>
+      <ModalBody>
+        {error && <p className="text-destructive text-sm">{error}</p>}
 
         {loading ? (
-          <p className="members-modal__muted">{t('members.loading')}</p>
+          <p className="text-muted-foreground text-sm">{t('members.loading')}</p>
         ) : (
-          <ul className="members-modal__list">
+          <ul className="flex flex-col">
             {members.map(m => (
-              <li key={m.userId} className="members-modal__row">
-                <div className="members-modal__person">
-                  <span className="members-modal__name">
-                    {m.displayName || m.email || m.userId.slice(0, 8)}
-                  </span>
-                  {m.email && <span className="members-modal__email">{m.email}</span>}
+              <li key={m.userId} className={row}>
+                <div className="flex min-w-0 flex-col">
+                  <span className={name}>{m.displayName || m.email || m.userId.slice(0, 8)}</span>
+                  {m.email && <span className={sub}>{m.email}</span>}
                 </div>
                 {isOwner ? (
-                  <div className="members-modal__controls">
-                    <select
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Select
+                      className="h-8 w-auto"
                       value={m.role}
                       disabled={busy}
                       onChange={e => run(() => setMemberRole(tripId, m.userId, e.target.value as TripRole), 'members.roleError')}
                     >
                       {ROLES.map(r => <option key={r} value={r}>{roleLabel(r)}</option>)}
-                    </select>
-                    <button
-                      className="members-modal__remove"
+                    </Select>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
                       disabled={busy}
-                      onClick={() => run(() => removeMember(tripId, m.userId), 'members.removeError')}
+                      onClick={async () => { if (await confirm()) run(() => removeMember(tripId, m.userId), 'members.removeError'); }}
                     >
                       {t('members.remove')}
-                    </button>
+                    </Button>
                   </div>
                 ) : (
-                  <span className="members-modal__role">{roleLabel(m.role)}</span>
+                  <span className={sub}>{roleLabel(m.role)}</span>
                 )}
               </li>
             ))}
@@ -123,22 +128,24 @@ export function MembersModal({ tripId, onClose }: Props) {
         )}
 
         {isOwner && invites.length > 0 && (
-          <div className="members-modal__pending">
-            <h3>{t('members.pending')}</h3>
-            <ul className="members-modal__list">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">{t('members.pending')}</h3>
+            <ul className="flex flex-col">
               {invites.map(inv => (
-                <li key={inv.id} className="members-modal__row">
-                  <div className="members-modal__person">
-                    <span className="members-modal__name">{inv.email}</span>
-                    <span className="members-modal__email">{roleLabel(inv.role)}</span>
+                <li key={inv.id} className={row}>
+                  <div className="flex min-w-0 flex-col">
+                    <span className={name}>{inv.email}</span>
+                    <span className={sub}>{roleLabel(inv.role)}</span>
                   </div>
-                  <button
-                    className="members-modal__remove"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
                     disabled={busy}
                     onClick={() => run(() => cancelInvite(tripId, inv.id), 'members.cancelError')}
                   >
                     {t('members.cancel')}
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -146,23 +153,22 @@ export function MembersModal({ tripId, onClose }: Props) {
         )}
 
         {isOwner && (
-          <form className="members-modal__invite" onSubmit={handleInvite}>
-            <input
+          <form className="flex items-center gap-2 pt-1" onSubmit={handleInvite}>
+            <Input
               type="email"
+              className="flex-1"
               placeholder={t('members.emailPlaceholder')}
               value={inviteEmail}
               onChange={e => setInviteEmail(e.target.value)}
               required
             />
-            <select value={inviteRole} onChange={e => setInviteRole(e.target.value as TripRole)}>
+            <Select className="w-auto" value={inviteRole} onChange={e => setInviteRole(e.target.value as TripRole)}>
               {ROLES.map(r => <option key={r} value={r}>{roleLabel(r)}</option>)}
-            </select>
-            <button type="submit" className="btn btn--primary" disabled={busy || !inviteEmail.trim()}>
-              {t('members.invite')}
-            </button>
+            </Select>
+            <Button type="submit" disabled={busy || !inviteEmail.trim()}>{t('members.invite')}</Button>
           </form>
         )}
-      </div>
-    </div>
+      </ModalBody>
+    </Modal>
   );
 }

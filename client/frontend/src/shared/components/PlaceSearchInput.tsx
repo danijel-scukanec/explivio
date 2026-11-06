@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
-import './PlaceSearchInput.css';
 
 export interface PlaceResult {
   name: string;
@@ -12,11 +11,14 @@ export interface PlaceResult {
 interface Props {
   onPlaceSelect: (result: PlaceResult) => void;
   placeholder?: string;
+  // Restrict suggestions to these Google Places primary types (e.g. ['(cities)'] for route stops, so
+  // the search offers cities/regions rather than restaurants and other POIs). Omit for all types.
+  includedPrimaryTypes?: string[];
 }
 
 setOptions({ key: import.meta.env.VITE_GOOGLE_PLACES_KEY });
 
-export function PlaceSearchInput({ onPlaceSelect, placeholder }: Props) {
+export function PlaceSearchInput({ onPlaceSelect, placeholder, includedPrimaryTypes }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const elementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
 
@@ -26,7 +28,10 @@ export function PlaceSearchInput({ onPlaceSelect, placeholder }: Props) {
     importLibrary('places').then(({ PlaceAutocompleteElement }: google.maps.PlacesLibrary) => {
       if (!containerRef.current || elementRef.current) return;
 
-      const element = new PlaceAutocompleteElement({ placeholder: placeholder ?? null });
+      const element = new PlaceAutocompleteElement({
+        placeholder: placeholder ?? null,
+        ...(includedPrimaryTypes ? { includedPrimaryTypes } : {}),
+      });
       elementRef.current = element;
       containerRef.current.appendChild(element);
 
@@ -49,5 +54,5 @@ export function PlaceSearchInput({ onPlaceSelect, placeholder }: Props) {
     };
   }, []);
 
-  return <div ref={containerRef} className="place-search-wrapper" />;
+  return <div ref={containerRef} className="w-full [&_gmp-place-autocomplete]:w-full" />;
 }

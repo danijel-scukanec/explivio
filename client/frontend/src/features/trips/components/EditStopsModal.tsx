@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import type { TripStop, TripStopInput } from '@explivio/shared';
 import { setTripStops } from '../services/tripsApi';
 import { TripStopsEditor } from './TripStopsEditor';
-import './CreateTripModal.css';
+import { Modal, ModalBody, ModalActions } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   tripId: string;
@@ -59,28 +60,20 @@ export function EditStopsModal({ tripId, initialStops, minDate, maxDate, onClose
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal__header">
-          <h2>{t('editRoute.title')}</h2>
-          <button className="modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
-        </div>
+    <Modal title={t('editRoute.title')} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+        <ModalBody>
+          <TripStopsEditor stops={stops} onChange={setStops} minDate={minDate} maxDate={maxDate} />
+          {error && <p className="text-destructive text-sm">{error}</p>}
+        </ModalBody>
 
-        <form onSubmit={handleSubmit} className="modal__form">
-          <div className="modal__stops">
-            <TripStopsEditor stops={stops} onChange={setStops} minDate={minDate} maxDate={maxDate} />
-          </div>
-
-          {error && <p className="modal__error">{error}</p>}
-
-          <div className="modal__actions">
-            <button type="button" className="btn btn--ghost" onClick={onClose}>{t('common.cancel')}</button>
-            <button type="submit" className="btn btn--primary" disabled={submitting}>
-              {submitting ? t('editRoute.saving') : t('editRoute.save')}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <ModalActions>
+          <Button type="button" variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? t('editRoute.saving') : t('editRoute.save')}
+          </Button>
+        </ModalActions>
+      </form>
+    </Modal>
   );
 }

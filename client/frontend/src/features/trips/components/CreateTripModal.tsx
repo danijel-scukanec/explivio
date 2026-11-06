@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import type { CreateTripRequest, TripStopInput } from '@explivio/shared';
 import { createTrip } from '../services/tripsApi';
 import { TripStopsEditor } from './TripStopsEditor';
-import './CreateTripModal.css';
+import { Modal, ModalBody, ModalActions } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { Field } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 
 // F25: currencies a trip's budget can be reported in.
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'AUD', 'CAD'];
@@ -62,45 +66,35 @@ export function CreateTripModal({ onClose, onCreated }: Props) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal__header">
-          <h2>{t('createTrip.title')}</h2>
-          <button className="modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
-        </div>
+    <Modal title={t('createTrip.title')} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+        <ModalBody>
+          <Field label={t('createTrip.name')}>
+            <Input name="name" value={form.name} onChange={handleChange} required placeholder={t('createTrip.namePlaceholder')} />
+          </Field>
 
-        <form onSubmit={handleSubmit} className="modal__form">
-          <label>
-            {t('createTrip.name')}
-            <input name="name" value={form.name} onChange={handleChange} required placeholder={t('createTrip.namePlaceholder')} />
-          </label>
-
-          <div className="modal__row">
-            <label>
-              {t('createTrip.startDate')}
-              <input type="date" name="startDate" value={form.startDate} onChange={handleChange} required />
-            </label>
-            <label>
-              {t('createTrip.endDate')}
-              <input type="date" name="endDate" value={form.endDate} min={form.startDate} onChange={handleChange} required />
-            </label>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t('createTrip.startDate')}>
+              <Input type="date" name="startDate" value={form.startDate} onChange={handleChange} required />
+            </Field>
+            <Field label={t('createTrip.endDate')}>
+              <Input type="date" name="endDate" value={form.endDate} min={form.startDate} onChange={handleChange} required />
+            </Field>
           </div>
 
-          <div className="modal__row">
-            <label>
-              {t('createTrip.travellers')}
-              <input type="number" name="travelerCount" value={form.travelerCount} onChange={handleChange} min={1} max={100} required />
-            </label>
-            <label>
-              {t('createTrip.baseCurrency')}
-              <select name="baseCurrency" value={form.baseCurrency} onChange={handleChange}>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t('createTrip.travellers')}>
+              <Input type="number" name="travelerCount" value={form.travelerCount} onChange={handleChange} min={1} max={100} required />
+            </Field>
+            <Field label={t('createTrip.baseCurrency')}>
+              <Select name="baseCurrency" value={form.baseCurrency} onChange={handleChange}>
                 {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </label>
+              </Select>
+            </Field>
           </div>
 
-          <div className="modal__stops">
-            <span className="modal__stops-label">{t('createTrip.destinations')}</span>
+          <div className="flex flex-col gap-2">
+            <span className="text-muted-foreground text-sm font-semibold">{t('createTrip.destinations')}</span>
             <TripStopsEditor
               stops={stops}
               onChange={setStops}
@@ -109,16 +103,16 @@ export function CreateTripModal({ onClose, onCreated }: Props) {
             />
           </div>
 
-          {error && <p className="modal__error">{error}</p>}
+          {error && <p className="text-destructive text-sm">{error}</p>}
+        </ModalBody>
 
-          <div className="modal__actions">
-            <button type="button" className="btn btn--ghost" onClick={onClose}>{t('common.cancel')}</button>
-            <button type="submit" className="btn btn--primary" disabled={submitting}>
-              {submitting ? t('createTrip.creating') : t('createTrip.create')}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <ModalActions>
+          <Button type="button" variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? t('createTrip.creating') : t('createTrip.create')}
+          </Button>
+        </ModalActions>
+      </form>
+    </Modal>
   );
 }

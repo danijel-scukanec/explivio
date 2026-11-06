@@ -2,7 +2,9 @@ import { useTranslation } from 'react-i18next';
 import type { TripStopInput } from '@explivio/shared';
 import { PlaceSearchInput } from '../../../shared/components/PlaceSearchInput';
 import type { PlaceResult } from '../../../shared/components/PlaceSearchInput';
-import './TripStopsEditor.css';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Field } from '@/components/ui/field';
 
 interface Props {
   stops: TripStopInput[];
@@ -50,56 +52,59 @@ export function TripStopsEditor({ stops, onChange, minDate, maxDate }: Props) {
   }
 
   return (
-    <div className="stops-editor">
+    <div className="flex flex-col gap-3">
       {stops.map((stop, i) => (
-        <div className="stop-row" key={i}>
-          <div className="stop-row__head">
-            <span className="stop-row__num">{i + 1}</span>
-            <input
-              className="stop-row__place"
+        <div className="bg-muted/50 flex flex-col gap-2 rounded-lg border p-3" key={i}>
+          <div className="flex items-center gap-2">
+            <span className="bg-primary text-primary-foreground grid size-6 shrink-0 place-items-center rounded-full text-xs font-semibold">
+              {i + 1}
+            </span>
+            <Input
+              className="min-w-0 flex-1"
               value={stop.place}
               onChange={e => update(i, { place: e.target.value })}
               placeholder={t('stops.cityPlace')}
               required
             />
-            <div className="stop-row__controls">
-              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label={t('stops.moveUp')}>↑</button>
-              <button type="button" onClick={() => move(i, 1)} disabled={i === stops.length - 1} aria-label={t('stops.moveDown')}>↓</button>
-              <button type="button" onClick={() => remove(i)} disabled={stops.length === 1} aria-label={t('stops.removeStop')}>✕</button>
+            <div className="flex gap-1">
+              <Button type="button" variant="outline" size="icon" className="size-8" onClick={() => move(i, -1)} disabled={i === 0} aria-label={t('stops.moveUp')}>↑</Button>
+              <Button type="button" variant="outline" size="icon" className="size-8" onClick={() => move(i, 1)} disabled={i === stops.length - 1} aria-label={t('stops.moveDown')}>↓</Button>
+              <Button type="button" variant="outline" size="icon" className="size-8" onClick={() => remove(i)} disabled={stops.length === 1} aria-label={t('stops.removeStop')}>✕</Button>
             </div>
           </div>
 
           <PlaceSearchInput
             onPlaceSelect={p => handlePlaceSelect(i, p)}
             placeholder={t('stops.searchAutofill')}
+            includedPrimaryTypes={['(cities)']}
           />
 
-          <div className="stop-row__dates">
-            <label>
-              {t('stops.arrive')}
-              <input
+          <div className="flex gap-3">
+            <Field className="text-muted-foreground flex-1 text-xs font-normal" label={t('stops.arrive')}>
+              <Input
                 type="date"
                 value={stop.arriveDate ?? ''}
                 min={minDate}
                 max={maxDate}
                 onChange={e => update(i, { arriveDate: e.target.value || null })}
               />
-            </label>
-            <label>
-              {t('stops.depart')}
-              <input
+            </Field>
+            <Field className="text-muted-foreground flex-1 text-xs font-normal" label={t('stops.depart')}>
+              <Input
                 type="date"
                 value={stop.departDate ?? ''}
                 min={stop.arriveDate ?? minDate}
                 max={maxDate}
                 onChange={e => update(i, { departDate: e.target.value || null })}
               />
-            </label>
+            </Field>
           </div>
         </div>
       ))}
 
-      <button type="button" className="stops-editor__add" onClick={add}>{t('stops.addStop')}</button>
+      <Button type="button" variant="outline" className="self-start border-dashed" onClick={add}>
+        {t('stops.addStop')}
+      </Button>
     </div>
   );
 }

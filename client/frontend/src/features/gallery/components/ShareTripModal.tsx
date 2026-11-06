@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { setTripVisibility, createShareLink, revokeShareLink, shareUrl } from '../services/galleryApi';
-import './ShareTripModal.css';
+import { Modal, ModalBody } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 // F26: the owner's share controls for a trip — list it in the public gallery, and mint/copy/revoke a
 // read-only share link. Opened from the itinerary header; reports changes back so the page can refresh
@@ -66,43 +68,36 @@ export function ShareTripModal({ tripId, isPublic, shareToken, onClose, onChange
   }
 
   return (
-    <div className="share-modal__overlay" onClick={onClose}>
-      <div className="share-modal" onClick={e => e.stopPropagation()}>
-        <div className="share-modal__head">
-          <h2>{t('share.title')}</h2>
-          <button className="share-modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
-        </div>
-
-        <label className="share-modal__row">
-          <input type="checkbox" checked={publicOn} onChange={togglePublic} disabled={busy} />
-          <span>
-            <strong>{t('share.listInGallery')}</strong>
-            <span className="share-modal__hint">{t('share.listInGalleryHint')}</span>
+    <Modal title={t('share.title')} onClose={onClose}>
+      <ModalBody>
+        <label className="hover:bg-muted/50 flex cursor-pointer items-start gap-3 rounded-lg border p-3">
+          <input type="checkbox" className="accent-primary mt-0.5 size-4" checked={publicOn} onChange={togglePublic} disabled={busy} />
+          <span className="flex flex-col gap-0.5">
+            <strong className="text-card-foreground text-sm">{t('share.listInGallery')}</strong>
+            <span className="text-muted-foreground text-xs">{t('share.listInGalleryHint')}</span>
           </span>
         </label>
 
-        <div className="share-modal__section">
-          <strong>{t('share.linkTitle')}</strong>
-          <span className="share-modal__hint">{t('share.linkHint')}</span>
+        <div className="flex flex-col gap-2">
+          <strong className="text-card-foreground text-sm">{t('share.linkTitle')}</strong>
+          <span className="text-muted-foreground text-xs">{t('share.linkHint')}</span>
           {token ? (
             <>
-              <div className="share-modal__link">
-                <input readOnly value={shareUrl(token)} onFocus={e => e.target.select()} />
-                <button className="btn btn--primary" onClick={copy}>
-                  {copied ? t('share.copied') : t('share.copy')}
-                </button>
+              <div className="flex gap-2">
+                <Input readOnly className="flex-1" value={shareUrl(token)} onFocus={e => e.target.select()} />
+                <Button onClick={copy}>{copied ? t('share.copied') : t('share.copy')}</Button>
               </div>
-              <button className="share-modal__revoke" onClick={revoke} disabled={busy}>
+              <Button variant="link" className="text-destructive self-start px-0" onClick={revoke} disabled={busy}>
                 {t('share.revoke')}
-              </button>
+              </Button>
             </>
           ) : (
-            <button className="btn btn--ghost" onClick={makeLink} disabled={busy}>
+            <Button variant="secondary" className="self-start" onClick={makeLink} disabled={busy}>
               🔗 {t('share.createLink')}
-            </button>
+            </Button>
           )}
         </div>
-      </div>
-    </div>
+      </ModalBody>
+    </Modal>
   );
 }
