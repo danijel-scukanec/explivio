@@ -334,6 +334,11 @@ app.UseRateLimiter();
 // endpoints/hubs, which all consume the internal id.
 app.UseMiddleware<CurrentUserResolutionMiddleware>();
 
+// Showcase access control: once the caller is authenticated, reject anyone not on Auth:AllowedEmails
+// (empty list = allow all, so local/dev/tests are unaffected). Stops self-registered strangers from
+// using resources (notably paid AI). After identity resolution so the user's claims are available.
+app.UseMiddleware<AllowlistMiddleware>();
+
 // F04: boundary idempotency for mutating requests carrying an Idempotency-Key. After auth so it can
 // scope keys by user, and after the rate limiter so throttled requests never reserve a key.
 app.UseIdempotency();

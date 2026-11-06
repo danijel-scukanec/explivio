@@ -17,6 +17,8 @@
 #     AZURE_ENV_NAME (e.g. explivio), AZURE_LOCATION (e.g. swedencentral)
 #     AI_ENDPOINT, AI_MODEL, AI_EMBEDDING_ENDPOINT, AI_EMBEDDING_MODEL, AI_OPENAI_RESOURCE_ID,
 #     ENTRA_AUTHORITY, ENTRA_AUDIENCE          (API bearer-token validation)
+#     ALLOWED_EMAILS (comma-separated sign-in allowlist; empty = allow everyone. Set this to lock the
+#       showcase to your own account so self-registered strangers can't use resources, notably paid AI.)
 #     VITE_ENTRA_AUTHORITY, VITE_ENTRA_CLIENT_ID, VITE_ENTRA_API_SCOPE
 #       (web SPA sign-in, baked into the build by the prepackage hook; public identifiers, not secrets.
 #        Without these the deployed SPA has no sign-in and sends no token, so the prod API 401s every
@@ -98,6 +100,7 @@ jobs:
           azd env set AI_OPENAI_RESOURCE_ID  "${{ vars.AI_OPENAI_RESOURCE_ID }}"
           azd env set ENTRA_AUTHORITY        "${{ vars.ENTRA_AUTHORITY }}"
           azd env set ENTRA_AUDIENCE         "${{ vars.ENTRA_AUDIENCE }}"
+          azd env set ALLOWED_EMAILS         "${{ vars.ALLOWED_EMAILS }}"
 
       - name: Provision + deploy (azd up)
         run: azd up --no-prompt
