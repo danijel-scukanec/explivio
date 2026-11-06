@@ -16,7 +16,11 @@
 #     AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID  (set by `azd pipeline config`)
 #     AZURE_ENV_NAME (e.g. explivio), AZURE_LOCATION (e.g. swedencentral)
 #     AI_ENDPOINT, AI_MODEL, AI_EMBEDDING_ENDPOINT, AI_EMBEDDING_MODEL, AI_OPENAI_RESOURCE_ID,
-#     ENTRA_AUTHORITY, ENTRA_AUDIENCE
+#     ENTRA_AUTHORITY, ENTRA_AUDIENCE          (API bearer-token validation)
+#     VITE_ENTRA_AUTHORITY, VITE_ENTRA_CLIENT_ID, VITE_ENTRA_API_SCOPE
+#       (web SPA sign-in, baked into the build by the prepackage hook; public identifiers, not secrets.
+#        Without these the deployed SPA has no sign-in and sends no token, so the prod API 401s every
+#        data call. The SPA's deployed origin must also be a redirect URI on its Entra app registration.)
 
 name: Deploy to Azure (manual)
 
@@ -45,6 +49,11 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      # Web SPA Entra sign-in config, read by the azure.yaml prepackage hook's `npm run build -w frontend`
+      # (Vite inlines VITE_*-prefixed env vars). Public identifiers, so plain repo variables.
+      VITE_ENTRA_AUTHORITY: ${{ vars.VITE_ENTRA_AUTHORITY }}
+      VITE_ENTRA_CLIENT_ID: ${{ vars.VITE_ENTRA_CLIENT_ID }}
+      VITE_ENTRA_API_SCOPE: ${{ vars.VITE_ENTRA_API_SCOPE }}
     steps:
       - uses: actions/checkout@v5
 
