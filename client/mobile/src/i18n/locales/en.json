@@ -8,10 +8,28 @@
     "somethingWrong": "Something went wrong. Please try again.",
     "location": "Location",
     "optional": "Optional",
+    "more": "More",
     "enterNameDate": "Please enter a name and date."
   },
   "language": {
     "label": "Language"
+  },
+  "nav": {
+    "trips": "Trips",
+    "explore": "Explore",
+    "notifications": "Alerts",
+    "profile": "Profile"
+  },
+  "settings": {
+    "title": "Profile",
+    "account": "Account",
+    "devUser": "Dev user",
+    "devHint": "Signed in with the local dev identity.",
+    "appearance": "Appearance",
+    "language": "Language",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark"
   },
   "enums": {
     "tripStatus": {

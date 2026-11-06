@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useFocusEffect, useGlobalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import type { Reservation } from '@explivio/shared';
 import { formatCurrency, formatTripDate } from '@explivio/shared';
@@ -17,14 +17,14 @@ export default function BookingsScreen() {
   const styles = useThemedStyles(makeStyles);
   const router = useRouter();
   const { t } = useTranslation();
-  const { tripId } = useLocalSearchParams<{ tripId: string }>();
+  const { tripId } = useGlobalSearchParams<{ tripId: string }>();
   const [tripName, setTripName] = useState('Bookings');
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
-    if (!tripId) return;
+    if (!tripId) { setLoading(false); return; }
     return Promise.all([getTrip(tripId), getReservations(tripId)])
       .then(([trip, data]) => { setTripName(trip.name); setReservations(data); setError(null); })
       .catch(() => setError(t('bookings.couldNotLoad')))

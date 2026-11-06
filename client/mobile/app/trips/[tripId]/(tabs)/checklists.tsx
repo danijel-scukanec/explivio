@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from 'react-native';
-import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Stack, useFocusEffect, useGlobalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import type { Checklist } from '@explivio/shared';
 import {
@@ -19,7 +19,7 @@ export default function ChecklistsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useThemedStyles(makeStyles);
-  const { tripId } = useLocalSearchParams<{ tripId: string }>();
+  const { tripId } = useGlobalSearchParams<{ tripId: string }>();
   const [tripName, setTripName] = useState('');
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ export default function ChecklistsScreen() {
   const [newListName, setNewListName] = useState('');
 
   const load = useCallback(() => {
-    if (!tripId) return;
+    if (!tripId) { setLoading(false); return; }
     return Promise.all([getTrip(tripId), getChecklists(tripId)])
       .then(([trip, lists]) => { setTripName(trip.name); setChecklists(lists); setError(null); })
       .catch(() => setError(t('checklists.couldNotLoad')))

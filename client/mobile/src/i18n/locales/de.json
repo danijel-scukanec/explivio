@@ -8,10 +8,28 @@
     "somethingWrong": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
     "location": "Ort",
     "optional": "Optional",
+    "more": "Mehr",
     "enterNameDate": "Bitte Name und Datum eingeben."
   },
   "language": {
     "label": "Sprache"
+  },
+  "nav": {
+    "trips": "Reisen",
+    "explore": "Entdecken",
+    "notifications": "Hinweise",
+    "profile": "Profil"
+  },
+  "settings": {
+    "title": "Profil",
+    "account": "Konto",
+    "devUser": "Dev-Benutzer",
+    "devHint": "Mit der lokalen Dev-Identität angemeldet.",
+    "appearance": "Darstellung",
+    "language": "Sprache",
+    "themeSystem": "System",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel"
   },
   "enums": {
     "tripStatus": {
