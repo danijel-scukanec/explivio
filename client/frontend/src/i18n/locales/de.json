@@ -5,7 +5,10 @@
     "loading": "Wird geladen…",
     "backToTrips": "← Reisen",
     "optionalNotes": "Optionale Notizen",
-    "somethingWrong": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+    "somethingWrong": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "delete": "Löschen",
+    "areYouSure": "Bist du sicher?",
+    "cantUndo": "Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "language": {
     "label": "Sprache"
@@ -85,7 +88,7 @@
   },
   "stops": {
     "cityPlace": "Stadt oder Ort",
-    "searchAutofill": "Suchen zum Ausfüllen + Karten-Pin setzen",
+    "searchAutofill": "Stadt suchen zum Ausfüllen",
     "arrive": "Ankunft",
     "depart": "Abreise",
     "addStop": "+ Stopp hinzufügen",
@@ -118,7 +121,13 @@
     "noTime": "Keine Zeit",
     "export": "Exportieren",
     "recap": "Rückblick",
-    "import": "Import"
+    "import": "Import",
+    "route": "Route",
+    "addStop": "Zur Route",
+    "addingStop": "Wird hinzugefügt…",
+    "addStopHint": "Dieser Ort ist nicht auf deiner Route — Stadt als Stopp hinzufügen",
+    "addToDay": "Hinzufügen",
+    "tripTo": "Reise nach {{name}}"
   },
   "activity": {
     "edit": "Aktivität bearbeiten",
@@ -255,7 +264,10 @@
     "couldNotClone": "Reise konnte nicht geklont werden.",
     "empty": "Noch keine öffentlichen Reisen. Veröffentliche eine über ihren Reiseplan.",
     "followingEmpty": "Noch keine Reisen von Personen, denen du folgst. Folge jemandem aus der Galerie.",
-    "tabs": { "all": "Alle", "following": "Folge ich" },
+    "tabs": {
+      "all": "Alle",
+      "following": "Folge ich"
+    },
     "by": "von {{name}}",
     "someone": "Jemand",
     "clone": "Klonen",

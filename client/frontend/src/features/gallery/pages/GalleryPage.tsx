@@ -1,13 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { GalleryItem } from '@explivio/shared';
 import {
   getGallery, getFollowingGallery, likeTrip, unlikeTrip, cloneTrip, followUser, unfollowUser,
 } from '../services/galleryApi';
 import { GalleryCard } from '../components/GalleryCard';
-import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
-import './GalleryPage.css';
+import { cn } from '@/lib/utils';
 
 type Tab = 'all' | 'following';
 
@@ -71,48 +70,47 @@ export function GalleryPage() {
     }
   }
 
+  const tabs: Tab[] = ['all', 'following'];
+
   return (
-    <div className="gallery-page">
-      <div className="gallery-page__header">
-        <div className="gallery-page__back">
-          <Link to="/trips">← {t('gallery.myTrips')}</Link>
-          <h1>{t('gallery.title')}</h1>
-          <span className="gallery-page__subtitle">{t('gallery.subtitle')}</span>
+    <div className="px-4 py-8 text-left sm:px-8">
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-foreground text-3xl font-semibold tracking-tight">{t('gallery.title')}</h1>
+          <span className="text-primary text-sm">{t('gallery.subtitle')}</span>
         </div>
-        <LanguageSwitcher />
       </div>
 
-      <div className="gallery-page__tabs" role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'all'}
-          className={`gallery-page__tab${tab === 'all' ? ' gallery-page__tab--active' : ''}`}
-          onClick={() => setTab('all')}
-        >
-          {t('gallery.tabs.all')}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'following'}
-          className={`gallery-page__tab${tab === 'following' ? ' gallery-page__tab--active' : ''}`}
-          onClick={() => setTab('following')}
-        >
-          {t('gallery.tabs.following')}
-        </button>
+      <div className="mb-5 flex gap-2" role="tablist">
+        {tabs.map(tb => (
+          <button
+            key={tb}
+            type="button"
+            role="tab"
+            aria-selected={tab === tb}
+            onClick={() => setTab(tb)}
+            className={cn(
+              'rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors',
+              tab === tb
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'text-foreground hover:border-primary',
+            )}
+          >
+            {t(`gallery.tabs.${tb}`)}
+          </button>
+        ))}
       </div>
 
       {loading ? (
-        <p className="gallery-page__status">{t('common.loading')}</p>
+        <p className="text-muted-foreground text-sm">{t('common.loading')}</p>
       ) : error ? (
-        <p className="gallery-page__status gallery-page__status--error">{error}</p>
+        <p className="text-destructive text-sm">{error}</p>
       ) : items.length === 0 ? (
-        <p className="gallery-page__empty">
+        <p className="text-muted-foreground text-sm">
           {tab === 'following' ? t('gallery.followingEmpty') : t('gallery.empty')}
         </p>
       ) : (
-        <div className="gallery-page__grid">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-[18px]">
           {items.map(item => (
             <GalleryCard
               key={item.tripId}

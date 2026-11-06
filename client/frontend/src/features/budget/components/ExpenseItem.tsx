@@ -4,7 +4,6 @@ import { formatCurrency, formatTripDate } from '@explivio/shared';
 import { useAuthedBlobUrl } from '../../../shared/hooks/useAuthedBlobUrl';
 import { receiptUrl } from '../services/budgetApi';
 import { nameFor } from '../memberNames';
-import './ExpenseItem.css';
 
 interface Props {
   expense: Expense;
@@ -36,35 +35,36 @@ export function ExpenseItem({ expense, tripId, baseCurrency, members, onDelete }
     : null;
   const shares = expense.shares ?? [];
   const isSplit = shares.length > 0;
+  const tag = 'ml-2 align-middle rounded-full px-1.5 py-px text-[11px]';
 
   return (
-    <div className="expense-item">
-      <span className="expense-item__icon">{CATEGORY_ICONS[expense.category] ?? '📌'}</span>
-      <div className="expense-item__body">
-        <span className="expense-item__description">
+    <div className="bg-card flex items-center gap-3 rounded-lg border px-3 py-2.5">
+      <span className="shrink-0 text-lg">{CATEGORY_ICONS[expense.category] ?? '📌'}</span>
+      <div className="flex flex-1 flex-col gap-0.5">
+        <span className="text-card-foreground text-[15px] font-medium">
           {expense.description}
-          {fromBooking && <span className="expense-item__tag">{t('expense.fromBooking')}</span>}
-          {isSplit && <span className="expense-item__tag expense-item__tag--split">{t('expense.splitWays', { count: shares.length })}</span>}
+          {fromBooking && <span className={`${tag} bg-primary/10 text-primary`}>{t('expense.fromBooking')}</span>}
+          {isSplit && <span className={`${tag} bg-muted text-foreground`}>{t('expense.splitWays', { count: shares.length })}</span>}
         </span>
-        <span className="expense-item__meta">
+        <span className="text-muted-foreground text-xs">
           {t(`enums.expenseCategory.${expense.category}`)} · {formatTripDate(expense.date)}
           {expense.paidByUserId && <> · {t('expense.paidBy', { name: nameFor(members, expense.paidByUserId) })}</>}
         </span>
       </div>
       {receipt && (
-        <a className="expense-item__receipt" href={receipt} target="_blank" rel="noreferrer" title={t('expense.viewReceipt')}>
-          <img src={receipt} alt={t('expense.receipt')} />
+        <a className="shrink-0 leading-none" href={receipt} target="_blank" rel="noreferrer" title={t('expense.viewReceipt')}>
+          <img className="size-[34px] rounded-md border object-cover" src={receipt} alt={t('expense.receipt')} />
         </a>
       )}
-      <span className="expense-item__amount">
+      <span className="text-card-foreground flex shrink-0 flex-col items-end text-[15px] font-semibold tabular-nums">
         {formatCurrency(Number(expense.amount), expense.currency)}
         {converted != null && (
-          <span className="expense-item__converted">≈ {formatCurrency(converted, baseCurrency)}</span>
+          <span className="text-muted-foreground text-xs font-normal">≈ {formatCurrency(converted, baseCurrency)}</span>
         )}
       </span>
       {fromBooking
-        ? <span className="expense-item__locked" title={t('expense.managedFromBooking')}>🔒</span>
-        : <button className="expense-item__delete" onClick={() => onDelete(expense.id)} aria-label={t('expense.delete')}>✕</button>
+        ? <span className="shrink-0 px-1.5 py-0.5 text-xs opacity-60" title={t('expense.managedFromBooking')}>🔒</span>
+        : <button className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 rounded px-1.5 py-0.5 text-[13px]" onClick={() => onDelete(expense.id)} aria-label={t('expense.delete')}>✕</button>
       }
     </div>
   );

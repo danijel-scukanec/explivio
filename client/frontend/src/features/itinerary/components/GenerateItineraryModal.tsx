@@ -3,8 +3,11 @@ import { useTranslation } from 'react-i18next';
 import type { CreateActivityRequest, GeneratedActivity } from '@explivio/shared';
 import { createActivity } from '../services/itineraryApi';
 import { useItineraryGeneration } from '../hooks/useItineraryGeneration';
-import '../../trips/components/CreateTripModal.css';
-import './GenerateItineraryModal.css';
+import { Modal, ModalBody } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { Field } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Props {
   tripId: string;
@@ -60,17 +63,11 @@ export function GenerateItineraryModal({ tripId, startDate, endDate, onClose, on
   const isDone = status === 'done';
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal modal--wide" onClick={e => e.stopPropagation()}>
-        <div className="modal__header">
-          <h2>{t('generate.title')}</h2>
-          <button className="modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
-        </div>
-
-        <form onSubmit={handleGenerate} className="modal__form">
-          <label>
-            {t('generate.whatKind')}
-            <textarea
+    <Modal title={t('generate.title')} onClose={onClose} className="max-w-[640px]">
+      <ModalBody>
+        <form onSubmit={handleGenerate} className="flex flex-col gap-4">
+          <Field label={t('generate.whatKind')}>
+            <Textarea
               name="prompt"
               value={form.prompt}
               onChange={handleChange}
@@ -78,64 +75,61 @@ export function GenerateItineraryModal({ tripId, startDate, endDate, onClose, on
               rows={2}
               placeholder={t('generate.promptPlaceholder')}
             />
-          </label>
+          </Field>
 
-          <div className="modal__row">
-            <label>
-              {t('generate.days')}
-              <input type="number" name="days" min={1} max={14} value={form.days} onChange={handleChange} required />
-            </label>
-            <label>
-              {t('generate.style')}
-              <input name="style" value={form.style} onChange={handleChange} placeholder={t('generate.stylePlaceholder')} />
-            </label>
-            <label>
-              {t('generate.budget')}
-              <input name="budget" value={form.budget} onChange={handleChange} placeholder={t('generate.budgetPlaceholder')} />
-            </label>
+          <div className="grid grid-cols-3 gap-3">
+            <Field label={t('generate.days')}>
+              <Input type="number" name="days" min={1} max={14} value={form.days} onChange={handleChange} required />
+            </Field>
+            <Field label={t('generate.style')}>
+              <Input name="style" value={form.style} onChange={handleChange} placeholder={t('generate.stylePlaceholder')} />
+            </Field>
+            <Field label={t('generate.budget')}>
+              <Input name="budget" value={form.budget} onChange={handleChange} placeholder={t('generate.budgetPlaceholder')} />
+            </Field>
           </div>
 
-          <div className="modal__actions">
-            <button type="submit" className="btn btn--primary" disabled={isStreaming}>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isStreaming}>
               {isStreaming ? t('generate.generating') : isDone ? t('generate.regenerate') : t('generate.generate')}
-            </button>
+            </Button>
           </div>
         </form>
 
         {(isStreaming || isDone) && (
-          <div className="gen-result">
-            {summary && <p className="gen-result__summary">{summary}</p>}
+          <div className="mt-2 border-t pt-4">
+            {summary && <p className="text-muted-foreground mb-4 text-[0.95rem]">{summary}</p>}
 
-            <div className="gen-result__cards">
+            <div className="flex max-h-[45vh] flex-col gap-2.5 overflow-y-auto">
               {activities.map((a, i) => (
-                <div className="gen-card" key={`${a.day}-${a.name}-${i}`}>
-                  <div className="gen-card__meta">
-                    <span className="gen-card__day">{t('generate.day', { number: a.day })}</span>
-                    {a.suggestedStartTime && <span className="gen-card__time">{a.suggestedStartTime}</span>}
-                    <span className={`gen-card__cat gen-card__cat--${a.category.toLowerCase()}`}>{t(`enums.activityCategory.${a.category}`)}</span>
+                <div className="bg-muted/50 animate-in fade-in slide-in-from-bottom-1 rounded-[10px] border p-3" key={`${a.day}-${a.name}-${i}`}>
+                  <div className="mb-1.5 flex items-center gap-2 text-xs">
+                    <span className="text-foreground font-semibold">{t('generate.day', { number: a.day })}</span>
+                    {a.suggestedStartTime && <span className="text-muted-foreground">{a.suggestedStartTime}</span>}
+                    <span className="border-primary/40 bg-primary/10 text-primary ml-auto rounded-full border px-2 py-0.5 text-[0.7rem]">{t(`enums.activityCategory.${a.category}`)}</span>
                   </div>
-                  <h4 className="gen-card__name">{a.name}</h4>
-                  <p className="gen-card__desc">{a.description}</p>
+                  <h4 className="text-foreground mb-0.5 text-[0.95rem] font-semibold">{a.name}</h4>
+                  <p className="text-muted-foreground text-[0.85rem] leading-snug">{a.description}</p>
                 </div>
               ))}
-              {isStreaming && <div className="gen-card gen-card--pending" aria-hidden="true" />}
+              {isStreaming && <div className="bg-muted/50 h-18 animate-pulse rounded-[10px] border border-dashed" aria-hidden="true" />}
             </div>
 
-            {error && <p className="modal__error">{error}</p>}
-            {addError && <p className="modal__error">{addError}</p>}
+            {error && <p className="text-destructive mt-2 text-sm">{error}</p>}
+            {addError && <p className="text-destructive mt-2 text-sm">{addError}</p>}
 
             {isDone && activities.length > 0 && (
-              <div className="modal__actions">
-                <button type="button" className="btn btn--ghost" onClick={onClose}>{t('common.cancel')}</button>
-                <button type="button" className="btn btn--primary" onClick={handleAddAll} disabled={adding}>
+              <div className="mt-4 flex justify-end gap-2">
+                <Button type="button" variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
+                <Button type="button" onClick={handleAddAll} disabled={adding}>
                   {adding ? t('generate.adding') : t('generate.addAll', { count: activities.length })}
-                </button>
+                </Button>
               </div>
             )}
           </div>
         )}
-      </div>
-    </div>
+      </ModalBody>
+    </Modal>
   );
 }
 

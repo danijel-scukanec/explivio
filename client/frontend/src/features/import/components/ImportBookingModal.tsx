@@ -4,8 +4,9 @@ import type { Trip, ExtractedBookings, ExtractedBookingItem } from '@explivio/sh
 import { parseBooking } from '../services/importApi';
 import { createActivity } from '../../itinerary/services/itineraryApi';
 import { createReservation } from '../../reservations/services/reservationsApi';
-import '../../trips/components/CreateTripModal.css';
-import './ImportBookingModal.css';
+import { Modal, ModalBody, ModalActions } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface Props {
   tripId: string;
@@ -132,79 +133,78 @@ export function ImportBookingModal({ tripId, trip, onClose, onAdded }: Props) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal__header">
-          <h2>{t('import.title')}</h2>
-          <button className="modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
-        </div>
+    <Modal title={t('import.title')} onClose={onClose}>
+      <ModalBody>
+        <p className="text-muted-foreground text-sm">{t('import.hint')}</p>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".eml,.txt,.html,message/rfc822,text/plain,text/html,image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleFile}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          className="self-start"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={parsing || adding}
+        >
+          {parsing ? t('import.parsing') : `📧 ${t('import.chooseFile')}`}
+        </Button>
 
-        <div className="modal__form">
-          <p className="import__hint">{t('import.hint')}</p>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".eml,.txt,.html,message/rfc822,text/plain,text/html,image/jpeg,image/png,image/webp"
-            style={{ display: 'none' }}
-            onChange={handleFile}
-          />
-          <button
-            type="button"
-            className="btn btn--ghost"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={parsing || adding}
-          >
-            {parsing ? t('import.parsing') : `📧 ${t('import.chooseFile')}`}
-          </button>
-
-          {result && (
-            <>
-              {result.summary && <p className="import__summary">{result.summary}</p>}
-              <div className="import__list">
-                {result.items.map((item, i) => {
-                  const isRes = item.kind === 'Reservation';
-                  const icon = isRes ? (KIND_ICON[item.reservationType ?? 'Other'] ?? '📌') : '📍';
-                  return (
-                    <label className={`import__item${selected.has(i) ? ' import__item--on' : ''}`} key={i}>
-                      <input type="checkbox" checked={selected.has(i)} onChange={() => toggle(i)} />
-                      <div className="import__item-body">
-                        <div className="import__item-title">
-                          {icon} {item.title}
-                          <span className="import__badge">
-                            {isRes ? (item.reservationType ?? t('import.reservation')) : t('import.activity')}
-                          </span>
-                        </div>
-                        <div className="import__item-meta">
-                          {item.date}{item.startTime ? ` · ${item.startTime}` : ''}
-                          {item.provider ? ` · ${item.provider}` : ''}
-                          {item.confirmationNumber ? ` · ${item.confirmationNumber}` : ''}
-                          {item.cost != null ? ` · ${item.cost} ${item.currency ?? ''}` : ''}
-                        </div>
+        {result && (
+          <>
+            {result.summary && <p className="text-muted-foreground text-sm">{result.summary}</p>}
+            <div className="flex max-h-[46vh] flex-col gap-2 overflow-y-auto">
+              {result.items.map((item, i) => {
+                const isRes = item.kind === 'Reservation';
+                const icon = isRes ? (KIND_ICON[item.reservationType ?? 'Other'] ?? '📌') : '📍';
+                return (
+                  <label
+                    className={cn(
+                      'flex cursor-pointer items-start gap-2.5 rounded-[10px] border px-3 py-2.5',
+                      selected.has(i) ? 'border-primary bg-primary/5' : '',
+                    )}
+                    key={i}
+                  >
+                    <input type="checkbox" className="accent-primary mt-1 size-4" checked={selected.has(i)} onChange={() => toggle(i)} />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-card-foreground flex flex-wrap items-center gap-2 font-semibold">
+                        {icon} {item.title}
+                        <span className="bg-primary/10 text-primary rounded-full px-1.5 py-0.5 text-[0.68rem] font-bold tracking-wide uppercase">
+                          {isRes ? (item.reservationType ?? t('import.reservation')) : t('import.activity')}
+                        </span>
                       </div>
-                    </label>
-                  );
-                })}
-              </div>
-            </>
-          )}
+                      <div className="text-muted-foreground mt-0.5 text-[0.82rem]">
+                        {item.date}{item.startTime ? ` · ${item.startTime}` : ''}
+                        {item.provider ? ` · ${item.provider}` : ''}
+                        {item.confirmationNumber ? ` · ${item.confirmationNumber}` : ''}
+                        {item.cost != null ? ` · ${item.cost} ${item.currency ?? ''}` : ''}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </>
+        )}
 
-          {error && <p className="modal__error">{error}</p>}
+        {error && <p className="text-destructive text-sm">{error}</p>}
+      </ModalBody>
 
-          <div className="modal__actions">
-            <button type="button" className="btn btn--ghost" onClick={onClose} disabled={adding}>
-              {t('common.cancel')}
-            </button>
-            <button
-              type="button"
-              className="btn btn--primary"
-              onClick={handleAdd}
-              disabled={adding || !result || selected.size === 0}
-            >
-              {adding ? t('import.adding') : t('import.add', { count: selected.size })}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+      <ModalActions>
+        <Button type="button" variant="secondary" onClick={onClose} disabled={adding}>
+          {t('common.cancel')}
+        </Button>
+        <Button
+          type="button"
+          onClick={handleAdd}
+          disabled={adding || !result || selected.size === 0}
+        >
+          {adding ? t('import.adding') : t('import.add', { count: selected.size })}
+        </Button>
+      </ModalActions>
+    </Modal>
   );
 }

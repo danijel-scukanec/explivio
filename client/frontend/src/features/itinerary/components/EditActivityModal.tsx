@@ -4,7 +4,11 @@ import type { Activity, ActivityCategory, UpdateActivityRequest } from '@explivi
 import { updateActivity } from '../services/itineraryApi';
 import { PlaceSearchInput } from '../../../shared/components/PlaceSearchInput';
 import type { PlaceResult } from '../../../shared/components/PlaceSearchInput';
-import '../../trips/components/CreateTripModal.css';
+import { Modal, ModalBody, ModalActions } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { Field } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 
 const CATEGORIES: ActivityCategory[] = [
   'Sightseeing', 'Food', 'Transport', 'Accommodation', 'Adventure', 'Other',
@@ -83,69 +87,57 @@ export function EditActivityModal({ tripId, activity, minDate, maxDate, onClose,
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal__header">
-          <h2>{t('editActivity.title')}</h2>
-          <button className="modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="modal__form">
-          <label>
-            {t('editActivity.changePlace')}
+    <Modal title={t('editActivity.title')} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+        <ModalBody>
+          <Field label={t('editActivity.changePlace')}>
             <PlaceSearchInput
               onPlaceSelect={handlePlaceSelect}
               placeholder={t('addActivity.searchPlaceholder')}
             />
-          </label>
+          </Field>
           {form.location && (
-            <p className="modal__place-selected">📍 {form.location}</p>
+            <p className="bg-primary/10 text-muted-foreground -mt-2 rounded-md px-2.5 py-1.5 text-[13px]">📍 {form.location}</p>
           )}
 
-          <label>
-            {t('addActivity.name')}
-            <input name="name" value={form.name} onChange={handleChange} required placeholder={t('addActivity.namePlaceholder')} />
-          </label>
+          <Field label={t('addActivity.name')}>
+            <Input name="name" value={form.name} onChange={handleChange} required placeholder={t('addActivity.namePlaceholder')} />
+          </Field>
 
-          <div className="modal__row">
-            <label>
-              {t('addActivity.date')}
-              <input type="date" name="date" value={form.date} min={minDate} max={maxDate} onChange={handleChange} required />
-            </label>
-            <label>
-              {t('addActivity.category')}
-              <select name="category" value={form.category} onChange={handleChange}>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t('addActivity.date')}>
+              <Input type="date" name="date" value={form.date} min={minDate} max={maxDate} onChange={handleChange} required />
+            </Field>
+            <Field label={t('addActivity.category')}>
+              <Select name="category" value={form.category} onChange={handleChange}>
                 {CATEGORIES.map(c => <option key={c} value={c}>{t(`enums.activityCategory.${c}`)}</option>)}
-              </select>
-            </label>
+              </Select>
+            </Field>
           </div>
 
-          <div className="modal__row">
-            <label>
-              {t('addActivity.startTime')}
-              <input type="time" name="startTime" value={form.startTime} onChange={handleChange} />
-            </label>
-            <label>
-              {t('addActivity.endTime')}
-              <input type="time" name="endTime" value={form.endTime} min={form.startTime} onChange={handleChange} />
-            </label>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t('addActivity.startTime')}>
+              <Input type="time" name="startTime" value={form.startTime} onChange={handleChange} />
+            </Field>
+            <Field label={t('addActivity.endTime')}>
+              <Input type="time" name="endTime" value={form.endTime} min={form.startTime} onChange={handleChange} />
+            </Field>
           </div>
 
-          <label>
-            {t('addActivity.notes')}
-            <input name="description" value={form.description} onChange={handleChange} placeholder={t('common.optionalNotes')} />
-          </label>
+          <Field label={t('addActivity.notes')}>
+            <Input name="description" value={form.description} onChange={handleChange} placeholder={t('common.optionalNotes')} />
+          </Field>
 
-          {error && <p className="modal__error">{error}</p>}
+          {error && <p className="text-destructive text-sm">{error}</p>}
+        </ModalBody>
 
-          <div className="modal__actions">
-            <button type="button" className="btn btn--ghost" onClick={onClose}>{t('common.cancel')}</button>
-            <button type="submit" className="btn btn--primary" disabled={submitting}>
-              {submitting ? t('editActivity.saving') : t('editActivity.save')}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <ModalActions>
+          <Button type="button" variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? t('editActivity.saving') : t('editActivity.save')}
+          </Button>
+        </ModalActions>
+      </form>
+    </Modal>
   );
 }

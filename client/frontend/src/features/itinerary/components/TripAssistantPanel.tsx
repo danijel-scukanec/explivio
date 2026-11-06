@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTripAssistant } from '../hooks/useTripAssistant';
-import './TripAssistantPanel.css';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 // F16: a floating, collapsible chat panel for the AI trip assistant. Self-contained — it owns its
 // open/close state and the conversation, so the itinerary page only has to mount it. Edits the
@@ -29,7 +31,7 @@ export function TripAssistantPanel({ tripId }: { tripId: string }) {
     return (
       <button
         type="button"
-        className="assistant-fab"
+        className="bg-primary fixed right-5 bottom-5 z-[900] size-14 rounded-full text-2xl text-white shadow-lg"
         onClick={() => setOpen(true)}
         aria-label={t('assistant.title')}
       >
@@ -41,34 +43,46 @@ export function TripAssistantPanel({ tripId }: { tripId: string }) {
   const streaming = status === 'streaming';
 
   return (
-    <section className="assistant-panel" aria-label={t('assistant.title')}>
-      <header className="assistant-panel__head">
+    <section
+      className="bg-background fixed right-5 bottom-5 z-[900] flex h-[min(540px,calc(100vh-100px))] w-[min(380px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border shadow-xl"
+      aria-label={t('assistant.title')}
+    >
+      <header className="bg-primary text-primary-foreground flex items-center justify-between px-3.5 py-3 font-bold">
         <span>💬 {t('assistant.title')}</span>
-        <button type="button" onClick={() => setOpen(false)} aria-label={t('common.close')}>
+        <button type="button" className="text-base" onClick={() => setOpen(false)} aria-label={t('common.close')}>
           ✕
         </button>
       </header>
 
-      <div className="assistant-panel__messages" ref={listRef}>
-        {messages.length === 0 && <p className="assistant-panel__empty">{t('assistant.empty')}</p>}
+      <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto p-3.5" ref={listRef}>
+        {messages.length === 0 && <p className="text-muted-foreground my-auto text-center text-sm">{t('assistant.empty')}</p>}
         {messages.map((m, i) => (
-          <div key={i} className={`assistant-msg assistant-msg--${m.role}`}>
+          <div
+            key={i}
+            className={cn(
+              'max-w-[85%] rounded-xl px-3 py-2 text-sm leading-snug break-words whitespace-pre-wrap',
+              m.role === 'user'
+                ? 'bg-primary text-primary-foreground self-end rounded-br-sm'
+                : 'bg-muted text-foreground self-start rounded-bl-sm border',
+            )}
+          >
             {m.content || (streaming && i === messages.length - 1 ? t('assistant.thinking') : '')}
           </div>
         ))}
       </div>
 
-      <form className="assistant-panel__input" onSubmit={onSubmit}>
-        <input
+      <form className="flex gap-2 border-t p-2.5" onSubmit={onSubmit}>
+        <Input
           type="text"
+          className="flex-1"
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder={t('assistant.placeholder')}
           disabled={streaming}
         />
-        <button type="submit" disabled={streaming || input.trim().length === 0}>
+        <Button type="submit" disabled={streaming || input.trim().length === 0}>
           {t('assistant.send')}
-        </button>
+        </Button>
       </form>
     </section>
   );

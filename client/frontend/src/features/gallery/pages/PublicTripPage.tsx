@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { Trip } from '@explivio/shared';
 import { formatTripDate } from '@explivio/shared';
 import { getGalleryTrip, getSharedTrip, cloneTrip } from '../services/galleryApi';
-import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
-import './PublicTripPage.css';
+import { Button } from '@/components/ui/button';
 
 // F26: a read-only view of a trip reached from the gallery (/gallery/:tripId) or a share link
 // (/shared/:token). Same component, two sources. Anyone viewing can clone it into their own trips.
@@ -40,38 +39,39 @@ export function PublicTripPage({ mode }: { mode: 'gallery' | 'shared' }) {
     }
   }
 
-  if (loading) return <div className="public-trip"><p className="public-trip__status">{t('common.loading')}</p></div>;
-  if (error || !trip) return <div className="public-trip"><p className="public-trip__status public-trip__status--error">{error ?? t('gallery.tripNotFound')}</p></div>;
+  if (loading) return <div className="px-5 py-6 sm:px-8 sm:py-10"><p className="text-muted-foreground text-sm">{t('common.loading')}</p></div>;
+  if (error || !trip) return <div className="px-5 py-6 sm:px-8 sm:py-10"><p className="text-destructive text-sm">{error ?? t('gallery.tripNotFound')}</p></div>;
 
   return (
-    <div className="public-trip">
-      <div className="public-trip__header">
-        <div className="public-trip__back">
-          <Link to={mode === 'gallery' ? '/gallery' : '/trips'}>
+    <div className="max-w-[820px] px-5 py-6 text-left sm:px-8 sm:py-10">
+      <div className="mb-3 flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <Link to={mode === 'gallery' ? '/gallery' : '/trips'} className="text-muted-foreground hover:text-primary text-sm">
             ← {mode === 'gallery' ? t('gallery.title') : t('gallery.myTrips')}
           </Link>
-          <h1>{trip.name}</h1>
-          <span className="public-trip__route">{trip.destination}</span>
+          <h1 className="text-foreground text-2xl font-semibold">{trip.name}</h1>
+          <span className="text-primary text-base">{trip.destination}</span>
         </div>
-        <div className="public-trip__actions">
-          <LanguageSwitcher />
-          <button className="btn btn--primary" onClick={handleClone} disabled={cloning}>
+        <div className="flex items-center gap-2">
+          <Button onClick={handleClone} disabled={cloning}>
             {cloning ? t('gallery.cloning') : `📋 ${t('gallery.cloneToMyTrips')}`}
-          </button>
+          </Button>
         </div>
       </div>
 
-      <p className="public-trip__meta">
+      <p className="text-muted-foreground mb-5 text-sm">
         {formatTripDate(trip.startDate)} – {formatTripDate(trip.endDate)} · {t('gallery.travelers', { count: Number(trip.travelerCount) })}
       </p>
 
-      <ol className="public-trip__stops">
+      <ol className="flex flex-col gap-2">
         {trip.stops.map((s, i) => (
-          <li key={s.id} className="public-trip__stop">
-            <span className="public-trip__stop-num">{i + 1}</span>
-            <span className="public-trip__stop-place">{s.place}</span>
+          <li key={s.id} className="bg-card flex items-center gap-3 rounded-xl border px-3.5 py-3">
+            <span className="bg-primary grid size-6 shrink-0 place-items-center rounded-full text-[13px] font-bold text-white">
+              {i + 1}
+            </span>
+            <span className="text-card-foreground flex-1 text-[15px] font-semibold">{s.place}</span>
             {(s.arriveDate || s.departDate) && (
-              <span className="public-trip__stop-dates">
+              <span className="text-muted-foreground text-[13px]">
                 {s.arriveDate ? formatTripDate(s.arriveDate) : ''}
                 {s.departDate ? ` – ${formatTripDate(s.departDate)}` : ''}
               </span>

@@ -9,7 +9,8 @@ import { useFeatures, isFeatureOn } from '../hooks/useFeatures';
 import {
   isWebPushSupported, getWebPushState, enableWebPush, disableWebPush, type WebPushState,
 } from '../push/webPush';
-import './NotificationBell.css';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const KIND_ICON: Record<string, string> = {
   ActivityAdded: '🗺️',
@@ -104,34 +105,38 @@ export function NotificationBell() {
   }
 
   return (
-    <div className="notif" ref={ref}>
-      <button
-        className="notif__bell btn btn--ghost"
+    <div className="relative inline-block" ref={ref}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative text-lg"
         onClick={toggle}
         aria-label={t('notifications.title')}
       >
         🔔
         {feed.unreadCount > 0 && (
-          <span className="notif__badge">{feed.unreadCount > 9 ? '9+' : feed.unreadCount}</span>
+          <span className="bg-destructive absolute -top-1 -right-1 grid h-4 min-w-4 place-items-center rounded-lg px-1 text-[10px] font-bold text-white">
+            {feed.unreadCount > 9 ? '9+' : feed.unreadCount}
+          </span>
         )}
-      </button>
+      </Button>
 
       {open && (
-        <div className="notif__panel">
-          <div className="notif__head">
-            <strong>{t('notifications.title')}</strong>
+        <div className="bg-popover absolute top-[calc(100%+8px)] right-0 z-50 max-h-[420px] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-xl border shadow-lg">
+          <div className="bg-popover sticky top-0 flex items-center justify-between border-b px-3.5 py-2.5">
+            <strong className="text-popover-foreground text-sm">{t('notifications.title')}</strong>
             {feed.items.some(n => !n.isRead) && (
-              <button className="notif__markall" onClick={markAll}>{t('notifications.markAllRead')}</button>
+              <button className="text-primary text-xs" onClick={markAll}>{t('notifications.markAllRead')}</button>
             )}
           </div>
 
           {pushEnabled && pushState && (
-            <div className="notif__push">
+            <div className="bg-popover border-b px-3.5 py-2">
               {pushState.permission === 'denied' && !pushState.subscribed ? (
-                <span className="notif__push-hint">{t('notifications.pushBlocked')}</span>
+                <span className="text-muted-foreground block text-center text-[11px]">{t('notifications.pushBlocked')}</span>
               ) : (
                 <button
-                  className="notif__push-btn"
+                  className="border-primary text-primary hover:bg-accent w-full rounded-md border px-2.5 py-1.5 text-xs font-semibold disabled:opacity-60"
                   onClick={togglePush}
                   disabled={pushBusy}
                 >
@@ -142,23 +147,26 @@ export function NotificationBell() {
           )}
 
           {feed.items.length === 0 ? (
-            <p className="notif__empty">{t('notifications.empty')}</p>
+            <p className="text-muted-foreground px-3.5 py-6 text-center text-[13px]">{t('notifications.empty')}</p>
           ) : (
-            <ul className="notif__list">
+            <ul>
               {feed.items.map(n => (
                 <li key={n.id}>
                   <button
-                    className={`notif__item${n.isRead ? '' : ' notif__item--unread'}`}
+                    className={cn(
+                      'hover:bg-accent flex w-full gap-2.5 border-b px-3.5 py-2.5 text-left',
+                      !n.isRead && 'bg-primary/5',
+                    )}
                     onClick={() => openItem(n)}
                   >
-                    <span className="notif__icon">{KIND_ICON[n.kind] ?? '🔔'}</span>
-                    <span className="notif__text">
-                      <span className="notif__title">{n.tripName}</span>
-                      <span className="notif__detail">
+                    <span className="shrink-0 text-lg">{KIND_ICON[n.kind] ?? '🔔'}</span>
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-popover-foreground text-[13px] font-semibold">{n.tripName}</span>
+                      <span className="text-muted-foreground text-xs">
                         {t(`notifications.kind.${n.kind}`, { defaultValue: n.kind })}
                         {n.detail ? ` · ${n.detail}` : ''}
                       </span>
-                      <span className="notif__time">{relativeTime(n.createdAt, i18n.language)}</span>
+                      <span className="text-muted-foreground text-[11px]">{relativeTime(n.createdAt, i18n.language)}</span>
                     </span>
                   </button>
                 </li>

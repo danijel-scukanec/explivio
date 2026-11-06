@@ -5,7 +5,10 @@
     "loading": "Cargando…",
     "backToTrips": "← Viajes",
     "optionalNotes": "Notas opcionales",
-    "somethingWrong": "Algo salió mal. Inténtalo de nuevo."
+    "somethingWrong": "Algo salió mal. Inténtalo de nuevo.",
+    "delete": "Eliminar",
+    "areYouSure": "¿Estás seguro?",
+    "cantUndo": "Esta acción no se puede deshacer."
   },
   "language": {
     "label": "Idioma"
@@ -85,7 +88,7 @@
   },
   "stops": {
     "cityPlace": "Ciudad o lugar",
-    "searchAutofill": "Busca para autocompletar + fijar en el mapa",
+    "searchAutofill": "Busca una ciudad para autocompletar",
     "arrive": "Llegada",
     "depart": "Salida",
     "addStop": "+ Añadir parada",
@@ -118,7 +121,13 @@
     "noTime": "Sin hora",
     "export": "Exportar",
     "recap": "Resumen",
-    "import": "Importar"
+    "import": "Importar",
+    "route": "Ruta",
+    "addStop": "Añadir a la ruta",
+    "addingStop": "Añadiendo…",
+    "addStopHint": "Este lugar no está en tu ruta — añade su ciudad como parada",
+    "addToDay": "Añadir",
+    "tripTo": "Viaje a {{name}}"
   },
   "activity": {
     "edit": "Editar actividad",
@@ -255,7 +264,10 @@
     "couldNotClone": "No se pudo clonar el viaje.",
     "empty": "Aún no hay viajes públicos. Publica uno desde su itinerario para empezar.",
     "followingEmpty": "Aún no hay viajes de personas que sigues. Sigue a alguien desde la galería.",
-    "tabs": { "all": "Todos", "following": "Siguiendo" },
+    "tabs": {
+      "all": "Todos",
+      "following": "Siguiendo"
+    },
     "by": "por {{name}}",
     "someone": "Alguien",
     "clone": "Clonar",

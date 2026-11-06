@@ -5,7 +5,10 @@
     "loading": "Loading…",
     "backToTrips": "← Trips",
     "optionalNotes": "Optional notes",
-    "somethingWrong": "Something went wrong. Please try again."
+    "somethingWrong": "Something went wrong. Please try again.",
+    "delete": "Delete",
+    "areYouSure": "Are you sure?",
+    "cantUndo": "This action can’t be undone."
   },
   "language": {
     "label": "Language"
@@ -85,7 +88,7 @@
   },
   "stops": {
     "cityPlace": "City or place",
-    "searchAutofill": "Search to autofill + drop a map pin",
+    "searchAutofill": "Search for a city to autofill",
     "arrive": "Arrive",
     "depart": "Depart",
     "addStop": "+ Add stop",
@@ -118,7 +121,13 @@
     "noTime": "No time",
     "export": "Export",
     "recap": "Recap",
-    "import": "Import"
+    "import": "Import",
+    "route": "Route",
+    "addStop": "Add to route",
+    "addingStop": "Adding…",
+    "addStopHint": "This place isn’t on your route — add its city as a stop",
+    "addToDay": "Add",
+    "tripTo": "Trip to {{name}}"
   },
   "activity": {
     "edit": "Edit activity",
@@ -255,7 +264,10 @@
     "couldNotClone": "Could not clone the trip.",
     "empty": "No public trips yet. Publish one from its itinerary to get started.",
     "followingEmpty": "No trips from people you follow yet. Follow someone from the gallery.",
-    "tabs": { "all": "All", "following": "Following" },
+    "tabs": {
+      "all": "All",
+      "following": "Following"
+    },
     "by": "by {{name}}",
     "someone": "Someone",
     "clone": "Clone",

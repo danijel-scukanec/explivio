@@ -6,8 +6,7 @@ import {
   getUserProfile, getUserTrips, followUser, unfollowUser, likeTrip, unlikeTrip, cloneTrip,
 } from '../services/galleryApi';
 import { GalleryCard } from '../components/GalleryCard';
-import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
-import './UserProfilePage.css';
+import { Button } from '@/components/ui/button';
 
 export function UserProfilePage() {
   const { userId = '' } = useParams();
@@ -73,45 +72,51 @@ export function UserProfilePage() {
   }
 
   return (
-    <div className="profile-page">
-      <div className="profile-page__topbar">
-        <Link to="/gallery">← {t('profile.backToGallery')}</Link>
-        <LanguageSwitcher />
+    <div className="px-5 py-6 text-left sm:px-8 sm:py-10">
+      <div className="mb-6 flex items-center justify-between">
+        <Link to="/gallery" className="text-muted-foreground hover:text-primary text-sm">
+          ← {t('profile.backToGallery')}
+        </Link>
       </div>
 
       {loading ? (
-        <p className="profile-page__status">{t('common.loading')}</p>
+        <p className="text-muted-foreground text-sm">{t('common.loading')}</p>
       ) : error || !profile ? (
-        <p className="profile-page__status profile-page__status--error">{error ?? t('profile.couldNotLoad')}</p>
+        <p className="text-destructive text-sm">{error ?? t('profile.couldNotLoad')}</p>
       ) : (
         <>
-          <header className="profile-page__header">
-            <div className="profile-page__avatar" aria-hidden>
+          <header className="mb-7 flex items-center gap-4">
+            <div
+              className="grid size-16 shrink-0 place-items-center rounded-full text-[28px] font-bold text-white"
+              style={{ background: 'linear-gradient(135deg, var(--primary), oklch(0.72 0.19 303.9))' }}
+              aria-hidden
+            >
               {(profile.displayName || '?').charAt(0).toUpperCase()}
             </div>
-            <div className="profile-page__meta">
-              <h1>{profile.displayName || t('gallery.someone')}</h1>
-              <div className="profile-page__counts">
-                <span><strong>{profile.followerCount}</strong> {t('social.followers')}</span>
-                <span><strong>{profile.followingCount}</strong> {t('social.followingCount')}</span>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-foreground mb-1 text-2xl font-semibold">{profile.displayName || t('gallery.someone')}</h1>
+              <div className="text-muted-foreground flex gap-4 text-sm">
+                <span><strong className="text-foreground">{profile.followerCount}</strong> {t('social.followers')}</span>
+                <span><strong className="text-foreground">{profile.followingCount}</strong> {t('social.followingCount')}</span>
               </div>
             </div>
             {!profile.isMe && (
-              <button
+              <Button
                 type="button"
-                className={`profile-page__follow${profile.followedByMe ? ' profile-page__follow--on' : ''}`}
+                variant={profile.followedByMe ? 'outline' : 'default'}
+                className="shrink-0 rounded-full px-5"
                 onClick={toggleFollow}
                 aria-pressed={profile.followedByMe}
               >
                 {profile.followedByMe ? t('social.following') : t('social.follow')}
-              </button>
+              </Button>
             )}
           </header>
 
           {items.length === 0 ? (
-            <p className="profile-page__empty">{t('profile.noTrips')}</p>
+            <p className="text-muted-foreground text-sm">{t('profile.noTrips')}</p>
           ) : (
-            <div className="profile-page__grid">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-[18px]">
               {items.map(item => (
                 <GalleryCard
                   key={item.tripId}

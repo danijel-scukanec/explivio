@@ -4,8 +4,12 @@ import type { ExpenseCategory, AddExpenseRequest, ExpenseShareInput, TripMember 
 import { addExpense, scanReceipt, uploadReceipt } from '../services/budgetApi';
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
 import { memberName } from '../memberNames';
-import '../../trips/components/CreateTripModal.css';
-import './AddExpenseModal.css';
+import { Modal, ModalBody, ModalActions } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import { Field } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 const CATEGORIES: ExpenseCategory[] = [
   'Transport', 'Accommodation', 'Food', 'Activities', 'Shopping', 'Other',
@@ -154,16 +158,11 @@ export function AddExpenseModal({ tripId, defaultDate, defaultCurrency, members,
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal__header">
-          <h2>{t('addExpense.title')}</h2>
-          <button className="modal__close" onClick={onClose} aria-label={t('common.close')}>✕</button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="modal__form">
+    <Modal title={t('addExpense.title')} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+        <ModalBody>
           {canScan && (
-            <div className="receipt-scan">
+            <div className="flex items-center gap-2.5">
               <input
                 ref={fileRef}
                 type="file"
@@ -171,90 +170,83 @@ export function AddExpenseModal({ tripId, defaultDate, defaultCurrency, members,
                 hidden
                 onChange={handleReceipt}
               />
-              <button
+              <Button
                 type="button"
-                className="btn btn--ghost receipt-scan__btn"
+                variant="secondary"
                 onClick={() => fileRef.current?.click()}
                 disabled={scanning}
               >
                 {scanning ? t('addExpense.scanning') : t('addExpense.scanReceipt')}
-              </button>
+              </Button>
               {receiptFile && !scanning && (
-                <span className="receipt-scan__file">📎 {receiptFile.name}</span>
+                <span className="text-muted-foreground truncate text-[13px]">📎 {receiptFile.name}</span>
               )}
             </div>
           )}
 
-          <label>
-            {t('addExpense.description')}
-            <input name="description" value={form.description} onChange={handleChange} required maxLength={300} placeholder={t('addExpense.descriptionPlaceholder')} />
-          </label>
+          <Field label={t('addExpense.description')}>
+            <Input name="description" value={form.description} onChange={handleChange} required maxLength={300} placeholder={t('addExpense.descriptionPlaceholder')} />
+          </Field>
 
-          <div className="modal__row">
-            <label>
-              {t('addExpense.amount')}
-              <input type="number" name="amount" value={form.amount} onChange={handleChange} required min="0" step="0.01" placeholder="0.00" />
-            </label>
-            <label>
-              {t('addExpense.currency')}
-              <select name="currency" value={form.currency} onChange={handleChange}>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t('addExpense.amount')}>
+              <Input type="number" name="amount" value={form.amount} onChange={handleChange} required min="0" step="0.01" placeholder="0.00" />
+            </Field>
+            <Field label={t('addExpense.currency')}>
+              <Select name="currency" value={form.currency} onChange={handleChange}>
                 {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </label>
+              </Select>
+            </Field>
           </div>
 
-          <div className="modal__row">
-            <label>
-              {t('addExpense.category')}
-              <select name="category" value={form.category} onChange={handleChange}>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t('addExpense.category')}>
+              <Select name="category" value={form.category} onChange={handleChange}>
                 {CATEGORIES.map(c => <option key={c} value={c}>{t(`enums.expenseCategory.${c}`)}</option>)}
-              </select>
-            </label>
-            <label>
-              {t('addExpense.date')}
-              <input type="date" name="date" value={form.date} onChange={handleChange} required />
-            </label>
+              </Select>
+            </Field>
+            <Field label={t('addExpense.date')}>
+              <Input type="date" name="date" value={form.date} onChange={handleChange} required />
+            </Field>
           </div>
 
           {canSplit && (
-            <div className="split">
-              <label className="split__toggle">
-                <input type="checkbox" checked={split} onChange={e => setSplit(e.target.checked)} />
+            <div className="border-t pt-3">
+              <label className="text-card-foreground flex cursor-pointer items-center gap-2 text-sm">
+                <input type="checkbox" className="accent-primary size-4" checked={split} onChange={e => setSplit(e.target.checked)} />
                 {t('addExpense.splitExpense')}
               </label>
 
               {split && (
-                <div className="split__body">
-                  <div className="modal__row">
-                    <label>
-                      {t('addExpense.paidBy')}
-                      <select value={paidBy} onChange={e => setPaidBy(e.target.value)}>
+                <div className="mt-3 flex flex-col gap-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label={t('addExpense.paidBy')}>
+                      <Select value={paidBy} onChange={e => setPaidBy(e.target.value)}>
                         {members.map(m => <option key={m.userId} value={m.userId}>{memberName(m)}</option>)}
-                      </select>
-                    </label>
-                    <label>
-                      {t('addExpense.splitMode')}
-                      <select value={mode} onChange={e => setMode(e.target.value as 'equal' | 'custom')}>
+                      </Select>
+                    </Field>
+                    <Field label={t('addExpense.splitMode')}>
+                      <Select value={mode} onChange={e => setMode(e.target.value as 'equal' | 'custom')}>
                         <option value="equal">{t('addExpense.splitEqual')}</option>
                         <option value="custom">{t('addExpense.splitCustom')}</option>
-                      </select>
-                    </label>
+                      </Select>
+                    </Field>
                   </div>
 
-                  <div className="split__members">
+                  <div className="flex flex-col gap-1.5">
                     {members.map(m => {
                       const isSelected = selected.has(m.userId);
                       return (
-                        <div className={`split__member${isSelected ? ' split__member--on' : ''}`} key={m.userId}>
-                          <label className="split__member-pick">
-                            <input type="checkbox" checked={isSelected} onChange={() => toggleMember(m.userId)} />
+                        <div className={cn('flex items-center justify-between gap-2.5 rounded-lg border px-2.5 py-1.5', isSelected ? 'border-primary' : 'opacity-60')} key={m.userId}>
+                          <label className="text-card-foreground flex cursor-pointer items-center gap-2 text-sm">
+                            <input type="checkbox" className="accent-primary size-4" checked={isSelected} onChange={() => toggleMember(m.userId)} />
                             {memberName(m)}
                           </label>
                           {isSelected && (
                             mode === 'equal'
-                              ? <span className="split__share">{(shares[m.userId] ?? 0).toFixed(2)}</span>
-                              : <input
-                                  className="split__share-input"
+                              ? <span className="text-muted-foreground text-sm tabular-nums">{(shares[m.userId] ?? 0).toFixed(2)}</span>
+                              : <Input
+                                  className="h-8 w-24 text-right"
                                   type="number" min="0" step="0.01"
                                   value={customAmounts[m.userId] ?? ''}
                                   onChange={e => setCustomAmounts(prev => ({ ...prev, [m.userId]: e.target.value }))}
@@ -266,7 +258,7 @@ export function AddExpenseModal({ tripId, defaultDate, defaultCurrency, members,
                     })}
                   </div>
 
-                  <div className={`split__summary${splitBalanced ? '' : ' split__summary--off'}`}>
+                  <div className={cn('text-[13px] tabular-nums', splitBalanced ? 'text-muted-foreground' : 'text-destructive')}>
                     {t('addExpense.splitTotal', {
                       total: sharesTotal.toFixed(2),
                       amount: amount.toFixed(2),
@@ -278,16 +270,16 @@ export function AddExpenseModal({ tripId, defaultDate, defaultCurrency, members,
             </div>
           )}
 
-          {error && <p className="modal__error">{error}</p>}
+          {error && <p className="text-destructive text-sm">{error}</p>}
+        </ModalBody>
 
-          <div className="modal__actions">
-            <button type="button" className="btn btn--ghost" onClick={onClose}>{t('common.cancel')}</button>
-            <button type="submit" className="btn btn--primary" disabled={submitting}>
-              {submitting ? t('addExpense.adding') : t('addExpense.add')}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <ModalActions>
+          <Button type="button" variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? t('addExpense.adding') : t('addExpense.add')}
+          </Button>
+        </ModalActions>
+      </form>
+    </Modal>
   );
 }

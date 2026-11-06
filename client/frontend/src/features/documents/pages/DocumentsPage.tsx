@@ -1,13 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Trip, TripDocument } from '@explivio/shared';
+import type { TripDocument } from '@explivio/shared';
 import { formatTripDate } from '@explivio/shared';
-import { getTrip } from '../../trips/services/tripsApi';
 import { getDocuments, uploadDocument, deleteDocument, downloadDocument } from '../services/documentsApi';
-import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
-import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
-import './DocumentsPage.css';
+import { useTrip } from '../../trips/pages/TripLayout';
+import { useConfirm } from '../../../shared/components/ConfirmProvider';
+import { Button } from '@/components/ui/button';
 
 // A human-readable size: bytes → "12 KB", "3.4 MB".
 function formatSize(bytes: number): string {
@@ -27,38 +25,28 @@ function fileIcon(contentType: string): string {
 
 export function DocumentsPage() {
   const { t } = useTranslation();
-  const { tripId } = useParams<{ tripId: string }>();
-  const [trip, setTrip] = useState<Trip | null>(null);
+  const { tripId, changeSignal } = useTrip();
+  const confirm = useConfirm();
   const [documents, setDocuments] = useState<TripDocument[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  async function load() {
-    if (!tripId) return;
+  const load = useCallback(async () => {
     setError(null);
     try {
-      const [tripData, docs] = await Promise.all([getTrip(tripId), getDocuments(tripId)]);
-      setTrip(tripData);
-      setDocuments(docs);
+      setDocuments(await getDocuments(tripId));
     } catch {
       setError(t('documents.couldNotLoad'));
-    } finally {
-      setLoading(false);
     }
-  }
+  }, [tripId, t]);
 
-  useEffect(() => { load(); }, [tripId]);
-
-  // F15: live collaboration — refetch when another member adds or removes a document.
-  const { presentUserIds } = useTripCollaboration(tripId, load);
-  const othersViewing = Math.max(0, presentUserIds.length - 1);
+  useEffect(() => { void load(); }, [load, changeSignal]);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = ''; // allow re-selecting the same file later
-    if (!tripId || !file) return;
+    if (!file) return;
     setError(null);
     setUploading(true);
     try {
@@ -72,70 +60,46 @@ export function DocumentsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!tripId) return;
+    if (!(await confirm())) return;
     await deleteDocument(tripId, id);
     load();
   }
 
-  if (loading) return <div className="documents-page"><p className="documents-page__status">{t('common.loading')}</p></div>;
-  if (error && !trip) return <div className="documents-page"><p className="documents-page__status documents-page__status--error">{error}</p></div>;
-  if (!trip) return <div className="documents-page"><p className="documents-page__status documents-page__status--error">{t('documents.notFound')}</p></div>;
-
   return (
-    <div className="documents-page">
-      <div className="documents-page__header">
-        <div className="documents-page__back">
-          <Link to="/trips">← Trips</Link>
-          <h1>{trip.name}</h1>
-          <span className="documents-page__destination">{trip.destination}</span>
-          {othersViewing > 0 && (
-            <span className="documents-page__presence" title={presentUserIds.join(', ')}>
-              <span className="documents-page__presence-dot" aria-hidden="true" />
-              {t('itinerary.othersViewing', { count: othersViewing })}
-            </span>
-          )}
-        </div>
-        <div className="documents-page__actions">
-          <Link className="btn btn--ghost" to={`/trips/${tripId}/itinerary`}>🗓 {t('documents.itinerary')}</Link>
-          <Link className="btn btn--ghost" to={`/trips/${tripId}/checklists`}>✅ {t('documents.checklists')}</Link>
-          <LanguageSwitcher />
-          <input
-            ref={fileInputRef}
-            type="file"
-            hidden
-            onChange={handleUpload}
-            accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.heic,.txt,.csv,.doc,.docx,.xls,.xlsx"
-          />
-          <button
-            className="btn btn--primary"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-          >
-            {uploading ? t('documents.uploading') : t('documents.upload')}
-          </button>
-        </div>
+    <div>
+      <div className="mb-4 flex items-center justify-end">
+        <input
+          ref={fileInputRef}
+          type="file"
+          hidden
+          onChange={handleUpload}
+          accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.heic,.txt,.csv,.doc,.docx,.xls,.xlsx"
+        />
+        <Button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+          {uploading ? t('documents.uploading') : t('documents.upload')}
+        </Button>
       </div>
 
-      {error && <p className="documents-page__status documents-page__status--error">{error}</p>}
+      {error && <p className="text-destructive mb-3 text-sm">{error}</p>}
 
       {documents.length === 0
-        ? <p className="documents-page__empty">{t('documents.empty')}</p>
+        ? <p className="text-muted-foreground text-sm">{t('documents.empty')}</p>
         : (
-          <ul className="documents-page__list">
+          <ul className="flex max-w-[720px] flex-col gap-2">
             {documents.map(doc => (
-              <li key={doc.id} className="document">
-                <span className="document__icon" aria-hidden="true">{fileIcon(doc.contentType)}</span>
+              <li key={doc.id} className="group bg-card flex items-center gap-3 rounded-xl border px-3.5 py-3">
+                <span className="text-xl leading-none" aria-hidden="true">{fileIcon(doc.contentType)}</span>
                 <button
                   type="button"
-                  className="document__name document__name--btn"
-                  onClick={() => downloadDocument(tripId!, doc.id, doc.fileName)}
+                  className="text-card-foreground hover:text-primary flex-1 truncate text-left text-sm font-medium hover:underline"
+                  onClick={() => downloadDocument(tripId, doc.id, doc.fileName)}
                 >
                   {doc.fileName}
                 </button>
-                <span className="document__meta">{formatSize(Number(doc.sizeBytes))} · {formatTripDate(doc.uploadedAt)}</span>
+                <span className="text-muted-foreground text-[13px] whitespace-nowrap tabular-nums">{formatSize(Number(doc.sizeBytes))} · {formatTripDate(doc.uploadedAt)}</span>
                 <button
                   type="button"
-                  className="document__delete"
+                  className="text-muted-foreground hover:text-destructive rounded p-1 text-sm opacity-0 group-hover:opacity-50 hover:!opacity-100"
                   onClick={() => handleDelete(doc.id)}
                   aria-label={t('documents.delete')}
                   title={t('documents.delete')}
