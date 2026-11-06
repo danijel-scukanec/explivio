@@ -90,9 +90,10 @@ hooks:
         done
         az containerapp update -g "$RG" -n api --set-env-vars \
           "Entra__Authority=$ENTRA_AUTHORITY" \
-          "Entra__Audience=$ENTRA_AUDIENCE" -o none
+          "Entra__Audience=$ENTRA_AUDIENCE" \
+          "Auth__AllowedEmails=${ALLOWED_EMAILS:-}" -o none
         az containerapp ingress update -g "$RG" -n api --type external -o none || true
-        echo "postdeploy: applied AI + Entra config (api, aiworker); api ingress external."
+        echo "postdeploy: applied AI + Entra + allowlist config (api, aiworker); api ingress external."
     windows:
       shell: pwsh
       continueOnError: false
@@ -116,6 +117,7 @@ hooks:
         }
         az containerapp update -g $RG -n api --set-env-vars `
           "Entra__Authority=$($env:ENTRA_AUTHORITY)" `
-          "Entra__Audience=$($env:ENTRA_AUDIENCE)" -o none
+          "Entra__Audience=$($env:ENTRA_AUDIENCE)" `
+          "Auth__AllowedEmails=$($env:ALLOWED_EMAILS)" -o none
         az containerapp ingress update -g $RG -n api --type external -o none
-        Write-Host "postdeploy: applied AI + Entra config (api, aiworker); api ingress external."
+        Write-Host "postdeploy: applied AI + Entra + allowlist config (api, aiworker); api ingress external."
