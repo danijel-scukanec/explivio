@@ -35,15 +35,21 @@ resource sqlFirewallRule_AllowAllAzureIps 'Microsoft.Sql/servers/firewallRules@2
   parent: sql
 }
 
+// Basic DTU tier (~€5/mo, 2 GB, always-on). Deliberately NOT the serverless free offer
+// (GP_S_Gen5 + useFreeLimit): that offer grants 100k vCore-seconds/month and auto-PAUSES for the rest
+// of the month once spent, which it did — the app's 5s outbox polling keeps the DB warm so it never
+// idles into a pause and burns the grant in ~1-3 days, then every DB-backed endpoint 500s. Basic is
+// fixed-price and never pauses. (Azure also refuses to downgrade a paid DB back to the free offer, so
+// this must stay Basic to match the live DB.)
 resource sqlserver 'Microsoft.Sql/servers/databases@2023-08-01' = {
   name: 'Explivio'
   location: location
   properties: {
-    freeLimitExhaustionBehavior: 'AutoPause'
-    useFreeLimit: true
+    maxSizeBytes: 2147483648
   }
   sku: {
-    name: 'GP_S_Gen5_2'
+    name: 'Basic'
+    tier: 'Basic'
   }
   parent: sql
 }

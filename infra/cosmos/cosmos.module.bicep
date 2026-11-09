@@ -71,6 +71,12 @@ resource places 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2
           }
         ]
       }
+      // NOTE: these must match what Cosmos materialises for the LIVE container exactly, or a redeploy
+      // issues a Collection Replace that tries to "modify" the vector index — which Cosmos forbids
+      // ("Paths in existing vector indexing policy cannot be modified"), failing the whole deployment.
+      // diskANN fills in quantizationByteSize/indexingSearchListSize defaults, and Cosmos auto-adds the
+      // _etag excluded path; declaring them here keeps the redeploy a no-op. (bicep's type model doesn't
+      // know these vector properties → BCP037 warnings, but azd passes them through to the data plane.)
       indexingPolicy: {
         indexingMode: 'consistent'
         automatic: true
@@ -83,11 +89,16 @@ resource places 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2
           {
             path: '/embedding/*'
           }
+          {
+            path: '/"_etag"/?'
+          }
         ]
         vectorIndexes: [
           {
             path: '/embedding'
             type: 'diskANN'
+            quantizationByteSize: 96
+            indexingSearchListSize: 100
           }
         ]
       }
