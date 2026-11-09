@@ -83,6 +83,8 @@ The API both **publishes** domain events (via the outbox) and **subscribes** to 
 
 This is an evolving portfolio project. The **committed target** — the foundation plus AI generation and streaming — is **complete**; the rest is a genuine, prioritized roadmap. See **[docs/FEATURES.md](docs/FEATURES.md)** for the full map.
 
+New to the app? The **[User Guide](docs/USER-GUIDE.md)** walks through planning a trip end to end — itineraries, AI generation, bookings, budget, sharing and more.
+
 **Built and verified**
 
 | Area | What |
