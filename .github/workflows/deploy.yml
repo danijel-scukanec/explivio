@@ -23,6 +23,9 @@
 #       (web SPA sign-in, baked into the build by the prepackage hook; public identifiers, not secrets.
 #        Without these the deployed SPA has no sign-in and sends no token, so the prod API 401s every
 #        data call. The SPA's deployed origin must also be a redirect URI on its Entra app registration.)
+#     VITE_GOOGLE_PLACES_KEY (optional; web place autocomplete + geocoding so the trip map populates.
+#       Public browser key — restrict it to the deployed origin in the Google Cloud console. Without it
+#       the app works but has no place search and the itinerary map stays empty.)
 
 name: Deploy to Azure (manual)
 
@@ -56,6 +59,9 @@ jobs:
       VITE_ENTRA_AUTHORITY: ${{ vars.VITE_ENTRA_AUTHORITY }}
       VITE_ENTRA_CLIENT_ID: ${{ vars.VITE_ENTRA_CLIENT_ID }}
       VITE_ENTRA_API_SCOPE: ${{ vars.VITE_ENTRA_API_SCOPE }}
+      # Google Places (New) browser key for place autocomplete + geocoding (so the trip map populates).
+      # Public but referrer-restricted — restrict it to the deployed origin in the Google Cloud console.
+      VITE_GOOGLE_PLACES_KEY: ${{ vars.VITE_GOOGLE_PLACES_KEY }}
     steps:
       - uses: actions/checkout@v5
 
