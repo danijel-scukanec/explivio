@@ -91,6 +91,23 @@ module sql_roles 'sql-roles/sql-roles.module.bicep' = {
     sql_outputs_sqlserveradminname: sql.outputs.sqlServerAdminName
   }
 }
+module signalr 'signalr/signalr.module.bicep' = {
+  name: 'signalr'
+  scope: rg
+  params: {
+    location: location
+  }
+}
+module signalr_roles 'signalr-roles/signalr-roles.module.bicep' = {
+  name: 'signalr-roles'
+  scope: rg
+  params: {
+    location: location
+    principalId: resources.outputs.MANAGED_IDENTITY_PRINCIPAL_ID
+    principalType: 'ServicePrincipal'
+    signalr_outputs_name: signalr.outputs.name
+  }
+}
 module storage 'storage/storage.module.bicep' = {
   name: 'storage'
   scope: rg
@@ -124,3 +141,4 @@ output MESSAGING_SERVICEBUSENDPOINT string = messaging.outputs.serviceBusEndpoin
 output MESSAGING_SERVICEBUSHOSTNAME string = messaging.outputs.serviceBusHostName
 output SQL_SQLSERVERFQDN string = sql.outputs.sqlServerFqdn
 output STORAGE_BLOBENDPOINT string = storage.outputs.blobEndpoint
+output SIGNALR_HOSTNAME string = signalr.outputs.hostName

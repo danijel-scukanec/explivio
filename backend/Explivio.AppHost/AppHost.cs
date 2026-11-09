@@ -60,6 +60,18 @@ else if (useCosmosEmulator)
 
 cosmos?.AddCosmosDatabase("explivio");
 
+// F13/F15: Azure SignalR Service as the backplane for the real-time hubs (itinerary generation,
+// trip collaboration, assistant, recap). Like App Insights and Cosmos it is publish-mode only: there
+// is no local emulator, and locally the hubs run in-process (a single `aspire run` process needs no
+// backplane). When deployed the API scales to multiple Container Apps replicas, and without a shared
+// backplane a client's `negotiate` and its follow-up transport request can land on different replicas
+// (→ 404) and a broadcast on one replica never reaches clients on another. Azure SignalR fixes both:
+// it owns the client connections and fans messages out across every replica. Default (not Serverless)
+// mode, since the API is the hub server. Provisioned on the Free tier in the committed bicep.
+var signalr = builder.ExecutionContext.IsPublishMode
+    ? builder.AddAzureSignalR("signalr")
+    : null;
+
 // F05: Service Bus for the transactional outbox. Runs as the local emulator (Docker) in dev and
 // provisions real Azure Service Bus when deployed. Domain events are published to this topic;
 // the AI (F06) and Notifications (F07) workers will add subscriptions here later.
@@ -97,6 +109,13 @@ var api = builder.AddProject<Projects.Explivio_API>("api")
     .WaitFor(serviceBus)
     .WithReference(blobs)
     .WaitFor(blobs);
+
+// F13/F15: hand the API the Azure SignalR connection when it exists (publish mode). Without it the
+// API falls back to the in-process SignalR backplane (local dev), so the hubs work in both modes.
+if (signalr is not null)
+{
+    api.WithReference(signalr);
+}
 
 // F14: give the API the Cosmos connection when Cosmos exists (real in publish mode, or the opt-in
 // local emulator). Without it the API uses the in-memory retriever. Only wait on the local emulator —

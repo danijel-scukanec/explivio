@@ -32,10 +32,15 @@ hooks:
         # bearer token (the API requires auth in prod). These are PUBLIC identifiers, not secrets; they
         # come from the azd env / CI variables. If unset the SPA falls back to the dev-identity flow,
         # which prod rejects — so a real deploy must provide all three.
+        # VITE_GOOGLE_PLACES_KEY enables the place-search autocomplete + geocoding, so itinerary
+        # activities get coordinates and the trip map populates. A PUBLIC, referrer-restricted browser
+        # key (restrict it to the deployed origin in the Google Cloud console); comes from the azd env /
+        # CI variables. If unset the app still works, just without autocomplete and the map.
         VITE_API_URL= \
         VITE_ENTRA_AUTHORITY="${VITE_ENTRA_AUTHORITY:-}" \
         VITE_ENTRA_CLIENT_ID="${VITE_ENTRA_CLIENT_ID:-}" \
         VITE_ENTRA_API_SCOPE="${VITE_ENTRA_API_SCOPE:-}" \
+        VITE_GOOGLE_PLACES_KEY="${VITE_GOOGLE_PLACES_KEY:-}" \
         npm --prefix client run build -w frontend
         rm -rf backend/Explivio.API/wwwroot
         mkdir -p backend/Explivio.API/wwwroot
@@ -48,6 +53,8 @@ hooks:
         npm --prefix client run build -w "@explivio/shared"
         # Relative API base + Entra sign-in config (public identifiers, from the azd env / CI variables)
         # so the deployed SPA signs in and sends a bearer token the prod API requires.
+        # VITE_GOOGLE_PLACES_KEY (if set in the azd env) is inherited by npm here and enables the place
+        # autocomplete + geocoding so the trip map populates; VITE_API_URL="" forces same-origin calls.
         $env:VITE_API_URL=""; npm --prefix client run build -w frontend
         Remove-Item -Recurse -Force backend/Explivio.API/wwwroot -ErrorAction SilentlyContinue
         New-Item -ItemType Directory -Force backend/Explivio.API/wwwroot | Out-Null

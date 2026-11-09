@@ -33,6 +33,8 @@ properties:
         value: '{{ .Env.MESSAGING_SERVICEBUSENDPOINT }}'
       - name: connectionstrings--sqlserver
         value: Server=tcp:{{ .Env.SQL_SQLSERVERFQDN }},1433;Encrypt=True;Authentication="Active Directory Default";Database=Explivio
+      - name: connectionstrings--signalr
+        value: 'Endpoint=https://{{ .Env.SIGNALR_HOSTNAME }};AuthType=azure.msi;ClientId={{ .Env.MANAGED_IDENTITY_CLIENT_ID }};Version=1.0;'
   template:
     containers:
       - image: {{ .Image }}
@@ -74,6 +76,8 @@ properties:
             secretRef: connectionstrings--messaging
           - name: ConnectionStrings__sqlserver
             secretRef: connectionstrings--sqlserver
+          - name: ConnectionStrings__signalr
+            secretRef: connectionstrings--signalr
     scale:
       minReplicas: 1
 tags:

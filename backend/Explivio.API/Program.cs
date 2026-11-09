@@ -162,9 +162,18 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("blobs"
 // the RequireFeature filter; GET /features exposes the states to the client.
 builder.Services.AddFeatureManagement();
 
-// F13: SignalR for streaming AI itinerary generation to the client (in-process; Azure SignalR is a
-// later scaling swap). The ItineraryGenerationHub streams the generation token-by-token.
-builder.Services.AddSignalR();
+// F13/F15: SignalR powers the streaming AI hubs and real-time collaboration. In-process is fine for a
+// single-process local `aspire run`, but the deployed API scales to multiple Container Apps replicas,
+// where in-process SignalR breaks: a client's negotiate and its transport request can hit different
+// replicas (→ 404), and a group broadcast on one replica never reaches clients on another. Azure
+// SignalR Service is the backplane that fixes both — it owns the connections and fans messages out
+// across replicas. Use it whenever its connection string is injected (publish/deploy, via the AppHost
+// WithReference); otherwise stay in-process so local dev and tests need no backplane.
+var signalRBuilder = builder.Services.AddSignalR();
+if (!string.IsNullOrEmpty(builder.Configuration.GetConnectionString("signalr")))
+{
+    signalRBuilder.AddNamedAzureSignalR("signalr");
+}
 
 // F15 Phase B: real-time collaboration. TripPresence tracks who is connected per trip (ephemeral,
 // in-memory singleton); the notifier pushes immediate "TripChanged" nudges to a trip's group when a
