@@ -173,6 +173,18 @@ var signalRBuilder = builder.Services.AddSignalR();
 if (!string.IsNullOrEmpty(builder.Configuration.GetConnectionString("signalr")))
 {
     signalRBuilder.AddNamedAzureSignalR("signalr");
+
+    // Azure SignalR Free tier caps at 20 CONCURRENT connections, and that count includes the server
+    // connections the SDK holds open per hub from app startup — not just clients. The default is 5 per
+    // hub; with our four hubs (itinerary-generation, collaboration, assistant, recap) that is 4 × 5 = 20
+    // server connections, which alone exhausts the free budget so every client `negotiate` gets a 429
+    // ("Connection count reaches limit"). Hold 1 per hub → 4 server connections, leaving 16 of the 20 for
+    // clients, which is plenty for the demo. (The SDK still scales connections up on demand toward
+    // MaxHubServerConnectionCount if needed.) Revisit if upgrading past the Free tier.
+    builder.Services.Configure<Microsoft.Azure.SignalR.ServiceOptions>(options =>
+    {
+        options.InitialHubServerConnectionCount = 1;
+    });
 }
 
 // F15 Phase B: real-time collaboration. TripPresence tracks who is connected per trip (ephemeral,
