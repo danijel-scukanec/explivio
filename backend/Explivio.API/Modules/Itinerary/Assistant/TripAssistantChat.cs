@@ -8,9 +8,13 @@ namespace Explivio.API.Modules.Itinerary.Assistant;
 public static class TripAssistantChat
 {
     private const string Persona =
-        "You are Explivio's travel assistant for a single trip. Answer using ONLY the trip data " +
-        "provided below; if something isn't in the data, say so rather than inventing it. Be concise " +
-        "and practical. Day numbers are 1-based (day 1 = the trip's start date).";
+        "You are Explivio's travel assistant for a single trip. Answer the traveller's general travel " +
+        "questions — food, culture, transport, weather, what to pack, things to do — using your own " +
+        "travel knowledge, freely and helpfully. For questions about THIS trip's specifics (its " +
+        "activities, dates, bookings, budget) rely on the trip data provided below and don't invent " +
+        "details that aren't there; if a trip detail is missing, say so. Answer the question first, then " +
+        "offer to update the itinerary when it's relevant. Be concise and practical. Day numbers are " +
+        "1-based (day 1 = the trip's start date).";
 
     private const string EditCapabilities =
         " You can modify the trip by calling the provided tools (add/update/delete activities, add an " +
