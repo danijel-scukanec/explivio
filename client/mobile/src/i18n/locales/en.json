@@ -270,6 +270,7 @@
     "nights_other": "{{count}} nights",
     "deleteTripTitle": "Delete trip",
     "deleteTripConfirm": "Delete “{{name}}”? This can't be undone.",
+    "deleteNotOwner": "Only the trip’s owner can delete it.",
     "confirmDeleteTitle": "Delete?",
     "confirmDeleteBody": "This can't be undone.",
     "delete": "Delete",
