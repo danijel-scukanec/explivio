@@ -28,6 +28,14 @@ Chat with an assistant that both answers questions about the trip and **makes th
 
 ---
 
+## ✨ Demo — real-time collaboration
+
+Trips are shareable with role-based membership (Owner / Editor / Viewer). When one member edits a shared trip, the change lands **live** in everyone else's view — presence shows who's watching, and the itinerary updates with no refresh. The push is an immediate in-process `IHubContext` broadcast, deliberately **not** routed through the 5-second outbox.
+
+![Two members on one trip side by side — an activity added by the Editor appears instantly in the Owner's view](docs/assets/f15-realtime-collaboration.gif)
+
+---
+
 ## ✨ Demo — trip status lifecycle
 
 Every trip carries an explicit lifecycle status — **Draft, Planned, Active, Completed, or Cancelled** — set by the user independently of its dates. Changing it updates the colour-coded badge everywhere, and the trips list can be filtered by status.
