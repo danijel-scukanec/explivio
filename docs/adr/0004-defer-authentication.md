@@ -1,7 +1,9 @@
 # 0004 — Defer real authentication (fake dev identity for now)
 
-- **Status:** Accepted
+- **Status:** Superseded by [0007](0007-entra-external-id-auth.md) (2026-10-28) — real auth shipped
 - **Date:** 2026-08-17
+
+> **Superseded:** the deferral worked as intended; Microsoft Entra External ID has since been wired in, with the dev identity kept as an env-gated fallback for local work and tests. See [ADR 0007](0007-entra-external-id-auth.md).
 
 ## Context
 Explivio needs user-scoped data, but wiring a real identity provider early adds tenant setup, token flows, and friction that slows the distributed + AI work that is the actual showcase. The endpoints already read a `sub` claim and use JWT bearer.
