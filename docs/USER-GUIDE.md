@@ -179,10 +179,21 @@ writes a warm, narrative look-back over your trip, drawing on the places you act
 
 ### Members (plan together)
 Open **Members** from the trip **⋯** menu. The **Owner** can **invite people by email**, set
-each person's role, and remove them:
-- **Owner** — full control
-- **Editor** — can change the trip
-- **Viewer** — read-only
+each person's role, and remove them. There are three roles, each able to do everything the one
+below it can:
+
+| What they can do | Viewer | Editor | Owner |
+|---|:---:|:---:|:---:|
+| View the trip and everything in it | ✓ | ✓ | ✓ |
+| Edit the itinerary, bookings, checklists, documents and budget | | ✓ | ✓ |
+| Change the route, dates, status and budget currency | | ✓ | ✓ |
+| Change the cover photo, create share links, generate the AI recap | | ✓ | ✓ |
+| Invite people, change roles and remove members | | | ✓ |
+| Publish the trip to the public gallery | | | ✓ |
+| Delete the trip | | | ✓ |
+
+In short: a **Viewer** can only look, an **Editor** can change the trip's content, and an
+**Owner** also controls who has access, whether it's public, and whether it exists.
 
 Invite someone who doesn't have an account yet and the invite is claimed automatically the
 first time they sign in. Everyone editing a shared trip sees each other's changes **in real
