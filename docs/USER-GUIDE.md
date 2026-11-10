@@ -6,8 +6,8 @@ questions, and share finished trips with others. This guide walks through the ap
 you'll actually use it.
 
 > Explivio runs on the **web** and as a **mobile app** (Android). The two are at feature
-> parity; screenshots below are from the web app, and the mobile layout mirrors them with a
-> bottom tab bar. Where something differs, it's called out.
+> parity; most screenshots below are from the web app, with the mobile app shown in
+> [§13](#13-the-mobile-app). Where something differs, it's called out.
 
 ---
 
@@ -251,11 +251,41 @@ the footer; dates and currencies adapt to the locale.
 
 ## 13. The mobile app
 
-The Android app has the same features as the web app, laid out for the phone:
-- A **bottom tab bar** for your main areas (Trips, Gallery, Notifications, Profile).
-- The same trip tabs — Itinerary, Bookings, Checklists, Documents, Budget, Recap — plus the
-  AI itinerary generation and assistant, maps, members, sharing and push notifications.
-- It works **offline** for viewing and syncs when you're back online.
+The Android app has the same features as the web app, laid out for the phone.
+
+### Getting around
+A **bottom tab bar** switches between your main areas:
+
+<img src="assets/mobile-trips.jpg" alt="Mobile — the Trips list with the bottom tab bar" width="300" />
+
+- **Trips** — your trips, each as a card with its route, dates and status badge. Tap **+ New**
+  to create one.
+- **Explore** — the public **gallery** (discover, like and clone other travellers' trips).
+- **Alerts** — your **notifications**.
+- **Profile** — your account, plus **theme** and **language** settings (below).
+
+### Inside a trip
+Open a trip and you get the same tabs as the web, along the bottom — **Itinerary, Bookings,
+Budget, Checklists, Documents** (and **Recap** when enabled). The **+ Add activity** and **⋯ More**
+buttons at the top cover the trip-level actions (edit route, cover photo, members, share, export).
+
+<img src="assets/mobile-itinerary.jpg" alt="Mobile — a trip's itinerary with activities grouped by day" width="300" />
+
+### Deleting a trip
+Delete is a phone gesture rather than a menu item: **long-press a trip's card** in the **Trips**
+list and confirm. As on the web, only the trip's **Owner** can delete it (see the
+[roles table](#members-plan-together)) — and it can't be undone.
+
+<img src="assets/mobile-delete.jpg" alt="Mobile — the delete-trip confirmation dialog" width="300" />
+
+### Settings
+The **Profile** tab holds your account, the **theme** (System / Light / Dark) and the **language**
+(English / Español / Deutsch) — the same choices as the web app's settings.
+
+<img src="assets/mobile-profile.jpg" alt="Mobile — the Profile tab with theme and language settings" width="300" />
+
+The app also receives **push notifications** on your phone, and works **offline** for viewing,
+syncing when you're back online.
 
 ---
 
