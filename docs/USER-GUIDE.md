@@ -257,6 +257,10 @@ The Android app has the same features as the web app, laid out for the phone:
   AI itinerary generation and assistant, maps, members, sharing and push notifications.
 - It works **offline** for viewing and syncs when you're back online.
 
+A few actions use phone gestures instead of the web's **⋯** menu:
+- **Delete a trip** — **long-press** its card in the **Trips** list and confirm. As on the web,
+  only the trip's **Owner** can delete it (see the [roles table](#members-plan-together)).
+
 ---
 
 *For how Explivio is built (architecture, services, deployment), see
