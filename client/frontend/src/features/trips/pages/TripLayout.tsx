@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams, Link, Outlet, useOutletContext, useLocation } from 'react-router-dom';
+import { useParams, Link, Outlet, useOutletContext, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { Trip, TripStatus } from '@explivio/shared';
+import type { Trip, TripStatus, TripRole } from '@explivio/shared';
 import { TRIP_STATUSES, tripStatusColor } from '@explivio/shared';
-import { getTrip, setTripStatus, setTripCover, tripCoverUrl } from '../services/tripsApi';
+import { getTrip, getMemberRole, setTripStatus, setTripCover, tripCoverUrl, deleteTrip } from '../services/tripsApi';
 import { EditStopsModal } from '../components/EditStopsModal';
 import { MembersModal } from '../components/MembersModal';
 import { ShareTripModal } from '../../gallery/components/ShareTripModal';
@@ -11,6 +11,7 @@ import { ExportItineraryModal } from '../../itinerary/components/ExportItinerary
 import { useTripCollaboration } from '../../../shared/hooks/useTripCollaboration';
 import { useFeatures, isFeatureOn } from '../../../shared/hooks/useFeatures';
 import { useAuthedBlobUrl } from '../../../shared/hooks/useAuthedBlobUrl';
+import { useConfirm } from '../../../shared/components/ConfirmProvider';
 import { Button } from '@/components/ui/button';
 import { Menu, MenuItem, MenuSeparator } from '@/components/ui/menu';
 
@@ -35,8 +36,11 @@ export function TripLayout() {
   const { t } = useTranslation();
   const { tripId } = useParams<{ tripId: string }>();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const confirm = useConfirm();
   const features = useFeatures();
   const [trip, setTrip] = useState<Trip | null>(null);
+  const [callerRole, setCallerRole] = useState<TripRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [changeSignal, setChangeSignal] = useState(0);
@@ -61,6 +65,15 @@ export function TripLayout() {
 
   useEffect(() => { reloadTrip(); }, [reloadTrip]);
 
+  // The caller's role on this trip — gates the Owner-only delete action. Best-effort: on failure we
+  // leave it null, which simply hides the control.
+  useEffect(() => {
+    if (!tripId) return;
+    let active = true;
+    getMemberRole(tripId).then(r => { if (active) setCallerRole(r); }).catch(() => undefined);
+    return () => { active = false; };
+  }, [tripId]);
+
   // Single live-collaboration subscription for the whole trip: presence badge here + a change signal
   // that every sub-page watches to refetch its own data.
   const { presentUserIds } = useTripCollaboration(tripId, () => {
@@ -76,6 +89,22 @@ export function TripLayout() {
       await setTripStatus(tripId, status);
     } catch {
       reloadTrip(); // revert to the server's truth on failure
+    }
+  }
+
+  async function handleDelete() {
+    if (!tripId || !trip) return;
+    const ok = await confirm({
+      title: t('itinerary.deleteTrip'),
+      message: t('itinerary.deleteTripConfirm', { name: trip.name }),
+      confirmLabel: t('common.delete'),
+    });
+    if (!ok) return;
+    try {
+      await deleteTrip(tripId);
+      navigate('/trips');
+    } catch {
+      setError(t('itinerary.deleteTripFailed'));
     }
   }
 
@@ -133,6 +162,14 @@ export function TripLayout() {
         <MenuSeparator />
         <MenuItem onClick={() => setShowShare(true)}>🔗 {t('itinerary.share')}</MenuItem>
         <MenuItem onClick={() => setShowExport(true)}>📅 {t('itinerary.export')}</MenuItem>
+        {callerRole === 'Owner' && (
+          <>
+            <MenuSeparator />
+            <MenuItem onClick={handleDelete} className="text-destructive hover:bg-destructive/10">
+              🗑️ {t('itinerary.deleteTrip')}
+            </MenuItem>
+          </>
+        )}
       </Menu>
     </div>
   );

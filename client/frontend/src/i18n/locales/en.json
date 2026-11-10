@@ -1,5 +1,10 @@
 {
   "theme": { "toggle": "Toggle light / dark theme" },
+  "errors": {
+    "title": "Something went wrong",
+    "body": "The app hit an unexpected error. Reloading usually fixes it.",
+    "reload": "Reload"
+  },
   "common": {
     "cancel": "Cancel",
     "close": "Close",
@@ -128,7 +133,10 @@
     "addingStop": "Adding…",
     "addStopHint": "This place isn’t on your route — add its city as a stop",
     "addToDay": "Add",
-    "tripTo": "Trip to {{name}}"
+    "tripTo": "Trip to {{name}}",
+    "deleteTrip": "Delete trip",
+    "deleteTripConfirm": "Delete “{{name}}” and all of its itinerary, bookings, checklists, documents and expenses? This can’t be undone.",
+    "deleteTripFailed": "Could not delete the trip."
   },
   "activity": {
     "edit": "Edit activity",
