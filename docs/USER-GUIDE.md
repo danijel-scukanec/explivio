@@ -59,6 +59,9 @@ Inside a trip, the **⋯** menu (top-right, next to the status badge) lets you:
 - **Members** — invite people and manage roles (see [Sharing & collaboration](#9-sharing--collaboration))
 - **Share** — create a public or link-based share
 - **Export** — download the itinerary (PDF / calendar)
+- **Delete trip** — permanently delete the trip and everything in it (itinerary, bookings,
+  checklists, documents and budget). Owner only, and you're asked to confirm first — this can't
+  be undone.
 
 Change a trip's **status** with the badge dropdown (Draft → Planned → Active → Completed → Cancelled).
 
