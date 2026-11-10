@@ -43,20 +43,33 @@ let initialized = false;
 /** Initialise MSAL and complete any redirect sign-in. Call once before rendering. No-op if disabled. */
 export async function initAuth(): Promise<void> {
   if (!msalInstance || initialized) return;
-  await msalInstance.initialize();
-  const result = await msalInstance.handleRedirectPromise();
-  if (result?.account) {
-    msalInstance.setActiveAccount(result.account);
-  } else if (!msalInstance.getActiveAccount()) {
-    const [first] = msalInstance.getAllAccounts();
-    if (first) msalInstance.setActiveAccount(first);
+  initialized = true; // set first so a re-entrant call can't double-run initialize()
+  try {
+    await msalInstance.initialize();
+    const result = await msalInstance.handleRedirectPromise();
+    if (result?.account) {
+      msalInstance.setActiveAccount(result.account);
+    } else if (!msalInstance.getActiveAccount()) {
+      const [first] = msalInstance.getAllAccounts();
+      if (first) msalInstance.setActiveAccount(first);
+    }
+  } catch (e) {
+    // A failed initialise / redirect-completion must NEVER block the app from mounting — otherwise the
+    // user is stuck on a blank white screen (this ran before React renders). Swallow and continue; the
+    // AuthGate then shows the sign-in screen so the user can recover.
+    console.error('MSAL initialisation failed', e);
   }
-  initialized = true;
 }
 
 function activeAccount(): AccountInfo | null {
   return msalInstance?.getActiveAccount() ?? msalInstance?.getAllAccounts()[0] ?? null;
 }
+
+// Guards against firing more than one redirect at a time: when a session expires, several in-flight
+// API calls hit the catch below at once, and MSAL throws "interaction_in_progress" for every attempt
+// after the first — which would surface as unhandled rejections while the first redirect is still
+// navigating away.
+let redirecting = false;
 
 /**
  * A fresh access token for the API, or null when unavailable. Silent from the MSAL cache; if the
@@ -70,7 +83,17 @@ async function getAccessToken(): Promise<string | null> {
     const result = await msalInstance.acquireTokenSilent({ scopes: [apiScope], account });
     return result.accessToken;
   } catch {
-    await msalInstance.acquireTokenRedirect({ scopes: [apiScope], account });
+    // Silent acquisition failed (expired session / revoked consent). Redirect to sign-in — but only
+    // once, and never let a redirect failure escape as an unhandled rejection.
+    if (!redirecting) {
+      redirecting = true;
+      try {
+        await msalInstance.acquireTokenRedirect({ scopes: [apiScope], account });
+      } catch (e) {
+        redirecting = false;
+        console.error('Token redirect failed', e);
+      }
+    }
     return null;
   }
 }

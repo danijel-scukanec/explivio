@@ -1,5 +1,10 @@
 {
   "theme": { "toggle": "Helles / dunkles Design umschalten" },
+  "errors": {
+    "title": "Etwas ist schiefgelaufen",
+    "body": "In der App ist ein unerwarteter Fehler aufgetreten. Neu laden behebt das meist.",
+    "reload": "Neu laden"
+  },
   "common": {
     "cancel": "Abbrechen",
     "close": "Schließen",
@@ -128,7 +133,10 @@
     "addingStop": "Wird hinzugefügt…",
     "addStopHint": "Dieser Ort ist nicht auf deiner Route — Stadt als Stopp hinzufügen",
     "addToDay": "Hinzufügen",
-    "tripTo": "Reise nach {{name}}"
+    "tripTo": "Reise nach {{name}}",
+    "deleteTrip": "Reise löschen",
+    "deleteTripConfirm": "„{{name}}“ mit dem gesamten Reiseverlauf, Buchungen, Checklisten, Dokumenten und Ausgaben löschen? Dies kann nicht rückgängig gemacht werden.",
+    "deleteTripFailed": "Die Reise konnte nicht gelöscht werden."
   },
   "activity": {
     "edit": "Aktivität bearbeiten",

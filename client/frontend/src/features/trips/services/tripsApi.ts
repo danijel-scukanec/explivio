@@ -28,6 +28,15 @@ export async function createTrip(data: CreateTripRequest): Promise<string> {
   return id;
 }
 
+// Delete a trip and everything under it (Owner only; enforced by the API's RequireTripRole filter).
+export async function deleteTrip(id: string): Promise<void> {
+  const res = await fetch(`${API_URL}/trips/${id}`, {
+    method: 'DELETE',
+    headers: await authHeaders(),
+  });
+  if (!res.ok) throw new Error('Failed to delete trip');
+}
+
 // F22: replace a trip's ordered route (multi-destination).
 export async function setTripStops(id: string, stops: TripStopInput[]): Promise<void> {
   const res = await fetch(`${API_URL}/trips/${id}/stops`, {
