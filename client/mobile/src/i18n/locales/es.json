@@ -270,6 +270,7 @@
     "nights_other": "{{count}} noches",
     "deleteTripTitle": "Eliminar viaje",
     "deleteTripConfirm": "¿Eliminar «{{name}}»? No se puede deshacer.",
+    "deleteNotOwner": "Solo el propietario del viaje puede eliminarlo.",
     "confirmDeleteTitle": "¿Eliminar?",
     "confirmDeleteBody": "No se puede deshacer.",
     "delete": "Eliminar",

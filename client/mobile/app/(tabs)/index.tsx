@@ -4,7 +4,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import type { Trip } from '@explivio/shared';
 import { formatTripDate, getTripDuration, tripStatusColor } from '@explivio/shared';
-import { getTrips, deleteTrip } from '../../src/api';
+import { getTrips, getMemberRole, deleteTrip } from '../../src/api';
 import type { Theme } from '../../src/theme';
 import { useTheme, useThemedStyles } from '../../src/useTheme';
 import { coverColor } from '../../src/coverImage';
@@ -29,7 +29,21 @@ export default function TripsScreen() {
   // Refetch every time the screen regains focus, so a trip created on the form screen shows on return.
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  function confirmDelete(trip: Trip) {
+  async function confirmDelete(trip: Trip) {
+    // Only the Owner can delete a trip (the API enforces this and returns 403 otherwise). Mirror the
+    // web app, which hides the action for non-owners: check the caller's role first and, for anyone
+    // else, explain rather than letting the delete fail silently. The list has no role info, so we
+    // fetch it on demand when the user actually reaches for delete.
+    let role;
+    try {
+      role = await getMemberRole(trip.id);
+    } catch {
+      return; // couldn't determine the role — do nothing rather than risk a failing delete
+    }
+    if (role !== 'Owner') {
+      Alert.alert(t('mobile.deleteTripTitle'), t('mobile.deleteNotOwner'));
+      return;
+    }
     Alert.alert(t('mobile.deleteTripTitle'), t('mobile.deleteTripConfirm', { name: trip.name }), [
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('mobile.delete'), style: 'destructive', onPress: () => void deleteTrip(trip.id).then(load).catch(() => {}) },
@@ -55,7 +69,7 @@ export default function TripsScreen() {
                 style={styles.card}
                 activeOpacity={0.7}
                 onPress={() => router.push(`/trips/${item.id}/itinerary`)}
-                onLongPress={() => confirmDelete(item)}
+                onLongPress={() => void confirmDelete(item)}
               >
                 <View style={[styles.cover, { backgroundColor: coverColor(item.id) }]}>
                   {item.status ? (

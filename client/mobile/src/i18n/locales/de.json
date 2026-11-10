@@ -270,6 +270,7 @@
     "nights_other": "{{count}} Nächte",
     "deleteTripTitle": "Reise löschen",
     "deleteTripConfirm": "„{{name}}“ löschen? Das kann nicht rückgängig gemacht werden.",
+    "deleteNotOwner": "Nur der Eigentümer der Reise kann sie löschen.",
     "confirmDeleteTitle": "Löschen?",
     "confirmDeleteBody": "Das kann nicht rückgängig gemacht werden.",
     "delete": "Löschen",
