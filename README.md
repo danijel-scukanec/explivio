@@ -16,15 +16,23 @@ Describe the trip in plain language; the model returns a **structured** itinerar
 
 ![AI itinerary generation streaming into the UI](docs/assets/f13-ai-itinerary-generation.gif)
 
-*(Shown running against the built-in deterministic stub — no API key required. Point it at a real model to see tokens arrive over several seconds; see [Using a real AI model](#using-a-real-ai-model).)*
+*(Recorded against a real model. The app also ships a deterministic stub so it runs with no API key — see [Using a real AI model](#using-a-real-ai-model).)*
+
+---
+
+## ✨ Demo — AI trip assistant (agentic edits)
+
+Chat with an assistant that both answers questions about the trip and **makes the changes itself**: it calls tools to add, update or remove activities, expenses and status, and the edit lands in the itinerary. Streamed over SignalR, and role-gated — Viewers get read-only Q&A.
+
+![Asking the assistant to add an activity, which it adds to the itinerary via tool-calling](docs/assets/f16-ai-assistant.gif)
 
 ---
 
 ## ✨ Demo — real-time collaboration
 
-Trips are shareable with role-based membership. When another member edits a shared trip, the change lands **live** — presence shows who's viewing, and the itinerary updates with no refresh. The push is an immediate in-process `IHubContext` broadcast, deliberately **not** routed through the 5-second outbox.
+Trips are shareable with role-based membership (Owner / Editor / Viewer). When one member edits a shared trip, the change lands **live** in everyone else's view — presence shows who's watching, and the itinerary updates with no refresh. The push is an immediate in-process `IHubContext` broadcast, deliberately **not** routed through the 5-second outbox.
 
-![A second viewer's itinerary updating live as another user edits](docs/assets/f15-realtime-collaboration.gif)
+![Two members on one trip side by side — an activity added by the Editor appears instantly in the Owner's view](docs/assets/f15-realtime-collaboration.gif)
 
 ---
 
@@ -81,7 +89,7 @@ The API both **publishes** domain events (via the outbox) and **subscribes** to 
 
 ## Project status
 
-This is an evolving portfolio project. The **committed target** — the foundation plus AI generation and streaming — is **complete**; the rest is a genuine, prioritized roadmap. See **[docs/FEATURES.md](docs/FEATURES.md)** for the full map.
+This is a portfolio project. The original **committed target** — the foundation plus AI generation and streaming — is complete, and in practice the build went well beyond it: the full **P0–P2 feature map has shipped**. See **[docs/FEATURES.md](docs/FEATURES.md)** for the map.
 
 New to the app? The **[User Guide](docs/USER-GUIDE.md)** walks through planning a trip end to end — itineraries, AI generation, bookings, budget, sharing and more.
 
@@ -109,7 +117,9 @@ New to the app? The **[User Guide](docs/USER-GUIDE.md)** walks through planning 
 | AI ops | **Token/cost telemetry**, a **semantic cache**, and **Azure AI Content Safety** moderation wrapped around every AI call as `IChatClient` middleware (metrics on the Aspire dashboard + an **AI usage** page), plus an **eval harness** (`Explivio.Evals`) that scores real-model output |
 | Quality | Testcontainers integration tests + GitHub Actions CI |
 
-**Roadmap (planned, not yet built)**
+**Deliberately out of scope**
+
+An optional **YARP BFF** gateway is noted in the feature map but not built — the single-origin SPA-served-from-the-API setup doesn't need it.
 
 iOS push is **deliberately out of scope** — it needs a paid Apple Developer account (APNs / Safari-PWA web push), not justified for a deploy-on-demand showcase. Push ships on Android + web; Apple devices degrade gracefully (no crash, no OS push). See [ADR 0006](docs/adr/0006-ios-push-out-of-scope.md).
 
@@ -117,7 +127,7 @@ iOS push is **deliberately out of scope** — it needs a paid Apple Developer ac
 
 ## Getting started
 
-**Prerequisites:** [.NET 10 SDK](https://dotnet.microsoft.com/), [Docker](https://www.docker.com/) (for SQL + the Service Bus emulator and integration tests), [Node.js](https://nodejs.org/) 20+.
+**Prerequisites:** [.NET 10 SDK](https://dotnet.microsoft.com/), [Docker](https://www.docker.com/) (for SQL + the Service Bus emulator and integration tests), [Node.js](https://nodejs.org/) 22+.
 
 ### Option A — Full distributed system via Aspire
 
